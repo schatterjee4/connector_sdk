@@ -17,6 +17,10 @@
       }
     }
   },
+  
+  test: ->(connection){
+	get("https://api.shipwire.com/api/v3/orders?limit=1")
+  },
 
   object_definitions: {
     product: {
@@ -28,18 +32,18 @@
           { name: 'description'},
           { name: 'hsCode'},
           { name: 'countryOfOrigin'},
-          { name: 'creationDate', type: :timestamp},
-          { name: 'archivedDate', type: :timestamp},
+          { name: 'creationDate', type: "timestamp"},
+          { name: 'archivedDate', type: "timestamp"},
           { name: 'status'},
           { name: 'storageConfiguration'},
           { name: 'batteryConfiguration'},
           { name: 'itemCount'},
           { name: 'vendorID'},
           { name: 'vendorExternalId'},
-          { name: 'dimensions', type: :object, properties: 
+          { name: 'dimensions', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
           				{ name: 'weight'},
 		          		{ name: 'weightUnit'},
@@ -51,10 +55,10 @@
           		}
           	]
           },
-          { name: 'values', type: :object, properties: 
+          { name: 'values', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
           				{ name: 'costValueCurrency'},
           				{ name: 'wholesaleValue'},
@@ -67,32 +71,33 @@
           		}
           	]
           },
-          { name: 'alternateNames', type: :object, properties: 
+          { name: 'alternateNames', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties:
+          		{ name: 'resource', type: "object", properties:
           			[
           				{ name: 'previous'},
           				{ name: 'next'},
-          				{ name: 'total', type: :integer},
-          				{ name: 'items', type: :array},
-          				{ name: 'offset', type: :integer}
+          				{ name: 'total', type: "integer"},
+          				{ name: 'items', type: "array"},
+          				{ name: 'offset', type: "integer"}
           			]
           		}
           	]
           },
-          { name: 'technicalData', type: :object, properties: [
+          { name: 'technicalData', type: "object", properties: [
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
-          				{ name: 'battery', type: :object, properties:[{ name: 'resourceLocation'}]}	
+          				{ name: 'battery', type: "object", properties:[{ name: 'resourceLocation'}]}	
           			]
+				}
           	]
           },
-          { name: 'flags', type: :object, properties: 
+          { name: 'flags', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties:
+          		{ name: 'resource', type: "object", properties:
           			[
           				{ name: 'isMedia'},
           				{ name: 'isDeletable'},
@@ -111,10 +116,10 @@
           		}
           	]
           },
-          { name: 'enqueuedDimentions', type: :object, properties: 
+          { name: 'enqueuedDimensions', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties:
+          		{ name: 'resource', type: "object", properties:
           			[
           				{ name: 'offset'},
           				{ name: 'total'},
@@ -125,16 +130,16 @@
           		}
           	]
           },
-          { name: 'innerPack', type: :object, properties: 
+          { name: 'innerPack', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
           				{ name: 'description'},
-          				{ name: 'dimensions', type: :object, properties: 
+          				{ name: 'dimensions', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties:
+          						{ name: 'resource', type: "object", properties:
           							[
           								{ name: 'height'},
           								{ name: 'HeightUnit'},
@@ -149,12 +154,12 @@
           					]
           				},
           				{ name: 'externalID'},
-          				{ name: 'flags', type: :object, properties: 
+          				{ name: 'flags', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource' type: :object, properties: 
+          						{ name: 'resource', type: "object", properties: 
           							[
-          								{ name: 'isPackagedReadyToShip', type: :integer}	
+          								{ name: 'isPackagedReadyToShip', type: "integer"}	
           							]
           						}	
           					]
@@ -162,10 +167,10 @@
           				{ name: 'individualItemsPerCase'},
           				{ name: 'ProductId'},
           				{ name: 'sku'},
-          				{ name: 'values', type: :object, properties:
+          				{ name: 'values', type: "object", properties:
 				          	[
 				          		{ name: 'resourceLocation'},
-				          		{ name: 'resource', type: :object, properties: 
+				          		{ name: 'resource', type: "object", properties: 
 				          			[
 				          				{ name: 'costValueCurrency'},
 				          				{ name: 'wholesaleValue'},
@@ -182,16 +187,16 @@
           		}
           	]
           },
-          { name: 'masterCase', type: :object, properties: 
+          { name: 'masterCase', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
           				{ name: 'sku'},
-          				{ name: 'dimensions', type: :object, properties: 
+          				{ name: 'dimensions', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties: 
+          						{ name: 'resource', type: "object", properties: 
           							[
           								{ name: 'weight'},
           								{ name: 'weightUnit'},
@@ -203,10 +208,10 @@
           						}
           					]
           				},
-          				{ name: 'values', type: :object, properties:
+          				{ name: 'values', type: "object", properties:
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties: 
+          						{ name: 'resource', type: "object", properties: 
           							[
           								{ name: 'costvalueCurrency'},
           								{ name: 'wholesaleValue'},
@@ -218,12 +223,12 @@
           						},
           					]
           				},
-          				{ name: 'externalId', type: :integer},
-          				{ name: 'individualItemsPerCase', type: :integer},
-          				{ name: 'flags', type: :object, properties: 
+          				{ name: 'externalId', type: "integer"},
+          				{ name: 'individualItemsPerCase', type: "integer"},
+          				{ name: 'flags', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties:[{ name: 'isPackagedReadyToShip'}]}
+          						{ name: 'resource', type: "object", properties:[{ name: 'isPackagedReadyToShip'}]}
           					]
           				},
           				{ name: 'productId'},
@@ -232,13 +237,13 @@
           		},
           	]#endof mastercase
           },
-          { name: 'pallet', type: :object, properties: 
+          { name: 'pallet', type: "object", properties: 
           	[
           		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: :object, properties: 
+          		{ name: 'resource', type: "object", properties: 
           			[
           				{ name: 'description'},
-          				{ name: 'dimensions', type: :object, properties: 
+          				{ name: 'dimensions', type: "object", properties: 
           					[
           						{ name: 'weight'},
           						{ name: 'weightUnit'},
@@ -249,10 +254,10 @@
           					]
           				},
           				{ name: 'externalId'},
-          				{ name: 'flags', type: :object, properties: 
+          				{ name: 'flags', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties: 
+          						{ name: 'resource', type: "object", properties: 
           							[
           								{ name: 'isPackagedReadyToShip'},
           								
@@ -263,10 +268,10 @@
           				{ name: 'individualItemsPerCase'},
           				{ name: 'productId'},
           				{ name: 'sku'},
-          				{ name: 'values', type: :object, properties: 
+          				{ name: 'values', type: "object", properties: 
           					[
           						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: :object, properties:
+          						{ name: 'resource', type: "object", properties:
           							[
 		          						{ name: 'costValue'},
 		          						{ name: 'costValueCurrency'},
@@ -275,6 +280,7 @@
 		          						{ name: 'wholesaleValue'},
 		          						{ name: 'wholesaleValueCurrency'}
           							]
+								}
           					]
           				}
           			]
@@ -288,25 +294,118 @@
     order: {
       fields: ->() {
       	[
-          { name:"resourceLocation"},
-          { name:"resource", type: :object, properties:
+          { name:"resource", type: "object", properties:
             [
-              { name:"id", type: :integer},
-              { name:"externalId", type: :integer},
+              { name:"id", type: "integer"},
+              { name:"externalId"},
               { name:"transactionId"},
               { name:"orderNo"},
-              { name:"processAfterDate", type: :datetime},
-              { name:"needsReview", type: :integer},
+              { name:"processAfterDate", type: "datetime"},
+              { name:"needsReview", type: "integer"},
               { name:"commerceName"},
               { name:"status"},
-              { name:"lastUpdatedDate", type: :datetime},
-              { name:"options", type: :object, properties:
+              { name:"lastUpdatedDate", type: "datetime"},
+			  { name:"vendorId", type: "integer" },
+			  { name:"vendorExternalId" },
+			  { name:"purchaseOrderId", type: "integer" },
+			  { name:"purchaseOrderExternalId"},
+			  { name:"purchaseOrderNo", type: "integer" },
+			  { name:"holds", type:"object", properties: 
+				[
+					{ name:"resourceLocation"},
+					{ name:"resource", type: "object", properties:
+						[
+							{ name:"total", type: "integer"},
+							{ name:"items", type:"array", of: "object", properties:
+								[
+									{ name:"resourceLocation"},
+									{ name:"resource", type: "object", properties:
+										[
+											{ name:"id", type: "integer"},
+											{ name:"orderId", type: "integer"},
+											{ name:"externalOrderId"},
+											{ name:"type"},
+											{ name:"subType"},
+											{ name:"description"},
+											{ name:"appliedDate", type: "datetime"},
+											{ name:"clearedDate", type: "datetime"}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			  },
+			  { name:"items", type:"object", properties: 
+				[
+					{ name:"resourceLocation"},
+					{ name:"resource", type: "object", properties:
+						[
+							{ name:"total", type: "integer"},
+							{ name:"items", type:"array", of: "object", properties:
+								[
+									{ name:"resourceLocation"},
+									{ name:"resource", type: "object", properties:
+										[
+											{ name:"id", type: "integer"},
+											{ name:"orderId", type: "integer"},
+											{ name:"externalOrderId"},
+											{ name:"productId", type: "integer"},
+											{ name:"productExternalId"},
+											{ name:"sku"},
+											{ name:"quantity", type: "integer"},
+											{ name:"commercialInvoiceValue", type: "float"},
+											{ name:"serialNumbers", type:"object", properties: 
+												[
+													{ name:"resourceLocation"},
+													{ name:"resource", type: "object", properties:
+														[
+															{ name:"items", type:"array", of: "object", properties:
+																[
+																	{ name:"resourceLocation"},
+																	{ name:"resource", type: "object", properties:
+																		[
+																			{ name:"orderId", type: "integer"},
+																			{ name:"productId", type: "integer"},
+																			{ name:"serialNumber"},
+																		]
+																	}
+																]
+															}
+														]
+													}
+												]
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			  },
+			  { name:"returns", type:"object", properties: 
+				[
+					{ name:"resourceLocation"},
+					{ name:"resource", type: "object", properties:
+						[
+							{ name:"total", type: "integer"},
+							{ name:"items", type:"array", of: "object", properties:
+								[
+								]
+							}
+						]
+					}
+				]
+			  },
+              { name:"options", type: "object", properties:
                 [
                   { name:"resourceLocation"},
-                  { name:"resource", type: :object, properties:
+                  { name:"resource", type: "object", properties:
                     [
-                      { name:"warehouseId", type: :integer},
-                      { name:"warehouseExternalId", type: :integer},
+                      { name:"warehouseId", type: "integer"},
+                      { name:"warehouseExternalId", type: "integer"},
                       { name:"warehouseRegion"},
                       { name:"warehouseArea"},
                       { name:"serviceLevelCode"},
@@ -314,41 +413,41 @@
                       { name:"carrierAccountNumber"},
                       { name:"sameDay"},
                       { name:"channelName"},
-                      { name:"forceDuplicate", type: :integer},
-                      { name:"forceAddress", type: :integer},
+                      { name:"forceDuplicate", type: "integer"},
+                      { name:"forceAddress", type: "integer"},
                       { name:"referrer"}
                     ]
                   }
                 ]
               },
-              { name:"pricing", type: :object, properties:
+              { name:"pricing", type: "object", properties:
                 [
                   { name:"resourceLocation"},
-                  { name:"resource", type: :object, properties:
+                  { name:"resource", type: "object", properties:
                     [
-                      { name:"shipping", type: :integer},
-                      { name:"packaging", type: :integer},
-                      { name:"insurance", type: :integer},
-                      { name:"handling", type: :integer},
-                      { name:"total", type: :integer}
+                      { name:"shipping", type: "float"},
+                      { name:"packaging", type: "float"},
+                      { name:"insurance", type: "float"},
+                      { name:"handling", type: "float"},
+                      { name:"total", type: "float"}
                     ]
                   }
                 ]
               },
-              { name:"shipFrom", type: :object, properties:
+              { name:"shipFrom", type: "object", properties:
                 [
                   { name:"resourceLocation"},
-                  { name:"resource", type: :object, properties:
+                  { name:"resource", type: "object", properties:
                     [
                       { name:"company"}
                     ]
                   }
                 ]
               },
-              { name:"shipTo", type: :object, properties:
+              { name:"shipTo", type: "object", properties:
                 [
                   { name:"resourceLocation"},
-                  { name:"resource", type: :object, properties:
+                  { name:"resource", type: "object", properties:
                     [
                       { name:"email"},
                       { name:"name"},
@@ -361,26 +460,39 @@
                       { name:"postalCode"},
                       { name:"country"},
                       { name:"phone"},
-                      { name:"isCommercial", type: :integer},
-                      { name:"isPoBox", type: :integer}
+                      { name:"isCommercial", type: "integer"},
+                      { name:"isPoBox", type: "integer"}
                     ]
                   }
                 ]
               },
-              { name:"events", type: :object, properties:
+			  { name:"commercialInvoice", type: "object", properties:
                 [
                   { name:"resourceLocation"},
-                  { name:"resource", type: :object, properties:
+                  { name:"resource", type: "object", properties:
                     [
-                      { name:"createdDate", type: :datetime},
-                      { name:"pickedUpDate", type: :datetime},
-                      { name:"submittedDate", type: :datetime},
-                      { name:"processedDate", type: :datetime},
-                      { name:"completedDate", type: :datetime},
-                      { name:"expectedDate", type: :datetime},
-                      { name:"cancelledDate", type: :datetime},
-                      { name:"returnedDate", type: :datetime},
-                      { name:"lastManualUpdateDate", type: :datetime}
+                      { name:"documentLocation"},
+					  { name:"shippingValue", type: "float"},
+					  { name:"insuranceValue", type: "float"},
+					  { name:"additionalValue", type: "float"},
+                    ]
+                  }
+                ]
+              },
+              { name:"events", type: "object", properties:
+                [
+                  { name:"resourceLocation"},
+                  { name:"resource", type: "object", properties:
+                    [
+                      { name:"createdDate", type: "datetime"},
+                      { name:"pickedUpDate", type: "datetime"},
+                      { name:"submittedDate", type: "datetime"},
+                      { name:"processedDate", type: "datetime"},
+                      { name:"completedDate", type: "datetime"},
+                      { name:"expectedDate", type: "datetime"},
+                      { name:"cancelledDate", type: "datetime"},
+                      { name:"returnedDate", type: "datetime"},
+                      { name:"lastManualUpdateDate", type: "datetime"}
                     ]
                   }
                 ]
@@ -407,10 +519,10 @@
       },
       output_fields: ->(object_definitions) {
         [
-           { name: 'items', type: :array, of: :object, properties:
+           { name: 'items', type: "array", of: "object", properties:
              [
               { name: 'resourceLocation', control_type: 'url'},
-              { name: 'resource', type: :object, properties: object_definitions['product']}
+              { name: 'resource', type: "object", properties: object_definitions['product']}
              ]
            }
         ]
@@ -420,7 +532,7 @@
     get_product_details: {
     	input_fields: ->() {
       	[
-          { name: 'ProductID', optional: :false}
+			{ name: "ProductID", optional: false }
         ]
       },
 
@@ -430,10 +542,10 @@
 
       output_fields: ->(object_definitions) {
       	[
-	 { name: 'status'},
-         { name: 'message'},
-         { name: 'resourceLocation'},
-         { name: 'resource', type: :object, properties: object_definitions['product']}
+			{ name: 'status'},
+			{ name: 'message'},
+			{ name: 'resourceLocation'},
+			{ name: 'resource', type: "object", properties: object_definitions['product']}
         ]
       }
     }
@@ -442,38 +554,64 @@
   triggers: {
   	new_or_updated_order: {
   		
-  		type: :paging_desc,
-  		
 		input_fields: ->(){
-	  	 [
-	   		{ name: 'since', type: :timestamp},
-	   		{ name: 'status', control_type: 'select', hint: 'type of order to be tracked. Leave blank to track all orders',
-	   			picklist: [['processed'],['canceled'], ['completed'], ['delivered'], ['returned'], ['submitted'], ['held'], ['tracked']]}
-	  	 ]
+			[
+				{ 
+					name: 'since', 
+					type: "timestamp",
+					hint: 'Defaults to recipe start if not entered.'
+				},
+				{ 
+					name: 'status', 
+					control_type: 'select', 
+					hint: 'Type of order to be tracked. Leave blank to track all orders.',
+					pick_list: "statuses"
+				}
+			]
 	 	},
 		
-		poll: ->(connection,input,last_updated_since) {
-        		since = last_updated_since || input['since'] || Time.now
-
-	        	result = get("https://api.shipwire.com/api/v3/orders").
-	          			params(updatedAfter: since.to_time.utc.iso8601,
-	                    		status: input['status'])['resource']
-	        	orders = result['items']
-	        	next_updated_since = orders.first['resource']['lastUpdatedDate'] unless orders.length == 0
-		        {
-		          events: orders,
-		          next_page: next_updated_since,
-		          can_poll_more: result['total'] > orders.length + result['offset']
-		        }
-		},
-
+		poll: ->(connection,input,next_page) {
+			since = input['since'] || Time.now
+			
+			if next_page.present? then 
+				result = get(next_page)['resource']					
+			else
+				result = get("https://api.shipwire.com/api/v3/orders").
+						params(updatedAfter: since.to_time.utc.iso8601,
+								status: input['status'],
+								expand: 'all',
+								limit: 1)['resource']
+			end
+			orders = result['items']
+			{
+			  events: orders,
+			  next_poll: result['next'],
+			  can_poll_more: result['next'].present?
+			}
+		}, 
+		
 		dedup: ->(order) {
-			order['resource']['id']
+			order['resource']['id'] + order['resource']['lastUpdatedDate'].to_time.to_i
 		},
 
 		output_fields: ->(object_definitions) {
 			object_definitions['order']
 		}
-    	}
+    }
+  },
+  
+  pick_lists: {
+	statuses: ->(connection) {
+		[
+			['Processed','processed'],
+			['Canceled','canceled'], 
+			['Completed','completed'], 
+			['Delivered','delivered'], 
+			['Returned','returned'], 
+			['Submitted','submitted'], 
+			['Held','held'], 
+			['Tracked','tracked']
+		]
+	}
   }
 }
