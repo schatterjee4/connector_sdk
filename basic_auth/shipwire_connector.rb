@@ -601,7 +601,7 @@
   },
 
   pick_lists: {
-    statuses: {
+    statuses: ->() {
 	    [
 		    ["Processed", "processed"],
 		    ["Canceled", "canceled"],
