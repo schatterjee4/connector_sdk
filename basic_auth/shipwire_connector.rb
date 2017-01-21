@@ -1,19 +1,19 @@
 {
-  title: 'Shipwire',
+  title: "Shipwire",
 
   connection: {
     fields:
       [
-        { name: 'username'},
-        { name: 'password', control_type: 'password'}
+        { name: "username"},
+        { name: "password", control_type: "password"}
       ],
 
     authorization: {
-      type: 'basic_auth',
+      type: "basic_auth",
 
       credentials: ->(connection) {
-        user(connection['username'])
-        password(connection['password'])
+        user(connection["username"])
+        password(connection["password"])
       }
     }
   },
@@ -26,158 +26,158 @@
     product: {
       fields: ->() {
         [
-          { name: 'id'},
-          { name: 'externalId'},
-          { name: 'sku'},
-          { name: 'description'},
-          { name: 'hsCode'},
-          { name: 'countryOfOrigin'},
-          { name: 'creationDate', type: "timestamp"},
-          { name: 'archivedDate', type: "timestamp"},
-          { name: 'status'},
-          { name: 'storageConfiguration'},
-          { name: 'batteryConfiguration'},
-          { name: 'itemCount'},
-          { name: 'vendorID'},
-          { name: 'vendorExternalId'},
-          { name: 'dimensions', type: "object", properties: 
+          { name: "id"},
+          { name: "externalId"},
+          { name: "sku"},
+          { name: "description"},
+          { name: "hsCode"},
+          { name: "countryOfOrigin"},
+          { name: "creationDate", type: "timestamp"},
+          { name: "archivedDate", type: "timestamp"},
+          { name: "status"},
+          { name: "storageConfiguration"},
+          { name: "batteryConfiguration"},
+          { name: "itemCount"},
+          { name: "vendorID"},
+          { name: "vendorExternalId"},
+          { name: "dimensions", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'weight'},
-		          		{ name: 'weightUnit'},
-		          		{ name: 'height'},
-		          		{ name: 'heightUnit'},
-		          		{ name: 'length'},
-		          		{ name: 'lengthUnit'}		
+          				{ name: "weight"},
+		          		{ name: "weightUnit"},
+		          		{ name: "height"},
+		          		{ name: "heightUnit"},
+		          		{ name: "length"},
+		          		{ name: "lengthUnit"}		
           			]
           		}
           	]
           },
-          { name: 'values', type: "object", properties: 
+          { name: "values", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'costValueCurrency'},
-          				{ name: 'wholesaleValue'},
-          				{ name: 'costValue'},
-          				{ name: 'wholesaleValueCurrency'},
-          				{ name: 'retailValue'},
-          				{ name: 'retailValueCurrency'}
+          				{ name: "costValueCurrency"},
+          				{ name: "wholesaleValue"},
+          				{ name: "costValue"},
+          				{ name: "wholesaleValueCurrency"},
+          				{ name: "retailValue"},
+          				{ name: "retailValueCurrency"}
           			]
           			
           		}
           	]
           },
-          { name: 'alternateNames', type: "object", properties: 
+          { name: "alternateNames", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties:
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties:
           			[
-          				{ name: 'previous'},
-          				{ name: 'next'},
-          				{ name: 'total', type: "integer"},
-          				{ name: 'items', type: "array"},
-          				{ name: 'offset', type: "integer"}
+          				{ name: "previous"},
+          				{ name: "next"},
+          				{ name: "total", type: "integer"},
+          				{ name: "items", type: "array"},
+          				{ name: "offset", type: "integer"}
           			]
           		}
           	]
           },
-          { name: 'technicalData', type: "object", properties: [
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          { name: "technicalData", type: "object", properties: [
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'battery', type: "object", properties:[{ name: 'resourceLocation'}]}	
+          				{ name: "battery", type: "object", properties:[{ name: "resourceLocation"}]}	
           			]
 				}
           	]
           },
-          { name: 'flags', type: "object", properties: 
+          { name: "flags", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties:
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties:
           			[
-          				{ name: 'isMedia'},
-          				{ name: 'isDeletable'},
-          				{ name: 'hasPallet'},
-          				{ name: 'isPackagedReadyToShip'},
-          				{ name: 'hasMasterCase'},
-          				{ name: 'isFragile'},
-          				{ name: 'isArchivable'},
-          				{ name: 'isLiquid'},
-          				{ name: 'isDangerous'},
-          				{ name: 'isPerishable'},
-          				{ name: 'hasEditRestrictions'},
-          				{ name: 'hasInnerPack'},
-          				{ name: 'isAdult'}
+          				{ name: "isMedia"},
+          				{ name: "isDeletable"},
+          				{ name: "hasPallet"},
+          				{ name: "isPackagedReadyToShip"},
+          				{ name: "hasMasterCase"},
+          				{ name: "isFragile"},
+          				{ name: "isArchivable"},
+          				{ name: "isLiquid"},
+          				{ name: "isDangerous"},
+          				{ name: "isPerishable"},
+          				{ name: "hasEditRestrictions"},
+          				{ name: "hasInnerPack"},
+          				{ name: "isAdult"}
           			]
           		}
           	]
           },
-          { name: 'enqueuedDimensions', type: "object", properties: 
+          { name: "enqueuedDimensions", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties:
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties:
           			[
-          				{ name: 'offset'},
-          				{ name: 'total'},
-          				{ name: 'previous'},
-          				{ name: 'next'},
-          				{ name: 'items'}
+          				{ name: "offset"},
+          				{ name: "total"},
+          				{ name: "previous"},
+          				{ name: "next"},
+          				{ name: "items"}
           			]
           		}
           	]
           },
-          { name: 'innerPack', type: "object", properties: 
+          { name: "innerPack", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'description'},
-          				{ name: 'dimensions', type: "object", properties: 
+          				{ name: "description"},
+          				{ name: "dimensions", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties:
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties:
           							[
-          								{ name: 'height'},
-          								{ name: 'HeightUnit'},
-          								{ name: 'length'},
-          								{ name: 'LengthUnit'},
-          								{ name: 'weight'},
-          								{ name: 'weightUnit'},
-          								{ name: 'width'},
-          								{ name: 'widthUnit'}
+          								{ name: "height"},
+          								{ name: "HeightUnit"},
+          								{ name: "length"},
+          								{ name: "LengthUnit"},
+          								{ name: "weight"},
+          								{ name: "weightUnit"},
+          								{ name: "width"},
+          								{ name: "widthUnit"}
           							]
           						}
           					]
           				},
-          				{ name: 'externalID'},
-          				{ name: 'flags', type: "object", properties: 
+          				{ name: "externalID"},
+          				{ name: "flags", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties: 
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties: 
           							[
-          								{ name: 'isPackagedReadyToShip', type: "integer"}	
+          								{ name: "isPackagedReadyToShip", type: "integer"}	
           							]
           						}	
           					]
           				},
-          				{ name: 'individualItemsPerCase'},
-          				{ name: 'ProductId'},
-          				{ name: 'sku'},
-          				{ name: 'values', type: "object", properties:
+          				{ name: "individualItemsPerCase"},
+          				{ name: "ProductId"},
+          				{ name: "sku"},
+          				{ name: "values", type: "object", properties:
 				          	[
-				          		{ name: 'resourceLocation'},
-				          		{ name: 'resource', type: "object", properties: 
+				          		{ name: "resourceLocation"},
+				          		{ name: "resource", type: "object", properties: 
 				          			[
-				          				{ name: 'costValueCurrency'},
-				          				{ name: 'wholesaleValue'},
-				          				{ name: 'costValue'},
-				          				{ name: 'wholesaleValueCurrency'},
-				          				{ name: 'retailValue'},
-				          				{ name: 'retailValueCurrency'}
+				          				{ name: "costValueCurrency"},
+				          				{ name: "wholesaleValue"},
+				          				{ name: "costValue"},
+				          				{ name: "wholesaleValueCurrency"},
+				          				{ name: "retailValue"},
+				          				{ name: "retailValueCurrency"}
 				          			]
 				          			
 				          		}
@@ -187,98 +187,98 @@
           		}
           	]
           },
-          { name: 'masterCase', type: "object", properties: 
+          { name: "masterCase", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'sku'},
-          				{ name: 'dimensions', type: "object", properties: 
+          				{ name: "sku"},
+          				{ name: "dimensions", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties: 
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties: 
           							[
-          								{ name: 'weight'},
-          								{ name: 'weightUnit'},
-          								{ name: 'height'},
-          								{ name: 'heightUnit'},
-          								{ name: 'length'},
-          								{ name: 'lengthUnit'}
+          								{ name: "weight"},
+          								{ name: "weightUnit"},
+          								{ name: "height"},
+          								{ name: "heightUnit"},
+          								{ name: "length"},
+          								{ name: "lengthUnit"}
           							]
           						}
           					]
           				},
-          				{ name: 'values', type: "object", properties:
+          				{ name: "values", type: "object", properties:
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties: 
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties: 
           							[
-          								{ name: 'costvalueCurrency'},
-          								{ name: 'wholesaleValue'},
-          								{ name: 'costValue'},
-          								{ name: 'wholesaleValueCurrency'},
-          								{ name: 'retailValue'},
-          								{ name: 'retailValueCurrency'}
+          								{ name: "costvalueCurrency"},
+          								{ name: "wholesaleValue"},
+          								{ name: "costValue"},
+          								{ name: "wholesaleValueCurrency"},
+          								{ name: "retailValue"},
+          								{ name: "retailValueCurrency"}
           							]
           						},
           					]
           				},
-          				{ name: 'externalId', type: "integer"},
-          				{ name: 'individualItemsPerCase', type: "integer"},
-          				{ name: 'flags', type: "object", properties: 
+          				{ name: "externalId", type: "integer"},
+          				{ name: "individualItemsPerCase", type: "integer"},
+          				{ name: "flags", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties:[{ name: 'isPackagedReadyToShip'}]}
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties:[{ name: "isPackagedReadyToShip"}]}
           					]
           				},
-          				{ name: 'productId'},
-          				{ name: 'description'}
+          				{ name: "productId"},
+          				{ name: "description"}
           			]
           		},
           	]#endof mastercase
           },
-          { name: 'pallet', type: "object", properties: 
+          { name: "pallet", type: "object", properties: 
           	[
-          		{ name: 'resourceLocation'},
-          		{ name: 'resource', type: "object", properties: 
+          		{ name: "resourceLocation"},
+          		{ name: "resource", type: "object", properties: 
           			[
-          				{ name: 'description'},
-          				{ name: 'dimensions', type: "object", properties: 
+          				{ name: "description"},
+          				{ name: "dimensions", type: "object", properties: 
           					[
-          						{ name: 'weight'},
-          						{ name: 'weightUnit'},
-          						{ name: 'height'},
-          						{ name: 'heightUnit'},
-          						{ name: 'length'},
-          						{ name: 'lengthUnit'}		
+          						{ name: "weight"},
+          						{ name: "weightUnit"},
+          						{ name: "height"},
+          						{ name: "heightUnit"},
+          						{ name: "length"},
+          						{ name: "lengthUnit"}		
           					]
           				},
-          				{ name: 'externalId'},
-          				{ name: 'flags', type: "object", properties: 
+          				{ name: "externalId"},
+          				{ name: "flags", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties: 
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties: 
           							[
-          								{ name: 'isPackagedReadyToShip'},
+          								{ name: "isPackagedReadyToShip"},
           								
           							]
           						}
           					]
           				},
-          				{ name: 'individualItemsPerCase'},
-          				{ name: 'productId'},
-          				{ name: 'sku'},
-          				{ name: 'values', type: "object", properties: 
+          				{ name: "individualItemsPerCase"},
+          				{ name: "productId"},
+          				{ name: "sku"},
+          				{ name: "values", type: "object", properties: 
           					[
-          						{ name: 'resourceLocation'},
-          						{ name: 'resource', type: "object", properties:
+          						{ name: "resourceLocation"},
+          						{ name: "resource", type: "object", properties:
           							[
-		          						{ name: 'costValue'},
-		          						{ name: 'costValueCurrency'},
-		          						{ name: 'retailValue'},
-		          						{ name: 'retailValueCurrency'},
-		          						{ name: 'wholesaleValue'},
-		          						{ name: 'wholesaleValueCurrency'}
+		          						{ name: "costValue"},
+		          						{ name: "costValueCurrency"},
+		          						{ name: "retailValue"},
+		          						{ name: "retailValueCurrency"},
+		          						{ name: "wholesaleValue"},
+		          						{ name: "wholesaleValueCurrency"}
           							]
 								}
           					]
@@ -508,21 +508,21 @@
     search_products: {
       input_fields: ->() {
         [
-          { name: 'sku', label: 'SKU'},
-          { name: 'description'}
+          { name: "sku", label: "SKU"},
+          { name: "description"}
         ]
       },
       execute: ->(connection,input) {
         {
-          'items': get("https://api.shipwire.com/api/v3/products", input)['resource']['items']
+          "items": get("https://api.shipwire.com/api/v3/products", input)["resource"]["items"]
         }
       },
       output_fields: ->(object_definitions) {
         [
-           { name: 'items', type: "array", of: "object", properties:
+           { name: "items", type: "array", of: "object", properties:
              [
-              { name: 'resourceLocation', control_type: 'url'},
-              { name: 'resource', type: "object", properties: object_definitions['product']}
+              { name: "resourceLocation", control_type: "url"},
+              { name: "resource", type: "object", properties: object_definitions["product"]}
              ]
            }
         ]
@@ -537,15 +537,15 @@
       },
 
       execute: ->(connection, input) {
-        product_detail = get("https://api.shipwire.com/api/v3/products/#{input['ProductID']}")
+        product_detail = get("https://api.shipwire.com/api/v3/products/#{input["ProductID"]}")
       },
 
       output_fields: ->(object_definitions) {
       	[
-			{ name: 'status'},
-			{ name: 'message'},
-			{ name: 'resourceLocation'},
-			{ name: 'resource', type: "object", properties: object_definitions['product']}
+			{ name: "status"},
+			{ name: "message"},
+			{ name: "resourceLocation"},
+			{ name: "resource", type: "object", properties: object_definitions["product"]}
         ]
       }
     }
@@ -557,61 +557,61 @@
 		input_fields: ->(){
 			[
 				{ 
-					name: 'since', 
+					name: "since", 
 					type: "timestamp",
-					hint: 'Defaults to recipe start if not entered.'
+					hint: "Defaults to recipe start if not entered."
 				},
 				{ 
-					name: 'status', 
-					control_type: 'select', 
-					hint: 'Type of order to be tracked. Leave blank to track all orders.',
+					name: "status", 
+					control_type: "select", 
+					hint: "Type of order to be tracked. Leave blank to track all orders.",
 					pick_list: "statuses"
 				}
 			]
 	 	},
 		
 		poll: ->(connection,input,next_page) {
-			since = input['since'] || Time.now
+			since = input["since"] || Time.now
 			
 			if next_page.present? then 
-				result = get(next_page)['resource']					
+				result = get(next_page)["resource"]					
 			else
 				result = get("https://api.shipwire.com/api/v3/orders").
 						params(updatedAfter: since.to_time.utc.iso8601,
-								status: input['status'],
-								expand: 'all',
-								limit: 1)['resource']
+								status: input["status"],
+								expand: "all",
+								limit: 1)["resource"]
 			end
-			orders = result['items']
+			orders = result["items"]
 			{
 			  events: orders,
-			  next_poll: result['next'],
-			  can_poll_more: result['next'].present?
+			  next_poll: result["next"],
+			  can_poll_more: result["next"].present?
 			}
 		}, 
-		
+
 		dedup: ->(order) {
-			order['resource']['id'] + order['resource']['lastUpdatedDate'].to_time.to_i
+			order["resource"]["id"] + order["resource"]["lastUpdatedDate"].to_time.to_i
 		},
 
 		output_fields: ->(object_definitions) {
-			object_definitions['order']
+			object_definitions["order"]
 		}
     }
   },
-  
+
   pick_lists: {
-	statuses: ->(connection) {
-		[
-			['Processed','processed'],
-			['Canceled','canceled'], 
-			['Completed','completed'], 
-			['Delivered','delivered'], 
-			['Returned','returned'], 
-			['Submitted','submitted'], 
-			['Held','held'], 
-			['Tracked','tracked']
-		]
-	}
+    statuses: {
+	    [
+		    ["Processed", "processed"],
+		    ["Canceled", "canceled"],
+		    ["Completed", "completed"],
+		    ["Delivered", "delivered"],
+		    ["Returned", "returned"],
+		    ["Submitted", "submitted"],
+		    ["Held", "held"],
+		    ["Tracked", "tracked"]
+	    ]
+    }
   }
 }
