@@ -87,7 +87,7 @@
 
         table_fields = if (project_id && dataset_id && table_id)
           get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
-          .dig("schema", "fields")
+            .dig("schema", "fields")
         else
           []
         end
@@ -131,8 +131,9 @@
               hint: field_hint,
               optional: field_optional,
               type: field_type,
-              properties: field["fields"]
-              .map { |inner_field| build_schema_field[inner_field] }
+              properties: field["fields"].map do |inner_field|
+                build_schema_field[inner_field]
+              end
             }
           else
             {
@@ -147,18 +148,18 @@
         table_schema_fields = [
           {
             name: "insertId",
-            hint: "A unique ID for each row. BigQuery uses this property to detect duplicate insertion requests on a best-effort basis"
+            hint: "A unique ID for each row. BigQuery uses this property" <<
+            " to detect duplicate insertion requests on a best-effort basis"
           }
-        ]
-        .concat(
-        table_fields
-        .map { |table_field| build_schema_field[table_field] }
-        )
+        ].
+        concat(table_fields.map lambda do |table_field|
+          build_schema_field[table_field] })
 
         [
           name: "rows",
           optional: false,
-          hint: "A JSON object that contains a row of data. The object's properties and values must match the destination table's schema",
+          hint: "A JSON object that contains a row of data. The object's" <<
+          " properties and values must match the destination table's schema",
           type: "array",
           of: "object",
           properties: table_schema_fields
@@ -169,7 +170,8 @@
 
   actions: {
     add_rows: {
-      description: 'Add <span class="provider">rows to dataset</span> in <span class="provider">BigQuery</span>',
+      description: "Add <span class='provider'>rows to dataset</span>" <<
+      " in <span class='provider'>BigQuery</span>",
       subtitle: "Add data rows",
       help: "Streams data into a table in BigQuery.",
 
@@ -200,11 +202,11 @@
         },
       ],
 
-      input_fields: ->(object_definitions) {
+      input_fields: lambda do |object_definitions|
         object_definitions["table_schema"]
-      },
+      end,
 
-      execute: ->(_connection, input) {
+      execute: lambda do |_connection, input|
         project_id = input["project"]
         dataset_id = input["dataset"]
         table_id = input["table"]
@@ -224,7 +226,7 @@
           table_id << "/insertAll").
           params(fields: "kind, insertErrors").
           payload(payload)
-      },
+      end,
 
       output_fields: lambda do |_object_definitions|
         [
@@ -236,38 +238,40 @@
         {
           kind: "bigquery#tableDataInsertAllResponse",
         }
-      end,
+      end
     },
   },
 
   pick_lists: {
     projects: lambda do |_connection|
       get("https://www.googleapis.com/bigquery/v2/projects").
-      dig("projects").
-      map do |project|
-        [project["friendlyName"], project["id"]]
-      end
+        dig("projects").
+        map do |project|
+          [project["friendlyName"], project["id"]]
+        end
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets").
-      dig("datasets").
-      map do |dataset|
-        [
-          dataset["datasetReference"]["datasetId"],
-          dataset["datasetReference"]["datasetId"]
-        ]
-      end
+      get("https://www.googleapis.com/bigquery/v2/projects/" <<
+        project_id << "/datasets").
+        dig("datasets").
+        map do |dataset|
+          [
+            dataset["datasetReference"]["datasetId"],
+            dataset["datasetReference"]["datasetId"]
+          ]
+        end
     end,
 
     tables: lambda do |_connection, project_id:, dataset_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables").
-      dig("tables").map do |table|
-        [
-          table["tableReference"]["tableId"],
-          table["tableReference"]["tableId"]
-        ]
-      end
-    end,
+      get("https://www.googleapis.com/bigquery/v2/projects/" <<
+        project_id << "/datasets/" << dataset_id "/tables").
+        dig("tables").map do |table|
+          [
+            table["tableReference"]["tableId"],
+            table["tableReference"]["tableId"]
+          ]
+        end
+    end
   },
 }
