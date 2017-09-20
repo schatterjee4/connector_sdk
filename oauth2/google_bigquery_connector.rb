@@ -152,8 +152,9 @@
             " to detect duplicate insertion requests on a best-effort basis"
           }
         ].
-        concat(table_fields.map lambda do |table_field|
-          build_schema_field[table_field] })
+        concat(table_fields.map do |table_field|
+          build_schema_field[table_field]
+        end)
 
         [
           name: "rows",
@@ -239,7 +240,7 @@
           kind: "bigquery#tableDataInsertAllResponse",
         }
       end
-    },
+    }
   },
 
   pick_lists: {
@@ -273,5 +274,5 @@
           ]
         end
     end
-  },
+  }
 }
