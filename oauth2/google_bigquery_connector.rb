@@ -119,7 +119,7 @@
 
         build_schema_field = ->(field) {
           field_name = field["name"].downcase
-          field_hint = (field["description"] && hint_map[field["type"]]) ? (field["description"] + hint_map[field["type"]]) : (field["description"] || hint_map[field["type"]])
+          field_hint = (field["description"] && hint_map[field["type"]]) ? (field["description"] << hint_map[field["type"]]) : (field["description"] || hint_map[field["type"]])
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
 
@@ -217,7 +217,7 @@
           end
         }
 
-        post("https://www.googleapis.com/bigquery/v2/projects/" +
+        post("https://www.googleapis.com/bigquery/v2/projects/" <<
           "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll"
         ).
         params(fields: "kind, insertErrors").
@@ -249,7 +249,7 @@
 
     datasets: lambda do |_connection, project_id:|
       get(
-        "https://www.googleapis.com/bigquery/v2/projects/" +
+        "https://www.googleapis.com/bigquery/v2/projects/" <<
         "#{project_id}/datasets"
       ).
       dig("datasets").
@@ -263,7 +263,7 @@
 
     tables: lambda do |_connection, project_id:, dataset_id:|
       get(
-        "https://www.googleapis.com/bigquery/v2/projects/" +
+        "https://www.googleapis.com/bigquery/v2/projects/" <<
         "#{project_id}/datasets/#{dataset_id}/tables"
       ).dig("tables").map do |table|
         [
