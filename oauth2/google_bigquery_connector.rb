@@ -165,8 +165,8 @@
           of: "object",
           properties: table_schema_fields
         ]
-      },
-    },
+      }
+    }
   },
 
   actions: {
@@ -222,7 +222,7 @@
           end
         }
 
-        post("https://www.googleapis.com/bigquery/v2/projects/" << project_id 
+        post("https://www.googleapis.com/bigquery/v2/projects/" << project_id
           << "/datasets/" << dataset_id << "/tables/" << table_id
           << "/insertAll").
           params(fields: "kind, insertErrors").
@@ -253,8 +253,8 @@
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" << project_id
-        << "/datasets").
+      get("https://www.googleapis.com/bigquery/v2/projects/" <<
+        project_id << "/datasets").
         dig("datasets").
         map do |dataset|
           [
@@ -265,8 +265,8 @@
     end,
 
     tables: lambda do |_connection, project_id:, dataset_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" << project_id
-        << "/datasets/" << dataset_id "/tables").
+      get("https://www.googleapis.com/bigquery/v2/projects/" <<
+        project_id << "/datasets/" << dataset_id "/tables").
         dig("tables").map do |table|
           [
             table["tableReference"]["tableId"],
