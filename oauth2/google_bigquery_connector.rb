@@ -211,7 +211,7 @@
         payload = {
           "rows" =>	rows.map do |row|
             {
-              "insertId": row.delete("insertId") || "",  # remove insertId from json part of input data
+              "insertId": row.delete("insertId") || "",
               "json" => row
             }
           end
@@ -224,7 +224,7 @@
         .payload(payload)
       },
 
-      output_fields: lambda |_object_definitions|
+      output_fields: lambda do |_object_definitions|
         [
           { name: "kind" },
         ]
@@ -242,17 +242,15 @@
     projects: lambda do |_connection|
       get(
         "https://www.googleapis.com/bigquery/v2/projects"
-      )
-      .dig("projects")
-      .map { |project| [project["friendlyName"], project["id"]] }
+      ).dig("projects").map do |project|
+         [project["friendlyName"], project["id"]]
+       end
     end,
 
     datasets: lambda do |_connection, project_id:|
       get(
         "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets"
-      )
-      .dig("datasets")
-      .map do |dataset|
+      ).dig("datasets").map do |dataset|
         [
           dataset["datasetReference"]["datasetId"],
           dataset["datasetReference"]["datasetId"]
@@ -263,9 +261,7 @@
     tables: lambda do |_connection, project_id:, dataset_id:|
       get(
         "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables"
-      )
-      .dig("tables")
-      .map do |table|
+      ).dig("tables").map do |table|
         [
           table["tableReference"]["tableId"],
           table["tableReference"]["tableId"]
