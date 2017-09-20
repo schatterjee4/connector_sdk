@@ -217,11 +217,11 @@
           end
         }
 
-        post(
-          "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll"
-        )
-        .params(fields: "kind, insertErrors")
-        .payload(payload)
+        post("https://www.googleapis.com/bigquery/v2/projects/"
+        + "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll"
+        ).
+        params(fields: "kind, insertErrors").
+        payload(payload)
       },
 
       output_fields: lambda do |_object_definitions|
@@ -240,17 +240,18 @@
 
   pick_lists: {
     projects: lambda do |_connection|
-      get(
-        "https://www.googleapis.com/bigquery/v2/projects"
-      ).dig("projects").map do |project|
-         [project["friendlyName"], project["id"]]
-       end
+      get("https://www.googleapis.com/bigquery/v2/projects").
+      dig("projects").
+      map do |project|
+        [project["friendlyName"], project["id"]]
+      end
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get(
-        "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets"
-      ).dig("datasets").map do |dataset|
+      get("https://www.googleapis.com/bigquery/v2/projects/"
+      +"#{project_id}/datasets").
+      dig("datasets").
+      map do |dataset|
         [
           dataset["datasetReference"]["datasetId"],
           dataset["datasetReference"]["datasetId"]
@@ -260,7 +261,8 @@
 
     tables: lambda do |_connection, project_id:, dataset_id:|
       get(
-        "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables"
+        "https://www.googleapis.com/bigquery/v2/projects/"
+        + "#{project_id}/datasets/#{dataset_id}/tables"
       ).dig("tables").map do |table|
         [
           table["tableReference"]["tableId"],
