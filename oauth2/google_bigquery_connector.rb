@@ -5,12 +5,12 @@
     fields: [
       {
         name: "client_id",
-        hint: "Find it in <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
+        hint: "Find it <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
         optional: false,
       },
       {
         name: "client_secret",
-        hint: "Find it in <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
+        hint: "Find it <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
         optional: false,
         control_type: "password",
       }
@@ -30,24 +30,24 @@
           "https://www.googleapis.com/auth/devstorage.read_write",	#Manage your data in Google Cloud Storage
         ].join(" ")
 
-        "https://accounts.google.com/o/oauth2/auth?client_id=#{connection["client_id"]}&response_type=code&scope=#{scopes}&access_type=offline&include_granted_scopes=true&prompt=consent"
+        "https://accounts.google.com/o/oauth2/auth?client_id=#{connection["client_id"] }&response_type=code&scope=#{scopes}&access_type=offline&include_granted_scopes=true&prompt=consent"
       },
 
       acquire: ->(connection, auth_code, redirect_uri) {
         response = post("https://accounts.google.com/o/oauth2/token")
         .payload(
-        client_id: connection["client_id"],
-        client_secret: connection["client_secret"],
-        grant_type: 'authorization_code',
-        code: auth_code,
-        redirect_uri: redirect_uri,
+          client_id: connection["client_id"],
+          client_secret: connection["client_secret"],
+          grant_type: "authorization_code",
+          code: auth_code,
+          redirect_uri: redirect_uri,
         )
         .request_format_www_form_urlencoded
 
         [
           {
-            access_token: response['access_token'],
-            refresh_token: response['refresh_token'],
+            access_token: response["access_token"],
+            refresh_token: response["refresh_token"],
           },
           nil,
           nil,
@@ -57,23 +57,23 @@
       refresh: ->(connection, refresh_token) {
         post("https://accounts.google.com/o/oauth2/token")
         .payload(
-        client_id: connection["client_id"],
-        client_secret: connection["client_secret"],
-        grant_type: 'refresh_token',
-        refresh_token: refresh_token,
+          client_id: connection["client_id"],
+          client_secret: connection["client_secret"],
+          grant_type: "refresh_token",
+          refresh_token: refresh_token,
         )
         .request_format_www_form_urlencoded
       },
 
       refresh_on: [401],
 
-      apply: ->(connection, access_token) {
+      apply: ->(_connection, access_token) {
         headers(Authorization: "Bearer #{access_token}")
       },
     },
   },
 
-  test: ->(connection) {
+  test: ->(_connection) {
     get("https://www.googleapis.com/bigquery/v2/projects")
     .params(maxResults: 1)
   },
@@ -81,20 +81,18 @@
   object_definitions: {
     table_schema: {
       fields: ->(connection, config_fields) {
-        project_id = config_fields['project']
-        dataset_id = config_fields['dataset']
-        table_id = config_fields['table']
+        project_id = config_fields["project"]
+        dataset_id = config_fields["dataset"]
+        table_id = config_fields["table"]
 
         table_fields = if (project_id && dataset_id && table_id)
-          get(
-          "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}"
-          )
+          get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
           .dig("schema", "fields")
         else
           []
         end
 
-        type = {
+        type_map = {
           "BYTES" => "string",
           "INTEGER" => "integer", "INT64" => "integer",
           "FLOAT" => "number", "FLOAT64" => "number",
@@ -106,7 +104,7 @@
           "RECORD" => "object", "STRUCT" => "object",
         }
 
-        hint = {
+        hint_map = {
           "STRING" => " | Variable-length character (UTF-8) data.",
           "BYTES" => " | Variable-length binary data.",
           "INTEGER" => " | 64-bit signed integer.",
@@ -119,45 +117,27 @@
           "RECORD" => " | A collection of one or more other fields.", #info - https://cloud.google.com/bigquery/data-types
         }
 
-        get_field_name = ->(field) {
-          field["name"].downcase
-        }
-
-        get_field_hint = ->(field) {
-          (field["description"] && hint[field["type"]]) ? (field["description"] + hint[field["type"]]) : (field["description"] || hint[field["type"]])
-        }
-
-        get_field_type = ->(field) {
-          type[field["type"]]
-        }
-
-        get_field_optional = ->(field) {
-          (field["mode"] != "REQUIRED")
-        }
-
-        #todo
-        # get_field_control_type = ->(field) {
-        #   (field["type"] == "BOOLEAN") ? ("checkbox") : ("text")
-        # }
-
         build_schema_field = ->(field) {
+          field_name = field["name"].downcase
+          field_hint = (field["description"] && hint_map[field["type"]]) ? (field["description"] + hint_map[field["type"]]) : (field["description"] || hint_map[field["type"]])
+          field_optional = (field["mode"] != "REQUIRED")
+          field_type = type_map[field["type"]]
+
           if ["RECORD", "STRUCT"].include? field["type"]
             {
-              name: get_field_name[field],
-              hint: get_field_hint[field],
-              optional: get_field_optional[field],
-              type: get_field_type[field],
+              name: field_name,
+              hint: field_hint,
+              optional: field_optional,
+              type: field_type,
               properties: field["fields"]
-              .map {|inner_field|
-                build_schema_field[inner_field]
-              }
+              .map { |inner_field| build_schema_field[inner_field] }
             }
           else
             {
-              name: get_field_name[field],
-              hint: get_field_hint[field],
-              optional: get_field_optional[field],
-              type: get_field_type[field],
+              name: field_name,
+              hint: field_hint,
+              optional: field_optional,
+              type: field_type,
             }
           end
         }
@@ -168,9 +148,9 @@
             hint: "A unique ID for each row. BigQuery uses this property to detect duplicate insertion requests on a best-effort basis"
           }
         ]
-        .concat(table_fields.map { |table_field|
-          build_schema_field[table_field]
-        }
+        .concat(
+        table_fields
+        .map { |table_field| build_schema_field[table_field] }
         )
 
         [
@@ -189,7 +169,7 @@
     add_rows: {
       description: 'Add <span class="provider">rows to dataset</span> in <span class="provider">BigQuery</span>',
       subtitle: "Add data rows",
-      help: "Streaming Data into BigQuery, you can choose to stream your data into BigQuery using this method.",
+      help: "Streams data into a table in BigQuery.",
 
       config_fields:
       [
@@ -230,84 +210,59 @@
 
         payload = {
           "rows" =>	rows.map { |row|
-            insert_id = row.delete("insertId") || ""  # remove insertId from json part of input data
             {
-              "insertId": insert_id,
+              "insertId": row.delete("insertId") || "",  # remove insertId from json part of input data
               "json" => row
             }
           }
         }
 
-        response = post(
-          "https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll"
-          )
+        response = post("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll")
         .params(fields: "insertErrors,kind")
         .payload(payload)
       },
 
       output_fields: ->(object_definitions) {
         [
-          { name:"kind" },
-          {
-            name:"insertErrors",
-            type: "array",
-            of: "object",
-            properties: [
-              { name:"index" },
-              {
-                name:"errors",
-                type: "array",
-                of: "object",
-                properties: [
-                  { name:"reason" },
-                  { name:"location" },
-                  { name:"debugInfo" },
-                  { name:"message" },
-                ],
-              },
-            ],
-          },
+          { name: "kind" },
         ]
       },
 
-      sample_output: ->() {
+      sample_output: lambda do
         {
           kind: "bigquery#tableDataInsertAllResponse",
-          insertErrors: [
-            {
-              index: 0,
-              errors: [
-                {
-                  reason: "invalid",
-                  location: "name1",
-                  debugInfo: "generic::not_found: no such field.",
-                  message: "no such field.",
-                },
-              ],
-            },
-          ],
         }
-      },
+      end,
     },
-  },
-
-  triggers: {
   },
 
   pick_lists: {
-    projects: ->(connection) {
-      get("https://www.googleapis.com/bigquery/v2/projects")["projects"]
-      .map { |project| [project["friendlyName"], project["id"]]}
-    },
+    projects: lambda do |_connection|
+      get("https://www.googleapis.com/bigquery/v2/projects")
+      .dig("projects")
+      .map { |project| [project["friendlyName"], project["id"]] }
+    end,
 
-    datasets: ->(connection, project_id:) {
-      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets")["datasets"]
-      .map { |dataset| [dataset["datasetReference"]["datasetId"], dataset["datasetReference"]["datasetId"]]}
-    },
+    datasets: lambda do |_connection, project_id:|
+      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets")
+      .dig("datasets")
+      .map do |dataset|
+        [
+          dataset["datasetReference"]["datasetId"],
+          dataset["datasetReference"]["datasetId"]
+        ]
+      end
+    end,
 
-    tables: ->(connection, project_id:, dataset_id:) {
-      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables")["tables"]
-      .map { |table| [table["tableReference"]["tableId"], table["tableReference"]["tableId"]]}
-    },
+    tables: lambda do |_connection, project_id:, dataset_id:|
+      get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables")
+      .dig("tables")
+      .map do |table|
+        [
+          table["tableReference"]["tableId"],
+          table["tableReference"]["tableId"]
+        ]
+      end
+    end,
   },
 }
