@@ -266,7 +266,7 @@
 
     tables: lambda do |_connection, project_id:, dataset_id:|
       get("https://www.googleapis.com/bigquery/v2/projects/" <<
-        project_id << "/datasets/" << dataset_id "/tables").
+        project_id << "/datasets/" << dataset_id << "/tables").
         dig("tables").map do |table|
           [
             table["tableReference"]["tableId"],
