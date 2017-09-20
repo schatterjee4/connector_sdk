@@ -219,12 +219,11 @@
           end
         }
 
-        post(
-          "https://www.googleapis.com/bigquery/v2/projects/" + project_id +
-          "/datasets/" + dataset_id+ "/tables/" + table_id + "/insertAll"
-        ).
-        params(fields: "kind, insertErrors").
-        payload(payload)
+        post("https://www.googleapis.com/bigquery/v2/projects/" +
+            project_id + "/datasets/" + dataset_id+ "/tables/" +
+            table_id + "/insertAll").
+            params(fields: "kind, insertErrors").
+            payload(payload)
       },
 
       output_fields: lambda do |_object_definitions|
