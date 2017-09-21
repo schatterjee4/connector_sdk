@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 {
-  title: 'Google BigQuery',
+  title: "Google BigQuery",
 
   connection: {
     fields: [
@@ -21,7 +23,7 @@
     ],
 
     authorization: {
-      type: 'oauth2',
+      type: "oauth2",
 
       authorization_url: lambda do |connection|
         scopes = [
@@ -42,12 +44,12 @@
       acquire: lambda do |connection, auth_code, redirect_uri|
         response =
           post("https://accounts.google.com/o/oauth2/token").
-            payload(client_id: connection["client_id"],
-                    client_secret: connection["client_secret"],
-                    grant_type: "authorization_code",
-                    code: auth_code,
-                    redirect_uri: redirect_uri).
-            request_format_www_form_urlencoded
+          payload(client_id: connection["client_id"],
+                  client_secret: connection["client_secret"],
+                  grant_type: "authorization_code",
+                  code: auth_code,
+                  redirect_uri: redirect_uri).
+          request_format_www_form_urlencoded
 
         [
           {
@@ -166,7 +168,6 @@
               map do |table_field|
                 build_schema_field[table_field]
               end)
-
 
         [
           name: "rows",
