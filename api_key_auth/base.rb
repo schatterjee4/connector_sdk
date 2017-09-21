@@ -129,7 +129,7 @@
       sample_output: lambda do |connection, _object_definitions|
         {
           leads: [get("https://api.getbase.com/v2/leads")['items'].
-                  dig(0, "data")]
+          dig(0, "data")]
         }
       end
     },
@@ -142,9 +142,10 @@
           ignored("id", "creator_id","created_at", "updated_at", "owner_id")
       end,
       execute: lambda do |connection, input|
+      	url = "https://api.getbase.com/v2/leads"
+        lead = post(url).payload(data: input)["data"]
         {
-          lead: post("https://api.getbase.com/v2/leads").
-            payload(data: input)["data"]
+          lead: lead
         }
       end,
       output_fields: ->(object_definitions) {
