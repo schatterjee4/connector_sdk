@@ -142,7 +142,7 @@
           ignored("id", "creator_id","created_at", "updated_at", "owner_id")
       end,
       execute: lambda do |connection, input|
-        lead = post("https://api.getbase.com/v2/leads").payload(data: input)
+        lead = post("https://api.getbase.com/v2/leads").payload(data: input) 
         	["data"]
         {
           lead: lead
