@@ -70,14 +70,14 @@
 
   actions: {
     search_leads: {
-      description: 'Search <span class="provider">Leads</span> in
-      <span class="provider">BASE</span>',
+      description: 'Search <span class="provider">Leads</span> in 
+      	<span class="provider">BASE</span>',
       subtitle: "Search leads in BASE",
       help: "Search will only return leads matching all inputs",
-      input_fields: ->(object_definitions) {
+      input_fields: ->() {
         [
           { name: "ids", type: :string, control_type: :text, label: "Id's",
-            hint: "Comma-separated list of lead IDs to be returned in a request." },
+            hint: "Comma-separated list of lead IDs." },
           { name: "creator_id", type: :integer, control_type: :number,
             label: "Created By(User ID)",
             hint: "Returns all leads created by that user."},
@@ -129,13 +129,14 @@
       },
       sample_output: lambda do |_connection, _object_definitions|
         {
-          leads: [get("https://api.getbase.com/v2/leads")['items'].dig(0, "data")]
+          leads: [get("https://api.getbase.com/v2/leads")['items'].
+          dig(0, "data")]
         }
       end
     },
     create_lead: {
-      description: 'Create <span class="provider">Lead</span> in
-      <span class="provider">BASE</span>',
+      description: 'Create <span class="provider">Lead</span> in 
+      	<span class="provider">BASE</span>',
       subtitle: "Create lead in BASE",
       input_fields: ->(object_definitions) {
         object_definitions["lead"].required("last_name", "organization_name").
