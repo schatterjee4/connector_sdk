@@ -18,10 +18,10 @@
       end
     }
   },
-  
+
   object_definitions: {
     lead: {
-      fields: ->(){
+      fields: lambda do
         [
           { name: "id", type: :integer, label: "Lead ID",
             control_type: :number },
@@ -57,7 +57,7 @@
           { name: "created_at", type: :date_time, control_type: :timestamp },
           { name: "updated_at", type: :date_time, control_type: :timestamp }
         ]
-      }
+      end
     },
 
   },
@@ -126,8 +126,9 @@
       },
       sample_output: lambda do
         {
-          leads: [get("https://api.getbase.com/v2/leads")['items'].
-                  dig(0, "data")]
+          leads: [
+            get("https://api.getbase.com/v2/leads")["items"].dig(0, "data")
+          ]
         }
       end
     },
@@ -161,6 +162,6 @@
         }
       end
     }
-
   }
+
 }
