@@ -25,28 +25,29 @@
 
       authorization_url: lambda do |connection|
         scopes = [
-          "https://www.googleapis.com/auth/bigquery",	# View and manage your data in Google BigQuery
-          "https://www.googleapis.com/auth/bigquery.insertdata",	# Insert data into Google BigQuery
-          "https://www.googleapis.com/auth/cloud-platform",		# View and manage your data across Google Cloud Platform services
-          "https://www.googleapis.com/auth/cloud-platform.read-only",	# View your data across Google Cloud Platform services
-          "https://www.googleapis.com/auth/devstorage.full_control",	# Manage your data and permissions in Google Cloud Storage
-          "https://www.googleapis.com/auth/devstorage.read_only",	# View your data in Google Cloud Storage
-          "https://www.googleapis.com/auth/devstorage.read_write",	# Manage your data in Google Cloud Storage
+          "https://www.googleapis.com/auth/bigquery",
+          "https://www.googleapis.com/auth/bigquery.insertdata",
+          "https://www.googleapis.com/auth/cloud-platform",
+          "https://www.googleapis.com/auth/cloud-platform.read-only",
+          "https://www.googleapis.com/auth/devstorage.full_control",
+          "https://www.googleapis.com/auth/devstorage.read_only",
+          "https://www.googleapis.com/auth/devstorage.read_write",
         ].join(" ")
 
         "https://accounts.google.com/o/oauth2/auth?client_id=" \
-          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" \
+          "#{connection["client_id"]}&response_type=code&scope=#{scopes}" \
           "&access_type=offline&include_granted_scopes=true&prompt=consent"
       end,
 
       acquire: lambda do |connection, auth_code, redirect_uri|
-        response = post("https://accounts.google.com/o/oauth2/token").
-          payload(client_id: connection["client_id"],
-                  client_secret: connection["client_secret"],
-                  grant_type: "authorization_code",
-                  code: auth_code,
-                  redirect_uri: redirect_uri).
-          request_format_www_form_urlencoded
+        response =
+          post("https://accounts.google.com/o/oauth2/token").
+            payload(client_id: connection["client_id"],
+                    client_secret: connection["client_secret"],
+                    grant_type: "authorization_code",
+                    code: auth_code,
+                    redirect_uri: redirect_uri).
+            request_format_www_form_urlencoded
 
         [
           {
@@ -87,13 +88,13 @@
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
         table_fields =
-        if project_id && dataset_id && table_id
-          get("https://www.googleapis.com/bigquery/v2/projects/" \
-          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
-          dig("schema", "fields")
-        else
-          []
-        end
+          if project_id && dataset_id && table_id
+            get("https://www.googleapis.com/bigquery/v2/projects/" \
+            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
+              dig("schema", "fields")
+          else
+            []
+          end
 
         type_map = {
           "BYTES" => "string",
@@ -127,11 +128,11 @@
         build_schema_field = lambda do |field|
           field_name = field["name"].downcase
           field_hint =
-          if field["description"] && hint_map[field["type"]]
-            field["description"] + hint_map[field["type"]]
-          else
-            field["description"] || hint_map[field["type"]]
-          end
+            if field["description"] && hint_map[field["type"]]
+              field["description"] + hint_map[field["type"]]
+            else
+              field["description"] || hint_map[field["type"]]
+            end
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
           if %w[RECORD STRUCT].include? field["type"]
@@ -155,17 +156,17 @@
         end
 
         table_schema_fields =
-        [
-          {
-            name: "insertId",
-            hint: "A unique ID for each row. BigQuery uses this property" \
-              " to detect duplicate insertion requests on a best-effort basis"
-          }
-        ].
-          concat(table_fields.
-            map do |table_field|
-            build_schema_field[table_field]
-            end)
+          [
+            {
+              name: "insertId",
+              hint: "A unique ID for each row. BigQuery uses this property" \
+                " to detect duplicate insertion requests on a best-effort basis"
+            }
+          ].concat(table_fields.
+              map do |table_field|
+                build_schema_field[table_field]
+              end)
+
 
         [
           name: "rows",
