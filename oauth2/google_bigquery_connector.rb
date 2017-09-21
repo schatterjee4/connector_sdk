@@ -5,15 +5,15 @@
     fields: [
       {
         name: "client_id",
-        hint: "Find it " <<
-          "<a href='https://console.cloud.google.com/apis/credentials'>" <<
+        hint: "Find it " \
+          "<a href='https://console.cloud.google.com/apis/credentials'>" \
           "here</a>",
         optional: false,
       },
       {
         name: "client_secret",
-        hint: "Find it " <<
-          "<a href='https://console.cloud.google.com/apis/credentials'>" <<
+        hint: "Find it " \
+          "<a href='https://console.cloud.google.com/apis/credentials'>" \
           "here</a>",
         optional: false,
         control_type: "password",
@@ -34,21 +34,21 @@
           "https://www.googleapis.com/auth/devstorage.read_write",	# Manage your data in Google Cloud Storage
         ].join(" ")
 
-        "https://accounts.google.com/o/oauth2/auth?client_id=" <<
-          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" <<
+        "https://accounts.google.com/o/oauth2/auth?client_id=" \
+          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" \
           "&access_type=offline&include_granted_scopes=true&prompt=consent"
       },
 
       acquire: ->(connection, auth_code, redirect_uri) {
         response = post("https://accounts.google.com/o/oauth2/token")
-        .payload(
-          client_id: connection["client_id"],
-          client_secret: connection["client_secret"],
-          grant_type: "authorization_code",
-          code: auth_code,
-          redirect_uri: redirect_uri,
-        )
-        .request_format_www_form_urlencoded
+          .payload(
+            client_id: connection["client_id"],
+            client_secret: connection["client_secret"],
+            grant_type: "authorization_code",
+            code: auth_code,
+            redirect_uri: redirect_uri,
+          )
+          .request_format_www_form_urlencoded
 
         [
           {
@@ -62,13 +62,13 @@
 
       refresh: ->(connection, refresh_token) {
         post("https://accounts.google.com/o/oauth2/token")
-        .payload(
-          client_id: connection["client_id"],
-          client_secret: connection["client_secret"],
-          grant_type: "refresh_token",
-          refresh_token: refresh_token,
-        )
-        .request_format_www_form_urlencoded
+          .payload(
+            client_id: connection["client_id"],
+            client_secret: connection["client_secret"],
+            grant_type: "refresh_token",
+            refresh_token: refresh_token,
+          )
+          .request_format_www_form_urlencoded
       },
 
       refresh_on: [401],
@@ -92,7 +92,7 @@
         table_id = config_fields["table"]
 
         table_fields = if (project_id && dataset_id && table_id)
-          get("https://www.googleapis.com/bigquery/v2/projects/" <<
+          get("https://www.googleapis.com/bigquery/v2/projects/" \
             "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
             .dig("schema", "fields")
         else
@@ -116,15 +116,15 @@
           "BYTES" => " | Variable-length binary data.",
           "INTEGER" => " | 64-bit signed integer.",
           "FLOAT" => " | Double-precision floating-point format.",
-          "BOOLEAN" => " | Boolean values are represented by the keywords" <<
+          "BOOLEAN" => " | Boolean values are represented by the keywords" \
             " true and false (case insensitive). Example: true",
-          "TIMESTAMP" => " | Represents an absolute point in time, with" <<
+          "TIMESTAMP" => " | Represents an absolute point in time, with" \
             " microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
-          "DATE" => " | Represents a logical calendar date." <<
+          "DATE" => " | Represents a logical calendar date." \
             " Example: 2017-09-13",
-          "TIME" => " | Represents a time, independent of a specific date." <<
+          "TIME" => " | Represents a time, independent of a specific date." \
             " Example: 11:16:00.000000",
-          "DATETIME" => " | Represents a year, month, day, hour, minute," <<
+          "DATETIME" => " | Represents a year, month, day, hour, minute," \
             " second, and subsecond. Example: 2017-09-13T11:16:00.000000",
           "RECORD" => " | A collection of one or more other fields.", # info - https://cloud.google.com/bigquery/data-types
         }
@@ -139,7 +139,7 @@
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
 
-          if ["RECORD", "STRUCT"].include? field["type"]
+          if %W[RECORD, STRUCT].include? field["type"]
             {
               name: field_name,
               hint: field_hint,
@@ -162,7 +162,7 @@
         table_schema_fields = [
           {
             name: "insertId",
-            hint: "A unique ID for each row. BigQuery uses this property" <<
+            hint: "A unique ID for each row. BigQuery uses this property" \
               " to detect duplicate insertion requests on a best-effort basis"
           }
         ].
@@ -173,7 +173,7 @@
         [
           name: "rows",
           optional: false,
-          hint: "A JSON object that contains a row of data. The object's" <<
+          hint: "A JSON object that contains a row of data. The object's" \
             " properties and values must match the destination table's schema",
           type: "array",
           of: "object",
@@ -185,7 +185,7 @@
 
   actions: {
     add_rows: {
-      description: "Add <span class='provider'>rows to dataset</span>" <<
+      description: "Add <span class='provider'>rows to dataset</span>" \
         " in <span class='provider'>BigQuery</span>",
       subtitle: "Add data rows",
       help: "Streams data into a table in BigQuery.",
@@ -236,9 +236,8 @@
           end
         }
 
-        post("https://www.googleapis.com/bigquery/v2/projects/" <<
-          project_id << "/datasets/" << dataset_id << "/tables/" <<
-          table_id << "/insertAll").
+        post("https://www.googleapis.com/bigquery/v2/projects/" \
+          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll").
           params(fields: "kind,insertErrors").
           payload(payload)
       end,
@@ -267,8 +266,8 @@
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" <<
-        project_id << "/datasets").
+      get("https://www.googleapis.com/bigquery/v2/projects/" \
+        "#{project_id}/datasets").
         dig("datasets").
         map do |dataset|
           [
@@ -279,8 +278,8 @@
     end,
 
     tables: lambda do |_connection, project_id:, dataset_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" <<
-        project_id << "/datasets/" << dataset_id << "/tables").
+      get("https://www.googleapis.com/bigquery/v2/projects/" \
+        "#{project_id}/datasets/#{dataset_id}/tables").
         dig("tables").map do |table|
           [
             table["tableReference"]["tableId"],
