@@ -80,7 +80,7 @@
             hint: "Comma-separated list of lead IDs." },
           { name: "creator_id", type: :integer, control_type: :number,
             label: "Created By(User ID)",
-            hint: "Returns all leads created by that user."},
+            hint: "Returns all leads created by that user." },
           { name: "owner_id", type: :integer, control_type: :number,
             label: "Owner ID",
             hint: "User ID. Returns all leads owned by that user." },
@@ -127,7 +127,7 @@
             properties: object_definitions["lead"] }
         ]
       },
-      sample_output: lambda do |_connection, _object_definitions|
+      sample_output: lambda do |connection, _object_definitions|
         {
           leads: [get("https://api.getbase.com/v2/leads")['items'].
           dig(0, "data")]
@@ -155,7 +155,7 @@
             properties: object_definitions["lead"] }
         ]
       },
-      sample_output: ->(connection, object_definitions){
+      sample_output: ->(connection, _object_definitions){
         {
           lead: get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
           dig(0, "data") || {}
