@@ -86,7 +86,6 @@
         project_id = config_fields["project"]
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
-
         table_fields =
         if project_id && dataset_id && table_id
           get("https://www.googleapis.com/bigquery/v2/projects/" \
@@ -107,7 +106,6 @@
           "DATETIME" => "string",
           "RECORD" => "object", "STRUCT" => "object",
         }
-
         hint_map = {
           "STRING" => " | Variable-length character (UTF-8) data.",
           "BYTES" => " | Variable-length binary data.",
@@ -136,7 +134,6 @@
           end
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
-
           if %w[RECORD STRUCT].include? field["type"]
             {
               name: field_name,
