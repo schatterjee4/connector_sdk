@@ -25,13 +25,13 @@
 
       authorization_url: ->(connection) {
         scopes = [
-          "https://www.googleapis.com/auth/bigquery",	#View and manage your data in Google BigQuery
-          "https://www.googleapis.com/auth/bigquery.insertdata",	#Insert data into Google BigQuery
-          "https://www.googleapis.com/auth/cloud-platform",		#View and manage your data across Google Cloud Platform services
-          "https://www.googleapis.com/auth/cloud-platform.read-only",	#View your data across Google Cloud Platform services
-          "https://www.googleapis.com/auth/devstorage.full_control",	#Manage your data and permissions in Google Cloud Storage
-          "https://www.googleapis.com/auth/devstorage.read_only",	#View your data in Google Cloud Storage
-          "https://www.googleapis.com/auth/devstorage.read_write",	#Manage your data in Google Cloud Storage
+          "https://www.googleapis.com/auth/bigquery",	# View and manage your data in Google BigQuery
+          "https://www.googleapis.com/auth/bigquery.insertdata",	# Insert data into Google BigQuery
+          "https://www.googleapis.com/auth/cloud-platform",		# View and manage your data across Google Cloud Platform services
+          "https://www.googleapis.com/auth/cloud-platform.read-only",	# View your data across Google Cloud Platform services
+          "https://www.googleapis.com/auth/devstorage.full_control",	# Manage your data and permissions in Google Cloud Storage
+          "https://www.googleapis.com/auth/devstorage.read_only",	# View your data in Google Cloud Storage
+          "https://www.googleapis.com/auth/devstorage.read_write",	# Manage your data in Google Cloud Storage
         ].join(" ")
 
         "https://accounts.google.com/o/oauth2/auth?client_id=" <<
@@ -80,7 +80,7 @@
 
   test: ->(_connection) {
     get("https://www.googleapis.com/bigquery/v2/projects")
-    .params(maxResults: 1)
+      .params(maxResults: 1)
   },
 
   object_definitions: {
@@ -92,7 +92,7 @@
 
         table_fields = if (project_id && dataset_id && table_id)
           get("https://www.googleapis.com/bigquery/v2/projects/" <<
-          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
+            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
             .dig("schema", "fields")
         else
           []
@@ -119,13 +119,13 @@
             " true and false (case insensitive). Example: true",
           "TIMESTAMP" => " | Represents an absolute point in time, with" <<
             " microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
-          "DATE" => " | Represents a logical calendar date. " <<
-            "Example: 2017-09-13",
-          "TIME" => " | Represents a time, independent of a specific date. "<<
-            "Example: 11:16:00.000000",
-          "DATETIME" => " | Represents a year, month, day, hour, minute, " <<
-            "second, and subsecond. Example: 2017-09-13T11:16:00.000000",
-          "RECORD" => " | A collection of one or more other fields.", #info - https://cloud.google.com/bigquery/data-types
+          "DATE" => " | Represents a logical calendar date." <<
+            " Example: 2017-09-13",
+          "TIME" => " | Represents a time, independent of a specific date."<<
+            " Example: 11:16:00.000000",
+          "DATETIME" => " | Represents a year, month, day, hour, minute," <<
+            " second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+          "RECORD" => " | A collection of one or more other fields.", # info - https://cloud.google.com/bigquery/data-types
         }
 
         build_schema_field = ->(field) {
@@ -160,7 +160,7 @@
           {
             name: "insertId",
             hint: "A unique ID for each row. BigQuery uses this property" <<
-            " to detect duplicate insertion requests on a best-effort basis"
+              " to detect duplicate insertion requests on a best-effort basis"
           }
         ].
         concat(table_fields.map do |table_field|
@@ -171,7 +171,7 @@
           name: "rows",
           optional: false,
           hint: "A JSON object that contains a row of data. The object's" <<
-          " properties and values must match the destination table's schema",
+            " properties and values must match the destination table's schema",
           type: "array",
           of: "object",
           properties: table_schema_fields
@@ -183,7 +183,7 @@
   actions: {
     add_rows: {
       description: "Add <span class='provider'>rows to dataset</span>" <<
-      " in <span class='provider'>BigQuery</span>",
+        " in <span class='provider'>BigQuery</span>",
       subtitle: "Add data rows",
       help: "Streams data into a table in BigQuery.",
 
