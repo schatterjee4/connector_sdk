@@ -23,7 +23,7 @@
     authorization: {
       type: 'oauth2',
 
-      authorization_url: ->(connection) {
+      authorization_url: lambda do |connection|
         scopes = [
           "https://www.googleapis.com/auth/bigquery",	# View and manage your data in Google BigQuery
           "https://www.googleapis.com/auth/bigquery.insertdata",	# Insert data into Google BigQuery
@@ -37,18 +37,16 @@
         "https://accounts.google.com/o/oauth2/auth?client_id=" \
           "#{connection["client_id"] }&response_type=code&scope=#{scopes}" \
           "&access_type=offline&include_granted_scopes=true&prompt=consent"
-      },
+      end,
 
-      acquire: ->(connection, auth_code, redirect_uri) {
-        response = post("https://accounts.google.com/o/oauth2/token")
-          .payload(
-            client_id: connection["client_id"],
+      acquire: lambda do |connection, auth_code, redirect_uri|
+        response = post("https://accounts.google.com/o/oauth2/token").
+          payload(client_id: connection["client_id"],
             client_secret: connection["client_secret"],
             grant_type: "authorization_code",
             code: auth_code,
-            redirect_uri: redirect_uri,
-          )
-          .request_format_www_form_urlencoded
+            redirect_uri: redirect_uri).
+          request_format_www_form_urlencoded
 
         [
           {
@@ -58,46 +56,44 @@
           nil,
           nil,
         ]
-      },
+      end,
 
-      refresh: ->(connection, refresh_token) {
-        post("https://accounts.google.com/o/oauth2/token")
-          .payload(
-            client_id: connection["client_id"],
+      refresh: lambda do |connection, refresh_token|
+        post("https://accounts.google.com/o/oauth2/token").
+          payload(client_id: connection["client_id"],
             client_secret: connection["client_secret"],
             grant_type: "refresh_token",
-            refresh_token: refresh_token,
-          )
-          .request_format_www_form_urlencoded
-      },
+            refresh_token: refresh_token).
+          request_format_www_form_urlencoded
+      end,
 
       refresh_on: [401],
 
-      apply: ->(_connection, access_token) {
+      apply: lambda do |_connection, access_token|
         headers(Authorization: "Bearer #{access_token}")
-      },
+      end,
     },
   },
 
-  test: ->(_connection) {
-    get("https://www.googleapis.com/bigquery/v2/projects")
-      .params(maxResults: 1)
-  },
+  test: lambda do |_connection|
+    get("https://www.googleapis.com/bigquery/v2/projects").
+      params(maxResults: 1)
+  end,
 
   object_definitions: {
     table_schema: {
-      fields: ->(_connection, config_fields) {
+      fields: lambda do |_connection, config_fields|
         project_id = config_fields["project"]
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
 
-        table_fields = if (project_id && dataset_id && table_id)
+        table_fields = if project_id && dataset_id && table_id
           get("https://www.googleapis.com/bigquery/v2/projects/" \
-            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
-            .dig("schema", "fields")
-        else
-          []
-        end
+            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
+            dig("schema", "fields")
+          else
+            []
+          end
 
         type_map = {
           "BYTES" => "string",
@@ -129,17 +125,17 @@
           "RECORD" => " | A collection of one or more other fields.", # info - https://cloud.google.com/bigquery/data-types
         }
 
-        build_schema_field = ->(field) {
+        build_schema_field = lambda do |field|
           field_name = field["name"].downcase
-          field_hint = if (field["description"] && hint_map[field["type"]])
-            (field["description"] + hint_map[field["type"]])
+          field_hint = if field["description"] && hint_map[field["type"]]
+            field["description"] + hint_map[field["type"]]
           else
-            (field["description"] || hint_map[field["type"]])
+            field["description"] || hint_map[field["type"]]
           end
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
 
-          if %W[RECORD, STRUCT].include? field["type"]
+          if %w[RECORD STRUCT].include? field["type"]
             {
               name: field_name,
               hint: field_hint,
@@ -157,7 +153,7 @@
               type: field_type,
             }
           end
-        }
+        end
 
         table_schema_fields = [
           {
@@ -166,9 +162,9 @@
               " to detect duplicate insertion requests on a best-effort basis"
           }
         ].
-        concat(table_fields.map do |table_field|
-          build_schema_field[table_field]
-        end)
+          concat(table_fields.map do |table_field|
+            build_schema_field[table_field]
+          end)
 
         [
           name: "rows",
@@ -179,7 +175,7 @@
           of: "object",
           properties: table_schema_fields
         ]
-      }
+      end
     }
   },
 
