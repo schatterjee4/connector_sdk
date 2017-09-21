@@ -35,7 +35,8 @@
         ].join(" ")
 
         "https://accounts.google.com/o/oauth2/auth?client_id=" <<
-          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" << "&access_type=offline&include_granted_scopes=true&prompt=consent"
+          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" <<
+          "&access_type=offline&include_granted_scopes=true&prompt=consent"
       },
 
       acquire: ->(connection, auth_code, redirect_uri) {
@@ -121,7 +122,7 @@
             " microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
           "DATE" => " | Represents a logical calendar date." <<
             " Example: 2017-09-13",
-          "TIME" => " | Represents a time, independent of a specific date."<<
+          "TIME" => " | Represents a time, independent of a specific date." <<
             " Example: 11:16:00.000000",
           "DATETIME" => " | Represents a year, month, day, hour, minute," <<
             " second, and subsecond. Example: 2017-09-13T11:16:00.000000",
@@ -130,9 +131,11 @@
 
         build_schema_field = ->(field) {
           field_name = field["name"].downcase
-          field_hint = (field["description"] && hint_map[field["type"]]) ?
-          (field["description"] + hint_map[field["type"]]) :
-          (field["description"] || hint_map[field["type"]])
+          field_hint = if (field["description"] && hint_map[field["type"]])
+            (field["description"] + hint_map[field["type"]])
+          else
+            (field["description"] || hint_map[field["type"]])
+          end
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
 
