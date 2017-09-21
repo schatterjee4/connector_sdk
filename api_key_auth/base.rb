@@ -10,7 +10,6 @@
         label: "Personal Access Token"
       }
     ],
-
     authorization: {
       type: "api_key",
 
@@ -19,8 +18,7 @@
       end
     }
   },
-
-
+  
   object_definitions: {
     lead: {
       fields: ->(){
@@ -126,10 +124,10 @@
             properties: object_definitions["lead"] }
         ]
       },
-      sample_output: lambda do |connection, _object_definitions|
+      sample_output: lambda do
         {
           leads: [get("https://api.getbase.com/v2/leads")['items'].
-          dig(0, "data")]
+                  dig(0, "data")]
         }
       end
     },
@@ -142,7 +140,7 @@
           ignored("id", "creator_id","created_at", "updated_at", "owner_id")
       end,
       execute: lambda do |connection, input|
-      	url = "https://api.getbase.com/v2/leads"
+        url = "https://api.getbase.com/v2/leads"
         lead = post(url).payload(data: input)["data"]
         {
           lead: lead
@@ -150,16 +148,18 @@
       end,
       output_fields: ->(object_definitions) {
         [
-          { name: "lead", type: :object, label: "Lead",
-            properties: object_definitions["lead"] }
+          {
+            name: "lead", type: :object, label: "Lead",
+            properties: object_definitions["lead"]
+          }
         ]
       },
-      sample_output: ->(connection, _object_definitions) {
+      sample_output: lambda do
         {
           lead: get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
           dig(0, "data") || {}
         }
-      }
+      end
     }
 
   }
