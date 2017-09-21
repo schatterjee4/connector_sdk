@@ -5,12 +5,16 @@
     fields: [
       {
         name: "client_id",
-        hint: "Find it <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
+        hint: "Find it " <<
+          "<a href='https://console.cloud.google.com/apis/credentials'>" <<
+          "here</a>",
         optional: false,
       },
       {
         name: "client_secret",
-        hint: "Find it <a href='https://console.cloud.google.com/apis/credentials'>here</a>",
+        hint: "Find it " <<
+          "<a href='https://console.cloud.google.com/apis/credentials'>" <<
+          "here</a>",
         optional: false,
         control_type: "password",
       }
@@ -30,7 +34,8 @@
           "https://www.googleapis.com/auth/devstorage.read_write",	#Manage your data in Google Cloud Storage
         ].join(" ")
 
-        "https://accounts.google.com/o/oauth2/auth?client_id=#{connection["client_id"] }&response_type=code&scope=#{scopes}&access_type=offline&include_granted_scopes=true&prompt=consent"
+        "https://accounts.google.com/o/oauth2/auth?client_id=" <<
+          "#{connection["client_id"] }&response_type=code&scope=#{scopes}" << "&access_type=offline&include_granted_scopes=true&prompt=consent"
       },
 
       acquire: ->(connection, auth_code, redirect_uri) {
@@ -86,7 +91,8 @@
         table_id = config_fields["table"]
 
         table_fields = if (project_id && dataset_id && table_id)
-          get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
+          get("https://www.googleapis.com/bigquery/v2/projects/" <<
+          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}")
             .dig("schema", "fields")
         else
           []
@@ -109,11 +115,16 @@
           "BYTES" => " | Variable-length binary data.",
           "INTEGER" => " | 64-bit signed integer.",
           "FLOAT" => " | Double-precision floating-point format.",
-          "BOOLEAN" => " | Boolean values are represented by the keywords true and false (case insensitive). Example: true",
-          "TIMESTAMP" => " | Represents an absolute point in time, with microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
-          "DATE" => " | Represents a logical calendar date. Example: 2017-09-13",
-          "TIME" => " | Represents a time, independent of a specific date. Example: 11:16:00.000000",
-          "DATETIME" => " | Represents a year, month, day, hour, minute, second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+          "BOOLEAN" => " | Boolean values are represented by the keywords" <<
+            " true and false (case insensitive). Example: true",
+          "TIMESTAMP" => " | Represents an absolute point in time, with" <<
+            " microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
+          "DATE" => " | Represents a logical calendar date. " <<
+            "Example: 2017-09-13",
+          "TIME" => " | Represents a time, independent of a specific date. "<<
+            "Example: 11:16:00.000000",
+          "DATETIME" => " | Represents a year, month, day, hour, minute, " <<
+            "second, and subsecond. Example: 2017-09-13T11:16:00.000000",
           "RECORD" => " | A collection of one or more other fields.", #info - https://cloud.google.com/bigquery/data-types
         }
 
