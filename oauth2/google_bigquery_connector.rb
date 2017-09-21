@@ -42,10 +42,10 @@
       acquire: lambda do |connection, auth_code, redirect_uri|
         response = post("https://accounts.google.com/o/oauth2/token").
           payload(client_id: connection["client_id"],
-            client_secret: connection["client_secret"],
-            grant_type: "authorization_code",
-            code: auth_code,
-            redirect_uri: redirect_uri).
+                  client_secret: connection["client_secret"],
+                  grant_type: "authorization_code",
+                  code: auth_code,
+                  redirect_uri: redirect_uri).
           request_format_www_form_urlencoded
 
         [
@@ -61,9 +61,9 @@
       refresh: lambda do |connection, refresh_token|
         post("https://accounts.google.com/o/oauth2/token").
           payload(client_id: connection["client_id"],
-            client_secret: connection["client_secret"],
-            grant_type: "refresh_token",
-            refresh_token: refresh_token).
+                  client_secret: connection["client_secret"],
+                  grant_type: "refresh_token",
+                  refresh_token: refresh_token).
           request_format_www_form_urlencoded
       end,
 
@@ -87,13 +87,14 @@
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
 
-        table_fields = if project_id && dataset_id && table_id
+        table_fields =
+        if project_id && dataset_id && table_id
           get("https://www.googleapis.com/bigquery/v2/projects/" \
-            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
-            dig("schema", "fields")
-          else
-            []
-          end
+          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
+          dig("schema", "fields")
+        else
+          []
+        end
 
         type_map = {
           "BYTES" => "string",
@@ -127,7 +128,8 @@
 
         build_schema_field = lambda do |field|
           field_name = field["name"].downcase
-          field_hint = if field["description"] && hint_map[field["type"]]
+          field_hint =
+          if field["description"] && hint_map[field["type"]]
             field["description"] + hint_map[field["type"]]
           else
             field["description"] || hint_map[field["type"]]
@@ -155,16 +157,18 @@
           end
         end
 
-        table_schema_fields = [
+        table_schema_fields =
+        [
           {
             name: "insertId",
             hint: "A unique ID for each row. BigQuery uses this property" \
               " to detect duplicate insertion requests on a best-effort basis"
           }
         ].
-          concat(table_fields.map do |table_field|
+          concat(table_fields.
+            map do |table_field|
             build_schema_field[table_field]
-          end)
+            end)
 
         [
           name: "rows",
