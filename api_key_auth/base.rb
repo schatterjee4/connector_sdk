@@ -115,7 +115,7 @@
           "#{key}=#{value}"
         end.join("&")
         result = get("https://api.getbase.com/v2/leads?" + params)["items"]
-        leads = result.map { |lead|  lead["data"] } unless result.blank?
+        leads = result.map { |lead| lead["data"] } unless result.blank?
         {
           leads: leads
         }
@@ -143,18 +143,18 @@
       end,
       execute: lambda do |connection, input|
         lead = post("https://api.getbase.com/v2/leads").
-          payload( data: input )["data"]
+        payload(data: input)["data"]
         {
           lead: lead
         }
       end,
-      output_fields: ->(object_definitions){
+      output_fields: ->(object_definitions) {
         [
           { name: "lead", type: :object, label: "Lead",
             properties: object_definitions["lead"] }
         ]
       },
-      sample_output: ->(connection, _object_definitions){
+      sample_output: ->(connection, _object_definitions) {
         {
           lead: get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
           dig(0, "data") || {}
