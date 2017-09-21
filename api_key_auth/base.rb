@@ -70,7 +70,7 @@
 
   actions: {
     search_leads: {
-      description: 'Search <span class="provider">Leads</span> in 
+      description: 'Search <span class="provider">Leads</span> in
       	<span class="provider">BASE</span>',
       subtitle: "Search leads in BASE",
       help: "Search will only return leads matching all inputs",
@@ -114,8 +114,7 @@
         params = input.map do |key, value|
           "#{key}=#{value}"
         end.join("&")
-        result = get("https://api.getbase.com/v2/leads?"+params)["items"]
-
+        result = get("https://api.getbase.com/v2/leads?" + params)["items"]
         leads = result.map { |lead|  lead["data"] } unless result.blank?
         {
           leads: leads
@@ -130,25 +129,25 @@
       sample_output: lambda do |connection, _object_definitions|
         {
           leads: [get("https://api.getbase.com/v2/leads")['items'].
-          dig(0, "data")]
+          	dig(0, "data")]
         }
       end
     },
     create_lead: {
-      description: 'Create <span class="provider">Lead</span> in 
+      description: 'Create <span class="provider">Lead</span> in
       	<span class="provider">BASE</span>',
       subtitle: "Create lead in BASE",
-      input_fields: ->(object_definitions) {
+      input_fields: lambda do |object_definitions|
         object_definitions["lead"].required("last_name", "organization_name").
-        ignored("id", "creator_id","created_at", "updated_at", "owner_id")
-      },
-      execute: ->(connection, input) {
+          ignored("id", "creator_id","created_at", "updated_at", "owner_id")
+      end,
+      execute: lambda do |connection, input|
         lead = post("https://api.getbase.com/v2/leads").
-        payload(data: input)["data"]
+          payload( data: input )["data"]
         {
           lead: lead
         }
-      },
+      end,
       output_fields: ->(object_definitions){
         [
           { name: "lead", type: :object, label: "Lead",
