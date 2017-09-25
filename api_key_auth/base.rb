@@ -95,16 +95,16 @@
           leads: leads
         }
       end,
-      output_fields: ->(object_definitions) {
+      output_fields: lambda do |object_definitions|
         [
           { name: "leads", type: :array, of: :object,
             properties: object_definitions["lead"] }
         ]
-      },
+      end,
       sample_output: lambda do
         {
           leads:
-          [ get("https://api.getbase.com/v2/leads")["items"].dig(0, "data") ]
+          [get("https://api.getbase.com/v2/leads")["items"].dig(0, "data")]
         }
       end
     },
