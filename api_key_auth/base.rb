@@ -1,5 +1,5 @@
 {
-  title: "Base CRM",
+  title: "BaseCRM",
 
   connection: {
     fields: [
@@ -29,7 +29,7 @@
             control_type: :number },
           { name: "owner_id", type: :integer, label: "Owner id",
             control_type: :number },
-          { name: "first_name"},
+          { name: "first_name" },
           { name: "last_name" },
           { name: "organization_name" },
           { name: "title" },
@@ -109,12 +109,12 @@
       end
     },
     create_lead: {
-      description: 
-      'Create <span class="provider">Lead</span> in <span class="provider">Base CRM</span>',
+      description:
+       'Create <span class="provider">Lead</span> in <span class="provider">Base CRM</span>',
       subtitle: "Create lead in Base CRM",
       input_fields: lambda do |object_definitions|
         object_definitions["lead"].required("last_name", "organization_name").
-          ignored("id", "creator_id","created_at", "updated_at", "owner_id")
+          ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
       end,
       execute: lambda do |connection, input|
         url = "https://api.getbase.com/v2/leads"
