@@ -45,12 +45,12 @@
           { name: "linkedin" },
           { name: "skype" },
           { name: "address", type: :object, properties: [
-            { name: "line1" },
-            { name: "city" },
-            { name: "postal_code" },
-            { name: "state" },
-            { name: "country" }
-          ]},
+              { name: "line1" },
+              { name: "city" },
+              { name: "postal_code" },
+              { name: "state" },
+              { name: "country" }
+          ] },
           { name: "created_at", type: :date_time, control_type: :timestamp },
           { name: "updated_at", type: :date_time, control_type: :timestamp }
         ]
@@ -81,9 +81,8 @@
             label: "State/region name" },
           { name: "address[country]", type: :string, control_type: :text,
             label: "Country name" }
-        ].concat(object_definitions["lead"].only("creator_id", "owner_id",
-          "source_id", "first_name", "last_name", "organization_name",
-          "status", "email", "phone", "mobile"))
+        ].concat(object_definitions["lead"].
+          only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
       execute: lambda do |connection, input|
         params = input.map do |key, value|
@@ -110,7 +109,7 @@
     },
     create_lead: {
       description:
-       'Create <span class="provider">Lead</span> in <span class="provider">Base CRM</span>',
+      'Create <span>Lead</span> in <span class="provider">Base CRM</span>',
       subtitle: "Create lead in Base CRM",
       input_fields: lambda do |object_definitions|
         object_definitions["lead"].required("last_name", "organization_name").
@@ -123,19 +122,19 @@
           lead: lead
         }
       end,
-      output_fields: ->(object_definitions) {
+      output_fields: lambda do |object_definitions|
         [
           {
             name: "lead", type: :object, label: "Lead",
             properties: object_definitions["lead"]
           }
         ]
-      },
+      end,
       sample_output: lambda do
         {
           lead:
           get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
-            dig(0, "data") || {}
+          dig(0, "data") || {}
         }
       end
     }
