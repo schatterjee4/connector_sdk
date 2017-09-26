@@ -30,12 +30,12 @@
           { name: "name" },
           { name: "modifiedDate", type: :integer,
             hint:
-            "Stores a particular Date & Time in UTC milliseconds past the epoch." }, # milliseconds since epoch
+            "Stores a particular Date & Time in UTC milliseconds past the epoch." },# milliseconds since epoch
         ].concat(
           get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
           map do |field|
-            pick_list = field["listOptions"].
-              map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
+          pick_list = field["listOptions"].
+          map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
             {
               name: field["id"],
               label: field["name"],
@@ -49,10 +49,8 @@
 
   actions: {
     create_account: {
-
       description:
       "Create <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
-
       input_fields: ->(object_definitions) {
         object_definitions["account"].ignored("id")
       },
@@ -64,10 +62,10 @@
             fields[k] = [ { raw: v } ]
           end
         end
-        post("https://api.salesforceiq.com/v2/accounts",
-             { name: input[:name], fieldValues: fields })
+        post("https://api.salesforceiq.com/v2/accounts").params(
+          name: input[:name],
+          fieldValues: fields)
       },
-
       output_fields: ->(object_definitions) {
         object_definitions["account"]
       },
@@ -80,12 +78,9 @@
       description:
       "Search <span class='provider'>Account</span>in <span class='provider'>SalesforceIQ</span>",
 
-
-      input_fields: ->() {
-        [
-          { name: "_ids", label: "Account identifiers",
-            hint: "Comma separated list of Account identifiers" }
-        ]
+      input_fields: ->() { [{ name: "_ids", 
+        label: "Account identifiers",
+        hint: "Comma separated list of Account identifiers" }]
       },
 
       execute: ->(connection,input) {
@@ -93,17 +88,16 @@
         accounts = response["objects"]
 
         accounts.each do |account| # add each custom field to account response object
-          (account["fieldValues"] || {}).map do |k,v|
+          (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
           end
         end
-
         { "accounts": accounts }
       },
 
-      output_fields: ->(object_definitions) {
-        [{ name: "accounts", type: :array, of: :object,
-           properties: object_definitions["account"] }]
+      output_fields: ->(object_definitions) { [{ name: "accounts", 
+        type: :array, of: :object,
+        properties: object_definitions["account"] }]
       },
       sample_output: ->(connection){
         get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
@@ -115,28 +109,24 @@
 
     new_updated_accounts: {
       description:
-      "New/Updated <span class='provider'>Account</span> in
-      <span class='provider'>SalesforceIQ</span>",
+      "New/Updated <span class='provider'>Account</span> in" +
+      "<span class='provider'>SalesforceIQ</span>",
       help: "Checks for new or updated accounts based on the plan",
 
 
-      input_fields: -> (object_definitions) {
-        [
-          { name: "since", type: :timestamp,
-            hint: "Recipe picks records start time, If value is not provided" }]
+      input_fields: -> (object_definitions) { [{ name: "since", 
+        type: :timestamp,
+        hint: "Recipe picks records start time, If value is not provided" }]
       },
-
       poll: -> (connection,input,modified_date_since) {
-
         modified_date = modified_date_since || (
         input["since"].present? ? (input["since"].to_time.to_f * 1000).to_i : (
           Time.now.to_time.to_f * 1000).to_i )
-        modified_date = 1506336003313
         result = get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: 50, _start: 0, 
+          params(_limit: 50, _start: 0,
           modifiedDate: modified_date_since)["objects"] # result returns in ascending order
         accounts = result.each do |account| # add each custom field to account response object
-          (account["fieldValues"] || {}).map do |k,v|
+          (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
           end
         end
@@ -146,7 +136,6 @@
         else
           modified_date_since = accounts.last["modifiedDate"]
         end
-
         {
           events: accounts,
           next_poll: modified_date_since,
@@ -161,7 +150,7 @@
       dedup: ->(account) {
         [account["id"], account["modifiedDate"]].join("_")
       },
-
+      
       output_fields: ->(object_definitions) {
         object_definitions["account"]
       },
