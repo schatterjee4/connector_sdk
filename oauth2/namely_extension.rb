@@ -256,7 +256,7 @@
                           profile: input["profile_id"])["events"]
         {
           events: response.where("time >=" => since),
-          next_page: (response.length >= limit) ? page + 1 : nil
+          next_page: response.length >= limit ? page + 1 : nil
         }
       },
 
