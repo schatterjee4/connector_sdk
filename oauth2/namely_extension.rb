@@ -189,9 +189,12 @@
 
   actions: {
     search_employee_profiles: {
-      description: 'Search <span class="provider">employee profiles</span> in <span class="provider">Namely</span>',
+      description: 'Search <span class="provider">employee profiles</span> '\
+                   'in <span class="provider">Namely</span>',
       subtitle: "Search employee profiles in Namely",
-      hint: "Use the input fields to add filters to employee profile results. Leave input fields blank to return all employee profiles.",
+      hint: "Use the input fields to add filters to employee profile results."\
+            "Leave input fields blank to return all employee profiles.",
+
       input_fields: ->() {
         [
           { name: "email", optional: true, sticky: true },
@@ -224,7 +227,8 @@
 
   triggers: {
     new_event: {
-      description: 'New <span class="provider">event</span> started in <span class="provider">Namely</span>',
+      description: 'New <span class="provider">event</span> '\
+                   'started in <span class="provider">Namely</span>',
       subtitle: "New event started in Namely",
       type: :paging_desc,
       input_fields: ->() {
@@ -233,10 +237,9 @@
           { name: "type", optional: false, control_type: :select, pick_list: "event_type", toggle_hint: "Select from list",
             toggle_field: {
               name: "type", type: :string, control_type: :text, label: "Type (Custom)", toggle_hint: "Use custom value",
-              hint: "Either of birthday, announcement, recent_arrival, anniversary, or all"
-            }
-          },
-          { name: "profile_id", optional: true, sticky: true, hint: "Id of the profile that you wish to pull all associated events from." }
+              hint: "Either of birthday, announcement, recent_arrival, anniversary, or all" } },
+          { name: "profile_id", optional: true, sticky: true,
+            hint: "ID of the profile that you wish to pull all associated events from." }
         ]
       },
       poll: ->(connection, input, page) {
