@@ -206,6 +206,7 @@
           { name: "start_date", type: :date, optional: true, sticky: true }
         ]
       },
+
       execute: ->(connection, input) {
         employees = get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
         params(
@@ -219,6 +220,7 @@
         end
         { "profiles": employees }
       },
+
       output_fields: ->(object_definitions) {
         object_definitions["profile"]
       }
@@ -231,6 +233,7 @@
                    'started in <span class="provider">Namely</span>',
       subtitle: "New event started in Namely",
       type: :paging_desc,
+
       input_fields: ->() {
         [
           { name: "since", type: :date, optional: false },
@@ -242,6 +245,7 @@
             hint: "ID of the profile that you wish to pull all associated events from." }
         ]
       },
+
       poll: ->(connection, input, page) {
         limit = 100
         page ||= 0
@@ -256,12 +260,15 @@
           next_page: (response.length >= limit) ? page + 1 : nil
         }
       },
+
       document_id: ->(response) {
         response["id"] + "@" + response["time"]
       },
+
       sort_by: ->(response) {
         response["time"]
       },
+
       output_fields: ->(object_definitions) {
         object_definitions["event"]
       }
@@ -274,6 +281,7 @@
         ["Active", "active"], ["Inactive", "inactive"], ["Pending", "pending"]
       ]
     },
+
     event_type: ->() {
       [
         ["Birthday", "birthday"], ["Announcement", "announcement"],
