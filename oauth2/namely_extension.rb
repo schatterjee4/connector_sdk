@@ -251,10 +251,9 @@
         page ||= 0
         since = input["since"].to_time.to_i
         response = get("https://#{connection["company"]}.namely.com/api/v1/events.json").
-          params(limit: limit,
-                 type: input["type"],
-                 profile: input["profile_id"]
-          )["events"]
+                   params(limit: limit,
+                          type: input["type"],
+                          profile: input["profile_id"])["events"]
         {
           events: response.where("time >=" => since),
           next_page: (response.length >= limit) ? page + 1 : nil
