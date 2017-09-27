@@ -203,10 +203,10 @@
           "tables/#{input['table']}/insertAll").
           params(fields: "kind,insertErrors").
           payload(rows: (input["rows"] || []).map do |row|
-                           {
-                             insertId: row.delete("insertId") || "",
-                             json: row
-                           }
+                          {
+                            insertId: row.delete("insertId") || "",
+                            json: row
+                          }
                         end)
       end,
 
