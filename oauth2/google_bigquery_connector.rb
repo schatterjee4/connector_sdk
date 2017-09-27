@@ -202,20 +202,20 @@
           "#{input['project']}/datasets/#{input['dataset']}/"   \
           "tables/#{input['table']}/insertAll").
           params(fields: "kind,insertErrors").
-          payload(rows: (input['rows'] || []).map do |row|
+          payload(rows: (input["rows"] || []).map do |row|
                            {
                              insertId: row.delete("insertId") || "",
                              json: row
                            }
-                         end)
+                        end)
       end,
 
       output_fields: lambda do |_object_definitions|
-        [{ name: 'kind' }]
+        [{ name: "kind" }]
       end,
 
       sample_output: lambda do
-        { kind: 'bigquery#tableDataInsertAllResponse' }
+        { kind: "bigquery#tableDataInsertAllResponse" }
       end
     }
   },
