@@ -117,8 +117,8 @@
   triggers: {
     new_updated_accounts: {
       description:
-      "New/Updated <span class='provider'>Account</span> in " +
-      "<span class='provider'>SalesforceIQ</span>",
+      "New/Updated <span class='provider'>Account</span> in " \
+      	"<span class='provider'>SalesforceIQ</span>",
       help: "Checks for new or updated accounts",
 
       input_fields: lambda do
