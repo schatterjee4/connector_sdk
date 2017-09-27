@@ -90,9 +90,9 @@
         table_id = config_fields["table"]
         table_fields = if project_id && dataset_id && table_id
                          get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
-                          dig("schema", "fields")
+                           dig("schema", "fields")
                        else
-                          []
+                         []
                        end
         type_map = {
           "BYTES" => "string",
@@ -145,13 +145,13 @@
         end
 
         table_schema_fields = [
-            {
+          {
               name: "insertId",
               label: "Insert id",
               hint: "A unique ID for each row. Google BigQuery uses this property" \
                 " to detect duplicate insertion requests on a best-effort basis"
-            }
-          ].concat(table_fields.
+          }
+        ].concat(table_fields.
               map do |table_field|
                 build_schema_field[table_field]
               end)
