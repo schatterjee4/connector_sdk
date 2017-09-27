@@ -40,18 +40,17 @@
       end,
 
       acquire: lambda do |connection, auth_code, redirect_uri|
-        response =
-          post("https://accounts.google.com/o/oauth2/token").
-          payload(client_id: connection["client_id"],
-                  client_secret: connection["client_secret"],
-                  grant_type: "authorization_code",
-                  code: auth_code,
-                  redirect_uri: redirect_uri).
-          request_format_www_form_urlencoded
+        response = post("https://accounts.google.com/o/oauth2/token").
+                    payload(client_id: connection["client_id"],
+                            client_secret: connection["client_secret"],
+                            grant_type: "authorization_code",
+                            code: auth_code,
+                            redirect_uri: redirect_uri).
+                    request_format_www_form_urlencoded
 
         [
           {
-            access_token: response["access_token"],
+            access_token: response,
             refresh_token: response["refresh_token"],
           },
           nil,
@@ -70,6 +69,8 @@
 
       refresh_on: [401],
 
+      detect_on: [/"errors"\s*:/, /"insertErrors"\s*:/],
+
       apply: lambda do |_connection, access_token|
         headers(Authorization: "Bearer #{access_token}")
       end,
@@ -87,15 +88,12 @@
         project_id = config_fields["project"]
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
-        table_fields =
-          if project_id && dataset_id && table_id
-            get("https://www.googleapis.com/bigquery/v2/projects/" \
-            "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
-              dig("schema", "fields")
-          else
-            []
-          end
-
+        table_fields = if project_id && dataset_id && table_id
+                         get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
+                          dig("schema", "fields")
+                       else
+                          []
+                       end
         type_map = {
           "BYTES" => "string",
           "INTEGER" => "integer", "INT64" => "integer",
@@ -108,36 +106,26 @@
           "RECORD" => "object", "STRUCT" => "object",
         }
         hint_map = {
-          "STRING" => " | Variable-length character (UTF-8) data.",
-          "BYTES" => " | Variable-length binary data.",
-          "INTEGER" => " | 64-bit signed integer.",
-          "FLOAT" => " | Double-precision floating-point format.",
-          "BOOLEAN" => " | Boolean values are represented by the keywords" \
-            " true and false (case insensitive). Example: true",
-          "TIMESTAMP" => " | Represents an absolute point in time, with" \
-            " microsecond precision. Example: 9999-12-31 23:59:59.999999 UTC",
-          "DATE" => " | Represents a logical calendar date." \
-            " Example: 2017-09-13",
-          "TIME" => " | Represents a time, independent of a specific date." \
-            " Example: 11:16:00.000000",
-          "DATETIME" => " | Represents a year, month, day, hour, minute," \
-            " second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+          "BOOLEAN" => " | Boolean values are represented by the keywords true and false (case insensitive). Example: true",
+          "TIME" => " | Represents a time, independent of a specific date. Example: 11:16:00.000000",
+          "DATETIME" => " | Represents a year, month, day, hour, minute, second, and subsecond. Example: 2017-09-13T11:16:00.000000",
           "RECORD" => " | A collection of one or more other fields.", # info - https://cloud.google.com/bigquery/data-types
         }
 
         build_schema_field = lambda do |field|
           field_name = field["name"].downcase
-          field_hint =
-            if field["description"] && hint_map[field["type"]]
-              field["description"] + hint_map[field["type"]]
-            else
-              field["description"] || hint_map[field["type"]]
-            end
+          field_label = field["name"].humanize
+          field_hint = if field["description"] && hint_map[field["type"]]
+                         field["description"] + hint_map[field["type"]]
+                       else
+                         field["description"] || hint_map[field["type"]]
+                       end
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
           if %w[RECORD STRUCT].include? field["type"]
             {
               name: field_name,
+              label: field_label,
               hint: field_hint,
               optional: field_optional,
               type: field_type,
@@ -148,6 +136,7 @@
           else
             {
               name: field_name,
+              label: field_label,
               hint: field_hint,
               optional: field_optional,
               type: field_type,
@@ -155,11 +144,11 @@
           end
         end
 
-        table_schema_fields =
-          [
+        table_schema_fields = [
             {
               name: "insertId",
-              hint: "A unique ID for each row. BigQuery uses this property" \
+              label: "Insert id",
+              hint: "A unique ID for each row. Google BigQuery uses this property" \
                 " to detect duplicate insertion requests on a best-effort basis"
             }
           ].concat(table_fields.
@@ -170,7 +159,7 @@
         [
           name: "rows",
           optional: false,
-          hint: "A JSON object that contains a row of data. The object's" \
+          hint: "A JSON object that contains a rows of data. The object's" \
             " properties and values must match the destination table's schema",
           type: "array",
           of: "object",
@@ -182,13 +171,12 @@
 
   actions: {
     add_rows: {
-      description: "Add <span class='provider'>rows to dataset</span>" \
-        " in <span class='provider'>BigQuery</span>",
+      description: "Add <span class='provider'>rows</span> to dataset" \
+        " in <span class='provider'>Google BigQuery</span>",
       subtitle: "Add data rows",
-      help: "Streams data into a table in BigQuery.",
+      help: "Streams data into a table in Google BigQuery.",
 
-      config_fields:
-      [
+      config_fields: [
         {
           name: "project",
           hint: "Select the appropriate Project to import data",
@@ -222,10 +210,9 @@
         project_id = input["project"]
         dataset_id = input["dataset"]
         table_id = input["table"]
-        rows = input["rows"] || []
 
         payload = {
-          "rows" =>	rows.map do |row|
+          "rows" =>	(input["rows"] || []).map do |row|
             {
               "insertId": row.delete("insertId") || "",
               "json" => row
@@ -241,7 +228,7 @@
 
       output_fields: lambda do |_object_definitions|
         [
-          { name: "kind" },
+          { name: "kind" }
         ]
       end,
 
