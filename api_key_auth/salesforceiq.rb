@@ -11,10 +11,10 @@
     authorization: {
       type: "basic_auth",
 
-      credentials: ->(connection) {
+      credentials: lambda do |connection|
         user(connection["api_key"])
         password(connection["api_secret"])
-      }
+      end
     }
   },
 
@@ -24,9 +24,9 @@
 
   object_definitions: {
     account: {
-      fields: ->(connection) {
-        [
-          { name: "id" },
+      fields: lambda do |connection|
+      	[
+      		{ name: "id" },
           { name: "name" },
           { name: "modifiedDate", type: :integer,
             hint:
@@ -36,14 +36,14 @@
           map do |field|
           pick_list = field["listOptions"].
           map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-            {
-              name: field["id"],
-              label: field["name"],
-              control_type: field["dataType"] == "List" ? "select" : "text",
-              pick_list: pick_list
-            }
+          {
+          	name: field["id"],
+          	label: field["name"],
+          	control_type: field["dataType"] == "List" ? "select" : "text",
+          	pick_list: pick_list
+          }
         end)
-      }
+      end
     },
   },
 
@@ -51,57 +51,63 @@
     create_account: {
       description:
       "Create <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
-      input_fields: ->(object_definitions) {
-        object_definitions["account"].ignored("id")
-      },
+      input_fields: lambda do |object_definitions|
+        object_definitions["account"].ignored("id", "modifiedDate")
+      end,
 
-      execute: ->(connection,input) {
+      execute: lambda do |connection,input|
         fields = {}
         input.each do |k, v|
           if k != "name"
             fields[k] = [ { raw: v } ]
           end
         end
-        post("https://api.salesforceiq.com/v2/accounts").params(
-          name: input[:name],
+        puts fields.to_json
+        post("https://api.salesforceiq.com/v2/accounts").payload(
+          name: input['name'],
           fieldValues: fields)
-      },
-      output_fields: ->(object_definitions) {
+      end,
+      output_fields: lambda do |object_definitions|
         object_definitions["account"]
-      },
-      sample_output: ->(connection){
+      end,
+      sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
-      }
+      end
     },
 
     search_account: {
       description:
       "Search <span class='provider'>Account</span>in <span class='provider'>SalesforceIQ</span>",
 
-      input_fields: ->() { [{ name: "_ids", 
-        label: "Account identifiers",
-        hint: "Comma separated list of Account identifiers" }]
-      },
+      input_fields: lambda do
+      [
+      	{ name: "_ids", label: "Account identifiers",
+      	  hint: "Comma separated list of Account identifiers" } ]
+      end,
 
-      execute: ->(connection,input) {
+      execute: lambda do |connection,input|
         response = get("https://api.salesforceiq.com/v2/accounts",input)
         accounts = response["objects"]
 
         accounts.each do |account| # add each custom field to account response object
-          (account["fieldValues"] || {}).map do |k, v|
-            account[k] = v.first["raw"]
+        	(account["fieldValues"] || {}).map do |k, v|
+        		account[k] = v.first["raw"]
           end
         end
-        { "accounts": accounts }
-      },
+        { 
+        	"accounts": accounts
+        }
+      end,
 
-      output_fields: ->(object_definitions) { [{ name: "accounts", 
-        type: :array, of: :object,
-        properties: object_definitions["account"] }]
-      },
-      sample_output: ->(connection){
+      output_fields: lambda do |object_definitions| 
+      	[ { 
+      		name: "accounts", type: :array, of: :object,
+      		properties: object_definitions["account"] 
+      		} ]
+      end,
+      sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
-      }
+      end
     }
   },
 
@@ -114,11 +120,12 @@
       help: "Checks for new or updated accounts based on the plan",
 
 
-      input_fields: -> (object_definitions) { [{ name: "since", 
-        type: :timestamp,
-        hint: "Recipe picks records start time, If value is not provided" }]
-      },
-      poll: -> (connection,input,modified_date_since) {
+      input_fields: lambda do |object_definitions| 
+      	[ { name: "since", type: :timestamp, 
+      		hint: "Recipe picks records start time, If value is not provided" 
+      		} ]
+      end,
+      poll: lambda do |connection, input, modified_date_since|
         modified_date = modified_date_since || (
         input["since"].present? ? (input["since"].to_time.to_f * 1000).to_i : (
           Time.now.to_time.to_f * 1000).to_i )
@@ -141,22 +148,22 @@
           next_poll: modified_date_since,
           next_page: accounts.size == 50
         }
-      },
+      end,
 
-      sort_by: ->(account) {
+      sort_by: lambda do |account|
         account["modifiedDate"]
-      },
+      end,
 
-      dedup: ->(account) {
+      dedup: lambda do |account|
         [account["id"], account["modifiedDate"]].join("_")
-      },
+      end,
       
-      output_fields: ->(object_definitions) {
+      output_fields: lambda do |object_definitions|
         object_definitions["account"]
-      },
-      sample_output: ->(connection){
+      end,
+      sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
-      }
+      end
     }
   }
 
