@@ -22,19 +22,19 @@
 
       acquire: lambda do |connection, auth_code, redirect_url|
         post("https://login.windows.net/common/oauth2/token").
-        payload(client_id: connection["client_id"],
-                grant_type: :authorization_code,
-                code: auth_code,
-                redirect_uri: redirect_url).
-        request_format_www_form_urlencoded
+          payload(client_id: connection["client_id"],
+            grant_type: :authorization_code,
+            code: auth_code,
+            redirect_uri: redirect_url).
+          request_format_www_form_urlencoded
       end,
 
       refresh: lambda do |connection, refresh_token|
         post("https://login.windows.net/common/oauth2/token").
-        payload(client_id: connection["client_id"],
-                grant_type: :refresh_token,
-                refresh_token: refresh_token).
-        request_format_www_form_urlencoded
+          payload(client_id: connection["client_id"],
+            grant_type: :refresh_token,
+            refresh_token: refresh_token).
+          request_format_www_form_urlencoded
       end,
 
       credentials: ->(_connection, access_token) {
@@ -54,8 +54,8 @@
           lists(guid%27#{config['list_id']}%27)/Fields?$select=odata.type,
           EntityPropertyName,Hidden,Required,ReadOnlyField,Title,
           TypeAsString,Choices,IsDependentLookup")["value"].
-        select { |f| f["ReadOnlyField"] == false && f["Hidden"] == false &&
-          f["TypeAsString"] != "Attachments" &&
+          select { |f| f["ReadOnlyField"] == false && f["Hidden"] == false &&
+            f["TypeAsString"] != "Attachments" &&
         f["EntityPropertyName"] != "ContentType" }.map do |f|
           if f["odata.type"] == "SP.Field"
             { name: f["EntityPropertyName"],
@@ -170,31 +170,31 @@
         }
       ],
 
-      input_fields: ->(object_definitions) {
+      input_fields: lambda do |object_definitions|
         object_definitions["list_create"]
-      },
+      end,
 
-      execute: ->(connection, input) {
+      execute: lambda do |connection, input|
         list_id = input.delete("list_id")
         post("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{list_id}%27)/items", input)
-      },
+      end,
 
-      output_fields: ->(object_definitions) {
-        [ { name: "FileSystemObjectType", 
+      output_fields: lambda do |object_definitions|
+        [ { name: "FileSystemObjectType",
           type: :integer,
           label: "File system object type" }
-        ].concat(object_definitions["list_output"])
-      },
+          ].concat(object_definitions["list_output"])
+      end,
 
-      sample_output: ->(connection, input) {
+      sample_output: lambda do |connection, input|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/
           items?$top=1")["value"]&.first || {}
-      }
+      end
     },
 
-    Upload_attachment: {
+    upload_attachment: {
       description: 'Upload <span class="provider">attachment</span> in <span class="provider">Microsoft Sharepoint</span>',
       title_hint: "Upload attachment in Sharepoint list",
       help: "Upload attachment in Sharepoint list",
@@ -206,17 +206,17 @@
         }
       ],
 
-      input_fields: ->() {
+      input_fields: lambda do
         [
           { name: "item_id", optional: false, label: "Item ID" },
           { name: "file_name", optional: false },
           { name: "content", optional: false }
         ]
-      },
+      end,
 
-      execute: ->(connection, input) {
+      execute: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
-        gsub(/file_name\=/, "")
+          gsub(/file_name\=/, "")
         form_digest = post("https://#{connection['subdomain']}.sharepoint.com/
           _api/contextinfo")&.[]("FormDigestValue")
         post("https://#{connection['subdomain']}.sharepoint.com/_api/web/
@@ -224,14 +224,14 @@
           AttachmentFiles/add(FileName='#{file_name}')", input).
           headers("X-RequestDigest": "#{form_digest}").
           request_body(input["content"])
-      },
+      end,
 
-      output_fields: ->() {
+      output_fields: lambda do
         [
           { name: "FileName", label: "File name" },
           { name: "FileNameAsPath", label: "File name as path",
-            type: :object, properties: [
-              { name: "DecodedUrl", label: "Decoded url" }
+            type: :object, properties: [ { 
+              name: "DecodedUrl", label: "Decoded url" }
           ] },
           { name: "ServerRelativePath", label: "Server relative path",
             type: :object, properties: [
@@ -239,11 +239,11 @@
           ] },
           { name: "ServerRelativeUrl", label: "Server relative url" }
         ]
-      },
+      end,
 
       sample_output: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
-        gsub(/file_name\=/, "")
+          gsub(/file_name\=/, "")
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/
           AttachmentFiles('#{file_name}')") || {}
@@ -262,31 +262,31 @@
         }
       ],
 
-      input_fields: ->() {
+      input_fields: lambda do
         [
           { name: "item_id", optional: false, label: "Item ID" },
           { name: "file_name", optional: false, lable: "File name" }
         ]
-      },
+      end,
 
       execute: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
-        gsub(/file_name\=/, "")
+          gsub(/file_name\=/, "")
         { "content" => get("https://#{connection['subdomain']}.sharepoint.com/
           _api/web/lists(guid%27#{input['list_id']}%27)/
           items(#{input['item_id']})/AttachmentFiles('#{file_name}')/$value").
           response_format_raw }
       end,
 
-      output_fields: ->() {
+      output_fields: lambda do
         [
           { name: "content" }
         ]
-      },
+      end,
 
-      sample_output: ->() {
+      sample_output: lambda do
         { "content": "test" }
-      }
+      end
     }
   },
 
@@ -303,16 +303,16 @@
         }
       ],
 
-      input_fields: ->() {
+      input_fields: lambda do
         [
           {
             name: "since", type: :date_time, label: "From",
             optional: false, hint: "Fetch new row from specified time"
           }
         ]
-      },
+      end,
 
-      poll: ->(connection, input, link) {
+      poll: lambda do |connection, input, link|
         if link.present?
           response = get(link)
         else
@@ -326,11 +326,11 @@
           next_poll: response["@odata.nextLink"],
           can_poll_more: response["@odata.nextLink"].present?
         }
-      },
+      end,
 
-      dedup: ->(response) {
+      dedup: lambda do |response|
         response["ID"]
-      },
+      end,
 
       output_fields: lambda do |object_definitions|
         [
@@ -354,11 +354,11 @@
         ].concat(object_definitions["list_output"])
       end,
 
-      sample_output: ->(connection, input) {
+      sample_output: lambda do |connection, input|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/
           items?$top=1")["value"]&.first || {}
-      }
+      end
     },
 
     deleted_row_in_sharepoint_list: {
@@ -366,23 +366,20 @@
       title_hint: "Triggers when a row is deleted in Sharepoint list",
       help: "Checks for deleted, each row deleted will be processed as a single trigger event.",
 
-      config_fields: [
-        {
-          name: "list_name", control_type: :select,
-          pick_list: :name_list, label: "List", optional: false
-        }
-      ],
-
-      input_fields: ->() {
+      input_fields: lambda do
         [
+          {
+            name: "list_name", control_type: :select,
+            pick_list: :name_list, label: "List", optional: false
+          },
           {
             name: "since", type: :date_time, label: "From",
             optional: false, hint: "Fetch deleted row from specified time"
           }
         ]
-      },
+      end,
 
-      poll: ->(connection, input, link) {
+      poll: lambda do |connection, input, link|
         if link.present?
           response = get(link)
         else
@@ -396,11 +393,11 @@
           next_poll: response["@odata.nextLink"],
           can_poll_more: response["@odata.nextLink"].present?
         }
-      },
+      end,
 
-      dedup: ->(response) {
+      dedup: lambda do |response|
         response["Id"]
-      },
+      end,
 
       output_fields: lambda do
         [
@@ -427,30 +424,28 @@
         ]
       end,
 
-      sample_output: ->(connection, input) {
+      sample_output: lambda do |connection, input|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/RecycleBin?
           $filter=DirName eq 'Lists/
           #{input['list_name']}'&$top=1")["value"]&.first || {}
-      }
+      end
     }
   },
 
   pick_lists: {
-    list: ->(connection) {
+    list: lambda do |connection|
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?
         $select=Title,Id,BaseType")["value"].
-        select { |f| f["BaseType"] == 0 }.
-        map do |i| 
-          [i["Title"], i["Id"]]
-        end.compact
-    },
+        select { |f| f["BaseType"] == 0 }.map do |i|
+        [i["Title"], i["Id"]]
+      end.compact
+    end,
 
-    name_list: ->(connection) {
+    name_list: lambda do |connection|
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?$select=Title,BaseType")["value"].
-        select { |f| f["BaseType"] == 0 }.
-        map do |i| 
-          [i["Title"], i["Title"]]
-        end.compact
-    }
+        select { |f| f["BaseType"] == 0 }.map do |i|
+        [i["Title"], i["Title"]]
+      end.compact
+    end
   }
 }
