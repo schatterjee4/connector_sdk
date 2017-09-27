@@ -146,10 +146,11 @@
 
         table_schema_fields = [
           {
-              name: "insertId",
-              label: "Insert id",
-              hint: "A unique ID for each row. Google BigQuery uses this property" \
-                " to detect duplicate insertion requests on a best-effort basis"
+            name: "insertId",
+            label: "Insert id",
+            hint: "A unique ID for each row. Google BigQuery uses this" \
+             "property to detect duplicate insertion requests on a"     \
+             " best-effort basis"
           }
         ].concat(table_fields.
               map do |table_field|
