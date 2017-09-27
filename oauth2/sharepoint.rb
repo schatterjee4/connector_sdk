@@ -272,7 +272,7 @@
       execute: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
           gsub(/file_name\=/, "")
-        { "content" => get("https://#{connection['subdomain']}.sharepoint.com/
+          { "content" => get("https://#{connection['subdomain']}.sharepoint.com/
           _api/web/lists(guid%27#{input['list_id']}%27)/
           items(#{input['item_id']})/AttachmentFiles('#{file_name}')/$value").
           response_format_raw }
@@ -349,7 +349,8 @@
                 type: :object, properties: [
                   { name: "DecodedUrl", label: "Decoded url" }
               ] },
-              { name: "ServerRelativeUrl", label: "Server relative url" }
+              { name: "ServerRelativeUrl", label: "Server relative url" 
+              }
           ] }
         ].concat(object_definitions["list_output"])
       end,
@@ -442,7 +443,8 @@
     end,
 
     name_list: lambda do |connection|
-      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?$select=Title,BaseType")["value"].
+      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
+        lists?$select=Title,BaseType")["value"].
         select { |f| f["BaseType"] == 0 }.map do |i|
         [i["Title"], i["Title"]]
       end.compact
