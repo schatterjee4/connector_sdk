@@ -52,7 +52,8 @@
       description:
       "Create <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
       input_fields: lambda do |object_definitions|
-        object_definitions["account"].ignored("id", "modifiedDate")
+        object_definitions["account"].ignored("id", "modifiedDate", "address_city", "address_state",
+          "address_postal_code", "address_country")
       end,
 
       execute: lambda do |connection,input|
@@ -119,7 +120,7 @@
       help: "Checks for new or updated accounts based on the plan",
 
       input_fields: lambda do
-      	[
+        [
         	{
         		name: "since", type: :timestamp,
         		hint: "Recipe picks records start time, If value is not provided"
@@ -131,7 +132,7 @@
         	Time.now).to_time.to_f * 1000).to_i
         result = get("https://api.salesforceiq.com/v2/accounts").
         	params(_limit: 50, _start: 0,
-          modifiedDate: modified_date_since)["objects"] # result returns in ascending order
+        	modifiedDate: modified_date_since)["objects"] # result returns in ascending order
         accounts = result.each do |account| # add each custom field to account response object
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
