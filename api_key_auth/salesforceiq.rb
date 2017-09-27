@@ -78,6 +78,8 @@
     search_account: {
       description:
       "Search <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
+      hint: 
+      "Returns accounts matching the IDs. If blank, returns all accounts."
 
       input_fields: lambda do
         [
@@ -123,7 +125,7 @@
         [
         	{
         		name: "since", type: :timestamp,
-        		hint: "Recipe picks records start time, If value is not provided"
+        		hint: "Fetch trigger events from specified time"
           }
         ]
       end,
