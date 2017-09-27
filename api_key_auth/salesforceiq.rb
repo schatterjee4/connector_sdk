@@ -79,7 +79,7 @@
       description:
       "Search <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
       hint: 
-      "Returns accounts matching the IDs. If blank, returns all accounts."
+      "Returns accounts matching the IDs. Returns all accounts, if blank."
 
       input_fields: lambda do
         [
