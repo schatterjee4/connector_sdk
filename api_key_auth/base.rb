@@ -45,11 +45,11 @@
           { name: "linkedin" },
           { name: "skype" },
           { name: "address", type: :object, properties: [
-              { name: "line1" },
-              { name: "city" },
-              { name: "postal_code" },
-              { name: "state" },
-              { name: "country" }
+            { name: "line1" },
+            { name: "city" },
+            { name: "postal_code" },
+            { name: "state" },
+            { name: "country" }
           ] },
           { name: "created_at", type: :date_time, control_type: :timestamp },
           { name: "updated_at", type: :date_time, control_type: :timestamp }
@@ -134,7 +134,7 @@
         {
           lead:
           get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
-          dig(0, "data") || {}
+            dig(0, "data") || {}
         }
       end
     }
