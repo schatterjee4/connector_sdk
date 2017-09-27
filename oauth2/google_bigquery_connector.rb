@@ -48,14 +48,7 @@
                             redirect_uri: redirect_uri).
                     request_format_www_form_urlencoded
 
-        [
-          {
-            access_token: response,
-            refresh_token: response["refresh_token"],
-          },
-          nil,
-          nil,
-        ]
+        [response, nil, nil]
       end,
 
       refresh: lambda do |connection, refresh_token|
@@ -69,7 +62,7 @@
 
       refresh_on: [401],
 
-      detect_on: [/"errors"\s*:/, /"insertErrors"\s*:/],
+      detect_on: [/"errors"\:\s*\[/],
 
       apply: lambda do |_connection, access_token|
         headers(Authorization: "Bearer #{access_token}")
@@ -109,7 +102,6 @@
           "BOOLEAN" => " | Boolean values are represented by the keywords true and false (case insensitive). Example: true",
           "TIME" => " | Represents a time, independent of a specific date. Example: 11:16:00.000000",
           "DATETIME" => " | Represents a year, month, day, hour, minute, second, and subsecond. Example: 2017-09-13T11:16:00.000000",
-          "RECORD" => " | A collection of one or more other fields.", # info - https://cloud.google.com/bigquery/data-types
         }
 
         build_schema_field = lambda do |field|
@@ -160,8 +152,6 @@
         [
           name: "rows",
           optional: false,
-          hint: "A JSON object that contains a rows of data. The object's" \
-            " properties and values must match the destination table's schema",
           type: "array",
           of: "object",
           properties: table_schema_fields
@@ -175,7 +165,7 @@
       description: "Add <span class='provider'>rows</span> to dataset" \
         " in <span class='provider'>Google BigQuery</span>",
       subtitle: "Add data rows",
-      help: "Streams data into a table in Google BigQuery.",
+      help: "Streams data into a table of Google BigQuery.",
 
       config_fields: [
         {
@@ -208,35 +198,24 @@
       end,
 
       execute: lambda do |_connection, input|
-        project_id = input["project"]
-        dataset_id = input["dataset"]
-        table_id = input["table"]
-
-        payload = {
-          "rows" =>	(input["rows"] || []).map do |row|
-            {
-              "insertId": row.delete("insertId") || "",
-              "json" => row
-            }
-          end
-        }
-
         post("https://www.googleapis.com/bigquery/v2/projects/" \
-          "#{project_id}/datasets/#{dataset_id}/tables/#{table_id}/insertAll").
+          "#{input['project']}/datasets/#{input['dataset']}/"   \
+          "tables/#{input['table']}/insertAll").
           params(fields: "kind,insertErrors").
-          payload(payload)
+          payload(rows: (input['rows'] || []).map do |row|
+                           {
+                             insertId: row.delete("insertId") || "",
+                             json: row
+                           }
+                         end)
       end,
 
       output_fields: lambda do |_object_definitions|
-        [
-          { name: "kind" }
-        ]
+        [{ name: 'kind' }]
       end,
 
       sample_output: lambda do
-        {
-          kind: "bigquery#tableDataInsertAllResponse",
-        }
+        { kind: 'bigquery#tableDataInsertAllResponse' }
       end
     }
   },
