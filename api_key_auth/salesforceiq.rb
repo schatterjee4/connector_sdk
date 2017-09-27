@@ -25,8 +25,8 @@
   object_definitions: {
     account: {
       fields: lambda do |connection|
-      	[
-      		{ name: "id" },
+        [
+          { name: "id" },
           { name: "name" },
           { name: "modifiedDate", type: :integer,
             hint:
@@ -34,14 +34,14 @@
         ].concat(
           get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
           map do |field|
-          pick_list = field["listOptions"].
-          map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-          {
-          	name: field["id"],
-          	label: field["name"],
-          	control_type: field["dataType"] == "List" ? "select" : "text",
-          	pick_list: pick_list
-          }
+            pick_list = field["listOptions"].
+              map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
+            {
+              name: field["id"],
+              label: field["name"],
+              control_type: field["dataType"] == "List" ? "select" : "text",
+              pick_list: pick_list
+            }
         end)
       end
     },
@@ -62,10 +62,9 @@
             fields[k] = [ { raw: v } ]
           end
         end
-        puts fields.to_json
         post("https://api.salesforceiq.com/v2/accounts").payload(
           name: input['name'],
-          fieldValues: fields)
+        fieldValues: fields)
       end,
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
@@ -80,9 +79,9 @@
       "Search <span class='provider'>Account</span>in <span class='provider'>SalesforceIQ</span>",
 
       input_fields: lambda do
-      [
-      	{ name: "_ids", label: "Account identifiers",
-      	  hint: "Comma separated list of Account identifiers" } ]
+        [
+          { name: "_ids", label: "Account identifiers",
+            hint: "Comma separated list of Account identifiers" } ]
       end,
 
       execute: lambda do |connection,input|
@@ -90,20 +89,21 @@
         accounts = response["objects"]
 
         accounts.each do |account| # add each custom field to account response object
-        	(account["fieldValues"] || {}).map do |k, v|
-        		account[k] = v.first["raw"]
+          (account["fieldValues"] || {}).map do |k, v|
+            account[k] = v.first["raw"]
           end
         end
-        { 
-        	"accounts": accounts
+        {
+          "accounts": accounts
         }
       end,
-
-      output_fields: lambda do |object_definitions| 
-      	[ { 
-      		name: "accounts", type: :array, of: :object,
-      		properties: object_definitions["account"] 
-      		} ]
+      output_fields: lambda do |object_definitions|
+        [ 
+        	{
+        		name: "accounts", type: :array, of: :object,
+        		properties: object_definitions["account"]
+        	}
+        ]
       end,
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
@@ -112,25 +112,25 @@
   },
 
   triggers: {
-
     new_updated_accounts: {
       description:
       "New/Updated <span class='provider'>Account</span> in" +
       "<span class='provider'>SalesforceIQ</span>",
       help: "Checks for new or updated accounts based on the plan",
 
-
-      input_fields: lambda do |object_definitions| 
-      	[ { name: "since", type: :timestamp, 
-      		hint: "Recipe picks records start time, If value is not provided" 
-      		} ]
+      input_fields: lambda do
+      	[
+        	{
+        		name: "since", type: :timestamp,
+        		hint: "Recipe picks records start time, If value is not provided"
+          }
+        ]
       end,
       poll: lambda do |connection, input, modified_date_since|
-        modified_date = modified_date_since || (
-        input["since"].present? ? (input["since"].to_time.to_f * 1000).to_i : (
-          Time.now.to_time.to_f * 1000).to_i )
+        modified_date = modified_date_since || ((input["since"].presence || 
+        	Time.now).to_time.to_f * 1000).to_i
         result = get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: 50, _start: 0,
+        	params(_limit: 50, _start: 0,
           modifiedDate: modified_date_since)["objects"] # result returns in ascending order
         accounts = result.each do |account| # add each custom field to account response object
           (account["fieldValues"] || {}).map do |k, v|
@@ -153,11 +153,9 @@
       sort_by: lambda do |account|
         account["modifiedDate"]
       end,
-
       dedup: lambda do |account|
         [account["id"], account["modifiedDate"]].join("_")
       end,
-      
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
       end,
