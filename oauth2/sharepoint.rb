@@ -20,22 +20,22 @@
         prompt=login&client_id=#{connection['client_id']}"
       },
 
-      acquire: ->(connection, auth_code, redirect_url) {
+      acquire: lambda do |connection, auth_code, redirect_url|
         post("https://login.windows.net/common/oauth2/token").
         payload(client_id: connection["client_id"],
                 grant_type: :authorization_code,
                 code: auth_code,
                 redirect_uri: redirect_url).
         request_format_www_form_urlencoded
-      },
+      end,
 
-      refresh: ->(connection, refresh_token) {
+      refresh: lambda do |connection, refresh_token|
         post("https://login.windows.net/common/oauth2/token").
         payload(client_id: connection["client_id"],
                 grant_type: :refresh_token,
                 refresh_token: refresh_token).
         request_format_www_form_urlencoded
-      },
+      end,
 
       credentials: ->(_connection, access_token) {
         headers("Authorization": "Bearer #{access_token}")
@@ -49,7 +49,7 @@
 
   object_definitions: {
     list_create: {
-      fields: ->(connection, config) {
+      fields: lambda do |connection, config|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{config['list_id']}%27)/Fields?$select=odata.type,
           EntityPropertyName,Hidden,Required,ReadOnlyField,Title,
@@ -102,11 +102,11 @@
               optional: !f["Required"] }
           end
         end
-      }
+      end
     },
 
     list_output: {
-      fields: ->(connection, config) {
+      fields: lambda do |connection, config|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{config['list_id']}%27)/Fields?$select=odata.type,
           Title,TypeAsString,EntityPropertyName,IsDependentLookup")["value"].
@@ -153,17 +153,15 @@
               label: "#{f['Title']}(#{f['EntityPropertyName']})" }
           end
         end
-      }
+      end
     }
   },
 
   actions: {
     Add_row_in_sharepoint_list: {
-      description: 'Add <span class="provider">row</span> in
-      <span class="provider">Microsoft Sharepoint</span>',
+      description: 'Add <span class="provider">row</span> in <span class="provider">Microsoft Sharepoint</span>',
       title_hint: "Add a row in Sharepoint list",
-      help: "Add a row item. First select the specific list to add a row,
-      then provide the data.",
+      help: "Add a row item to the list",
 
       config_fields: [
         {
@@ -177,15 +175,15 @@
       },
 
       execute: ->(connection, input) {
-        input.delete("list_id")
+        list_id = input.delete("list_id")
         post("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{list_id}%27)/items", input)
       },
 
       output_fields: ->(object_definitions) {
-        [
-          { name: "FileSystemObjectType", type: :integer,
-            label: "File system object type" }
+        [ { name: "FileSystemObjectType", 
+          type: :integer,
+          label: "File system object type" }
         ].concat(object_definitions["list_output"])
       },
 
@@ -197,8 +195,7 @@
     },
 
     Upload_attachment: {
-      description: 'Upload <span class="provider">attachment</span> in
-      <span class="provider">Microsoft Sharepoint</span>',
+      description: 'Upload <span class="provider">attachment</span> in <span class="provider">Microsoft Sharepoint</span>',
       title_hint: "Upload attachment in Sharepoint list",
       help: "Upload attachment in Sharepoint list",
 
@@ -212,7 +209,7 @@
       input_fields: ->() {
         [
           { name: "item_id", optional: false, label: "Item ID" },
-          { name: "file_name", optional: false, lable: "File name" },
+          { name: "file_name", optional: false },
           { name: "content", optional: false }
         ]
       },
@@ -225,8 +222,8 @@
         post("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/
           AttachmentFiles/add(FileName='#{file_name}')", input).
-        headers("X-RequestDigest": "#{form_digest}").
-        request_body(input["content"])
+          headers("X-RequestDigest": "#{form_digest}").
+          request_body(input["content"])
       },
 
       output_fields: ->() {
@@ -244,18 +241,17 @@
         ]
       },
 
-      sample_output: ->(connection, input) {
+      sample_output: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
         gsub(/file_name\=/, "")
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/
           AttachmentFiles('#{file_name}')") || {}
-      }
+      end
     },
 
-    Download_attachment: {
-      description: 'Download <span class="provider">attachment</span> in
-      <span class="provider">Microsoft Sharepoint</span>',
+    download_attachment: {
+      description: 'Download <span class="provider">attachment</span> in <span class="provider">Microsoft Sharepoint</span>',
       title_hint: "Download attachment in Sharepoint list",
       help: "Download attachment in Sharepoint list",
 
@@ -273,14 +269,14 @@
         ]
       },
 
-      execute: ->(connection, input) {
+      execute: lambda do |connection, input|
         file_name = { "file_name" => input["file_name"] }.encode_www_form.
         gsub(/file_name\=/, "")
         { "content" => get("https://#{connection['subdomain']}.sharepoint.com/
           _api/web/lists(guid%27#{input['list_id']}%27)/
           items(#{input['item_id']})/AttachmentFiles('#{file_name}')/$value").
           response_format_raw }
-      },
+      end,
 
       output_fields: ->() {
         [
@@ -288,7 +284,7 @@
         ]
       },
 
-      sample_output: ->(_connection, _input) {
+      sample_output: ->() {
         { "content": "test" }
       }
     }
@@ -296,12 +292,9 @@
 
   triggers: {
     new_row_in_sharepoint_list: {
-      description: "New <span class='provider'>row</span> in
-      <span class='provider'>Microsoft Sharepoint</span>",
+      description: "New <span class='provider'>row</span> in <span class='provider'>Microsoft Sharepoint</span>",
       title_hint: "Triggers when a new row is created in Sharepoint list",
-      help: "Checks for newly created rows every
-      {{authUser.membership.poll_interval}} minutes. Each new row will be 
-      processed as a single trigger event.",
+      help: "Checks for newly created, Each new row will be processed as a single trigger event.",
 
       config_fields: [
         {
@@ -339,7 +332,7 @@
         response["ID"]
       },
 
-      output_fields: ->(object_definitions) {
+      output_fields: lambda do |object_definitions|
         [
           { name: "FileSystemObjectType", type: :integer,
             label: "File system object type" },
@@ -359,7 +352,7 @@
               { name: "ServerRelativeUrl", label: "Server relative url" }
           ] }
         ].concat(object_definitions["list_output"])
-      },
+      end,
 
       sample_output: ->(connection, input) {
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
@@ -369,12 +362,9 @@
     },
 
     deleted_row_in_sharepoint_list: {
-      description: "Deleted <span class='provider'>row</span> in
-      <span class='provider'>Microsoft Sharepoint</span>",
+      description: "Deleted <span class='provider'>row</span> in <span class='provider'>Microsoft Sharepoint</span>",
       title_hint: "Triggers when a row is deleted in Sharepoint list",
-      help: "Checks for deleted rows every
-      {{authUser.membership.poll_interval}} minutes. Each row deleted 
-      will be processed as a single trigger event.",
+      help: "Checks for deleted, each row deleted will be processed as a single trigger event.",
 
       config_fields: [
         {
@@ -412,7 +402,7 @@
         response["Id"]
       },
 
-      output_fields: ->() {
+      output_fields: lambda do
         [
           { name: "AuthorEmail", label: "Author email" },
           { name: "AuthorName", label: "Author name" },
@@ -435,7 +425,7 @@
           { name: "Size" },
           { name: "Title" },
         ]
-      },
+      end,
 
       sample_output: ->(connection, input) {
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/RecycleBin?
@@ -449,17 +439,18 @@
     list: ->(connection) {
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?
         $select=Title,Id,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Id"]]
-      end.compact
+        select { |f| f["BaseType"] == 0 }.
+        map do |i| 
+          [i["Title"], i["Id"]]
+        end.compact
     },
 
     name_list: ->(connection) {
-      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?
-        $select=Title,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Title"]]
-      end.compact
+      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists?$select=Title,BaseType")["value"].
+        select { |f| f["BaseType"] == 0 }.
+        map do |i| 
+          [i["Title"], i["Title"]]
+        end.compact
     }
   }
 }
