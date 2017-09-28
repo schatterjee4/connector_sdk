@@ -48,7 +48,7 @@
   },
 
   test: lambda do |connection|
-    get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists")
+    get("https://#{connection['subdomain']}.sharepoint.com/_api/web/title")
   end,
 
   object_definitions: {
@@ -385,20 +385,28 @@
           { name: "EditorId", label: "Editor ID", type: :integer },
           { name: "AttachmentFiles", label: "Attachment files",
             type: :object, properties: [
-              { name: "FileName", label: "File name" },
-              { name: "FileNameAsPath", label: "File name as path",
+              {
+                name: "FileName", label: "File name"
+              },
+              {
+                name: "FileNameAsPath", label: "File name as path",
                 type: :object, properties: [
-                  { name: "DecodedUrl", label: "Decoded url" }
+                  {
+                    name: "DecodedUrl", label: "Decoded url"
+                  }
                 ]
               },
-              { name: "ServerRelativePath", label: "Server relative path",
+              {
+                name: "ServerRelativePath", label: "Server relative path",
                 type: :object, properties: [
-                  { name: "DecodedUrl", label: "Decoded url" }
+                  {
+                    name: "DecodedUrl", label: "Decoded url"
+                  }
                 ]
               },
               { name: "ServerRelativeUrl", label: "Server relative url" }
-              ]
-            }
+            ]
+          }
         ].concat(object_definitions["list_output"])
       end,
 
@@ -415,15 +423,12 @@
       title_hint: "Triggers when a row is deleted in Sharepoint list",
       help: "Each row deleted will be processed as a single trigger event.",
 
-      config_fields: [
-        {
-          name: "list_name", control_type: :select,
-          pick_list: :name_list, label: "List", optional: false
-        }
-      ],
-
       input_fields: lambda do
         [
+          {
+            name: "list_name", control_type: :select,
+            pick_list: :name_list, label: "List", optional: false
+          },
           {
             name: "since", type: :date_time,
             label: "From", optional: false,
@@ -438,10 +443,10 @@
         else
           item = get("https://#{connection['subdomain']}.sharepoint.com/" \
            "_api/web/RecycleBin").
-            params("$filter": "((DirName eq 'Lists/#{input['list_name']}') and" \
-             " (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
-              "$orderby": "DeletedDate asc",
-              "$top": 100)
+            params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
+             "and (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
+                  "$orderby": "DeletedDate asc",
+                  "$top": 100)
         end
         {
           events: item["value"],
@@ -463,18 +468,20 @@
           { name: "DeletedDate", label: "Deleted date", type: :date_time },
           { name: "DirName", label: "Directory name" },
           { name: "DirNamePath", label: "Directory name path",
-            type: :object, properties: [
+            type: :object, properties:
+            [
               { name: "DecodedUrl", label: "Decoded url" }
-              ]
+            ]
             },
           { name: "Id" },
           { name: "ItemState", type: :integer, label: "Item state" },
           { name: "ItemType", type: :integer, label: "Item type" },
           { name: "LeafName", label: "Leaf name" },
           { name: "LeafNamePath", label: "Leaf name path",
-            type: :object, properties: [
+            type: :object, properties:
+            [
               { name: "DecodedUrl", label: "Decoded url" }
-              ]
+            ]
             },
           { name: "Size" },
           { name: "Title" },
