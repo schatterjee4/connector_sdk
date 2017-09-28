@@ -394,19 +394,30 @@
           { name: "AuthorId", label: "Author ID", type: :integer },
           { name: "EditorId", label: "Editor ID", type: :integer },
           { name: "AttachmentFiles", label: "Attachment files",
-            type: :object, properties: [
+            type: :object,
+            properties: [
               { name: "FileName", label: "File name" },
-              { name: "FileNameAsPath", label: "File name as path",
-                type: :object, properties: [
-                  { name: "DecodedUrl", label: "Decoded url" } 
+              {
+                name: "FileNameAsPath", label: "File name as path",
+                type: :object,
+                properties: [
+                  {
+                    name: "DecodedUrl", label: "Decoded url"
+                  }
                 ]
               },
-              { name: "ServerRelativePath", label: "Server relative path",
-                type: :object, properties: [
-                  { name: "DecodedUrl", label: "Decoded url" }
+              {
+                name: "ServerRelativePath", label: "Server relative path",
+                type: :object,
+                properties: [
+                  {
+                    name: "DecodedUrl", label: "Decoded url"
+                  }
                 ]
               },
-              { name: "ServerRelativeUrl", label: "Server relative url" }
+              {
+                name: "ServerRelativeUrl", label: "Server relative url"
+              }
             ]
           }
         ].concat(object_definitions["list_output"])
