@@ -49,7 +49,8 @@
   actions: {
     create_account: {
       description:
-      "Create <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
+      "Create <span class='provider'>Account</span> in " \
+      "<span class='provider'>SalesforceIQ</span>",
       input_fields: lambda do |object_definitions|
         object_definitions["account"].ignored("id", "modifiedDate", "address_city", 
         "address_state", "address_postal_code", "address_country")
@@ -74,10 +75,10 @@
     },
     search_account: {
       description:
-      "Search <span class='provider'>Account</span> in <span class='provider'>SalesforceIQ</span>",
-      hint: 
+      "Search <span class='provider'>Account</span> in " \
+      "<span class='provider'>SalesforceIQ</span>",
+      hint:
       "Returns accounts matching the IDs. Returns all accounts, if blank.",
-
       input_fields: lambda do
         [ 
           { name: "_ids", label: "Account identifiers",
@@ -86,8 +87,8 @@
         ]
       end,
       execute: lambda do |connection,input|
-        accounts = get("https://api.salesforceiq.com/v2/accounts",input)["objects"]
-        accounts.each do |account| # add each custom field to account response object
+        accounts = get("https://api.salesforceiq.com/v2/accounts",input)["objects"].
+          each do |account| # add each custom field to account response object
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
           end
@@ -119,7 +120,7 @@
       input_fields: lambda do
         [
           {
-            name: "since", type: :timestamp,
+            name: "From", type: :timestamp,
             hint: "Fetch trigger events from specified time"
           }
         ]
