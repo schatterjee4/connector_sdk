@@ -398,13 +398,16 @@
               { name: "FileName", label: "File name" },
               { name: "FileNameAsPath", label: "File name as path",
                 type: :object, properties: [
-                { name: "DecodedUrl", label: "Decoded url" } ]
+                  { name: "DecodedUrl", label: "Decoded url" } 
+                ]
               },
               { name: "ServerRelativePath", label: "Server relative path",
                 type: :object, properties: [
-                { name: "DecodedUrl", label: "Decoded url" } ]
+                  { name: "DecodedUrl", label: "Decoded url" }
+                ]
               },
-              { name: "ServerRelativeUrl", label: "Server relative url" } ]
+              { name: "ServerRelativeUrl", label: "Server relative url" }
+            ]
           }
         ].concat(object_definitions["list_output"])
       end,
@@ -468,7 +471,8 @@
           { name: "DirName", label: "Directory name" },
           { name: "DirNamePath", label: "Directory name path",
             type: :object, properties: [
-            { name: "DecodedUrl", label: "Decoded url" } ]
+              { name: "DecodedUrl", label: "Decoded url" }
+            ]
           },
           { name: "Id" },
           { name: "ItemState", type: :integer, label: "Item state" },
@@ -476,7 +480,8 @@
           { name: "LeafName", label: "Leaf name" },
           { name: "LeafNamePath", label: "Leaf name path",
             type: :object, properties: [
-            { name: "DecodedUrl", label: "Decoded url" } ]
+              { name: "DecodedUrl", label: "Decoded url" }
+            ]
           },
           { name: "Size" },
           { name: "Title" },
