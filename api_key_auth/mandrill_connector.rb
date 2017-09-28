@@ -32,14 +32,16 @@
         template_variables = if config_fields.blank?
                                []
                              else
-                               post("https://mandrillapp.com/api/1.0/templates/info.json")
+                               post("https://mandrillapp.com/api/1.0/" \
+                                 "templates/info.json")
                                  .payload(name: config_fields["template"])
                                  .dig("code")
                                  .scan(/mc:edit=\"([^\"]*)\"/)
                                  .map do |var|
                                  {
                                    name: var.first,
-                                   hint: "Include html tags for better formatting"
+                                   hint: "Include html tags for better" \
+                                    " formatting"
                                  }
                                end
                              end
@@ -84,7 +86,8 @@
             name: "send_at",
             hint: "When this message should be sent as a UTC timestamp in" \
               " YYYY-MM-DD HH:MM:SS format. If you specify a time in the"  \
-              " past, the message will be sent immediately. Example: 2017-09-28 09:00:00"
+              " past, the message will be sent immediately. Example:"      \
+              " 2017-09-28 09:00:00"
           }
         ].concat(if template_variables.blank?
                    []
@@ -129,12 +132,12 @@
           track_clicks: input["track_clicks"]
         }
 
-        post("https://mandrillapp.com/api/1.0/messages/send-template.json")
+        post("https://mandrillapp.com/api/1.0/messages/send-template.json") \
           .payload(template_name: input["template"],
                    template_content: (input["template_content"] || [])
                     .map { |key, val| { name: key, content: val } },
                    message:   message,
-                   send_at: input["send_at"])
+                   send_at: input["send_at"]) \
           &.first
       },
 
@@ -160,7 +163,7 @@
 
   pick_lists: {
     templates: lambda { |_connection|
-      post("https://mandrillapp.com/api/1.0/templates/list.json")
+      post("https://mandrillapp.com/api/1.0/templates/list.json") \
         .map { |template| [template["name"], template["slug"]] }
     }
   }
