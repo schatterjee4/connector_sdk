@@ -35,11 +35,11 @@
           { name: "title" },
           { name: "description" },
           { name: "industry" },
-          { name: "website", type: :string, control_type: :url },
-          { name: "email", type: :string, control_type: :email },
-          { name: "phone", type: :string, control_type: :phone },
-          { name: "mobile", type: :string, control_type: :phone },
-          { name: "fax", type: :string, control_type: :phone },
+          { name: "website", control_type: :url },
+          { name: "email", control_type: :email },
+          { name: "phone", control_type: :phone },
+          { name: "mobile", control_type: :phone },
+          { name: "fax", control_type: :phone },
           { name: "twitter" },
           { name: "facebook" },
           { name: "linkedin" },
@@ -71,27 +71,19 @@
       help: "Search will only return leads matching all inputs",
       input_fields: lambda do |object_definitions|
         [
-          { name: "ids", type: :string, control_type: :text, label: "Id's",
+          { name: "ids", label: "Id's",
             hint: "Comma-separated list of lead IDs." },
-          { name: "address[city]", type: :string, control_type: :text,
-            label: "City name" },
-          { name: "address[postal_code]", type: :string, control_type: :text,
-            label: "Zip/postal code" },
-          { name: "address[state]", type: :string, control_type: :text,
-            label: "State/region name" },
-          { name: "address[country]", type: :string, control_type: :text,
-            label: "Country name" }
+          { name: "address[city]", label: "City name" },
+          { name: "address[postal_code]", label: "Zip/postal code" },
+          { name: "address[state]", label: "State/region name" },
+          { name: "address[country]", label: "Country name" }
         ].concat(object_definitions["lead"].
           only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
       execute: lambda do |connection, input|
-        params = input.map do |key, value|
-          "#{key}=#{value}"
-        end.join("&")
-        result = get("https://api.getbase.com/v2/leads?" + params)["items"]
-        leads = result.pluck("data")
         {
-          leads: leads
+          leads: get("https://api.getbase.com/v2/leads", input).dig("items")&.
+          	pluck("data")
         }
       end,
       output_fields: lambda do |object_definitions|
@@ -103,7 +95,8 @@
       sample_output: lambda do
         {
           leads:
-          [get("https://api.getbase.com/v2/leads")["items"].dig(0, "data")]
+          [get("https://api.getbase.com/v2/leads").
+          	params(per_page: 1)["items"].dig(0, "data")]
         }
       end
     },
@@ -116,8 +109,8 @@
           ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
       end,
       execute: lambda do |connection, input|
-        url = "https://api.getbase.com/v2/leads"
-        lead = post(url).payload(data: input)["data"]
+        lead = post("https://api.getbase.com/v2/leads").
+        	payload(data: input)["data"]
         {
           lead: lead
         }
