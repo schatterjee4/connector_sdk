@@ -26,7 +26,7 @@
       fields: lambda do |connection|
         [
           { name: "id" },
-          { name: "name" },
+          { name: "name", optional: false },
           { name: "modifiedDate", label: "Modified date", type: :integer,
             hint:
             "Stores a particular Date & Time in UTC milliseconds past the epoch." },# milliseconds since epoch
@@ -116,6 +116,8 @@
       description:
       "New/Updated <span class='provider'>Account</span> in " \
         "<span class='provider'>SalesforceIQ</span>",
+      hint: "Fetch trigger events from specified time, If left blank," \
+       " accounts are processed from Recipe start time",
       help: "Checks for new or updated accounts",
       input_fields: lambda do
         [
