@@ -42,7 +42,7 @@
                                    hint: "Include html tags for better formatting"
                                  }
                                end
-          end
+                             end
 
         [
           {
@@ -123,9 +123,7 @@
         message = {
           from_email: input["from_email"],
           from_name: input["from_name"],
-          to: input["to"]
-                  .split("\n")
-                  .map { |to| { email: to.strip } },
+          to: input["to"].split("\n").map { |to| { email: to.strip } },
           important: input["important"],
           track_opens: input["track_opens"],
           track_clicks: input["track_clicks"]
