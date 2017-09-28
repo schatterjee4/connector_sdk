@@ -64,7 +64,6 @@
         end
         post("https://api.salesforceiq.com/v2/accounts").
           payload(name: input['name'], fieldValues: fields)
-
       end,
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
@@ -74,11 +73,9 @@
       end
     },
     search_account: {
-      description:
-      "Search <span class='provider'>Account</span> in " \
-      "<span class='provider'>SalesforceIQ</span>",
-      hint:
-      "Returns accounts matching the IDs. Returns all accounts, if blank.",
+      description: "Search <span class='provider'>Account</span> in " \
+       "<span class='provider'>SalesforceIQ</span>",
+      help: "Returns accounts matching the IDs. Returns all accounts, if blank.",
       input_fields: lambda do
         [ 
           { name: "_ids", label: "Account identifiers",
@@ -116,14 +113,14 @@
       description:
       "New/Updated <span class='provider'>Account</span> in " \
         "<span class='provider'>SalesforceIQ</span>",
-      hint: "Fetch trigger events from specified time, If left blank," \
-       " accounts are processed from Recipe start time",
       help: "Checks for new or updated accounts",
       input_fields: lambda do
         [
           {
-            name: "since", type: :timestamp, label: "From",
-            hint: "Fetch trigger events from specified time"
+            name: "since", type: :timestamp,
+            sticky: true, label: "From",
+            hint: "Fetch trigger events from specified time, If left blank," \
+             " accounts are processed from Recipe start time"
           }
         ]
       end,
