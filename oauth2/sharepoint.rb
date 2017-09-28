@@ -9,7 +9,7 @@
         optional: false,
         hint: "Your sharepoint subdomain found in your sharepoint URL"
       },
-      { name: "client_id", label: "Client ID", optional: false },
+      { name: "client_id", label: "Client id", optional: false },
     ],
 
     authorization: {
@@ -37,15 +37,15 @@
           request_format_www_form_urlencoded
       end,
 
-      credentials: ->(_connection, access_token) {
+      credentials: lambda do |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
-      }
+      end
     }
   },
 
-  test: ->(connection) {
+  test: lambda do |connection|
     get("https://#{connection['subdomain']}.sharepoint.com/_api/web/title")
-  },
+  end,
 
   object_definitions: {
     list_create: {
@@ -146,7 +146,7 @@
               type: :object, properties: [
                 { name: "Label" },
                 { name: "TermGuid" },
-                { name: "WssId", type: :integer, label: "Wss ID" }
+                { name: "WssId", type: :integer, label: "Wss id" }
             ] }
           else
             { name: f["EntityPropertyName"],
@@ -159,9 +159,10 @@
 
   actions: {
     Add_row_in_sharepoint_list: {
-      description: 'Add <span class="provider">row</span> in <span class="provider">Microsoft Sharepoint</span>',
-      title_hint: "Add a row in Sharepoint list",
-      help: "Add a row item to the list",
+      description: 'Add <span class="provider">row</span> in " \
+      "<span class="provider">Microsoft Sharepoint</span>',
+      title_hint: "Add a row in Microsoft Sharepoint list",
+      help: "Add a row item to Microsoft Sharepoint list",
 
       config_fields: [
         {
@@ -169,35 +170,31 @@
           label: "List", optional: false
         }
       ],
-
       input_fields: lambda do |object_definitions|
         object_definitions["list_create"]
       end,
-
       execute: lambda do |connection, input|
         list_id = input.delete("list_id")
         post("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{list_id}%27)/items", input)
       end,
-
       output_fields: lambda do |object_definitions|
         [ { name: "FileSystemObjectType",
           type: :integer,
           label: "File system object type" }
           ].concat(object_definitions["list_output"])
       end,
-
       sample_output: lambda do |connection, input|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/
           lists(guid%27#{input['list_id']}%27)/
           items?$top=1")["value"]&.first || {}
       end
     },
-
     upload_attachment: {
-      description: 'Upload <span class="provider">attachment</span> in <span class="provider">Microsoft Sharepoint</span>',
-      title_hint: "Upload attachment in Sharepoint list",
-      help: "Upload attachment in Sharepoint list",
+      description: 'Upload <span class="provider">attachment</span> in " \
+      "<span class="provider">Microsoft Sharepoint</span>',
+      title_hint: "Upload attachment in Microsoft Sharepoint list",
+      help: "Upload attachment in Microsoft Sharepoint list",
 
       config_fields: [
         {
@@ -252,8 +249,8 @@
 
     download_attachment: {
       description: 'Download <span class="provider">attachment</span> in <span class="provider">Microsoft Sharepoint</span>',
-      title_hint: "Download attachment in Sharepoint list",
-      help: "Download attachment in Sharepoint list",
+      title_hint: "Download attachment in Microsoft Sharepoint list",
+      help: "Download attachment in Microsoft Sharepoint list",
 
       config_fields: [
         {
@@ -293,7 +290,7 @@
   triggers: {
     new_row_in_sharepoint_list: {
       description: "New <span class='provider'>row</span> in <span class='provider'>Microsoft Sharepoint</span>",
-      title_hint: "Triggers when a new row is created in Sharepoint list",
+      title_hint: "Triggers when a new row is created in Microsoft Sharepoint list",
       help: "Checks for newly created, Each new row will be processed as a single trigger event.",
 
       config_fields: [
