@@ -120,7 +120,7 @@
       input_fields: lambda do
         [
           {
-            name: "From", type: :timestamp,
+            name: "since", type: :timestamp, label: "From",
             hint: "Fetch trigger events from specified time"
           }
         ]
