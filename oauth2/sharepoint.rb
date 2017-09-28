@@ -102,7 +102,8 @@
                 label: "#{f['Title']} (#{f['EntityPropertyName']})",
                 type: :integer, optional: !f["Required"]
               }
-            elsif f["odata.type"] == "SP.FieldLookup" && f["IsDependentLookup"] == false
+            elsif f["odata.type"] == "SP.FieldLookup" &&
+             f["IsDependentLookup"] == false
               {
                 name: "#{f['EntityPropertyName']}Id",
                 label: "#{f['Title']} (#{f['EntityPropertyName']})",
@@ -135,30 +136,37 @@
           params("$select": "odata.type,Title,TypeAsString,
             EntityPropertyName,IsDependentLookup")["value"].
           map do |f|
-            if f["odata.type"] == "SP.FieldNumber" || f["TypeAsString"] == "Counter"
+            if f["odata.type"] == "SP.FieldNumber" ||
+             f["TypeAsString"] == "Counter"
               {
                 name: f["EntityPropertyName"],
-                label: "#{f['Title']} (#{f['EntityPropertyName']})", type: :integer 
+                label: "#{f['Title']} (#{f['EntityPropertyName']})",
+                type: :integer 
               }
             elsif f["odata.type"] == "SP.Field"
               {
                 name: f["EntityPropertyName"],
-                label: "#{f['Title']} (#{f['EntityPropertyName']})", type: :boolean
+                label: "#{f['Title']} (#{f['EntityPropertyName']})",
+                type: :boolean
               }
             elsif f["odata.type"] == "SP.FieldDateTime"
               {
                 name: f["EntityPropertyName"],
-                label: "#{f['Title']} (#{f['EntityPropertyName']})", type: :date_time
+                label: "#{f['Title']} (#{f['EntityPropertyName']})",
+                type: :date_time
               }
             elsif f["odata.type"] == "SP.FieldUser"
               {
                 name: "#{f['EntityPropertyName']}Id",
-                label: "#{f['Title']} (#{f['EntityPropertyName']})", type: :integer
+                label: "#{f['Title']} (#{f['EntityPropertyName']})",
+                type: :integer
               }
-            elsif f["odata.type"] == "SP.FieldLookup" && f["IsDependentLookup"] == false
+            elsif f["odata.type"] == "SP.FieldLookup" &&
+             f["IsDependentLookup"] == false
               {
                 name: "#{f['EntityPropertyName']}Id",
-                label: "#{f['Title']} (#{f['EntityPropertyName']})", type: :integer
+                label: "#{f['Title']} (#{f['EntityPropertyName']})",
+                type: :integer
               }
             elsif f["odata.type"] == "SP.FieldUrl"
               {
@@ -192,9 +200,11 @@
 
   actions: {
     add_row_in_sharepoint_list: {
-      description: "Add <span class='provider'>row</span> in <span class='provider'>Microsoft Sharepoint</span> list",
+      description: "Add <span class='provider'>row</span> in " \
+       "<span class='provider'>Microsoft Sharepoint</span> list",
       title_hint: "Add a row in Microsoft Sharepoint list",
-      help: "Add a row item. select the specific list to add a row, then provide the data.",
+      help: "Add a row item. select the specific list to add a row," \
+       " then provide the data.",
 
       config_fields: [
         {
@@ -385,27 +395,16 @@
           { name: "EditorId", label: "Editor ID", type: :integer },
           { name: "AttachmentFiles", label: "Attachment files",
             type: :object, properties: [
-              {
-                name: "FileName", label: "File name"
-              },
-              {
-                name: "FileNameAsPath", label: "File name as path",
+              { name: "FileName", label: "File name" },
+              { name: "FileNameAsPath", label: "File name as path",
                 type: :object, properties: [
-                  {
-                    name: "DecodedUrl", label: "Decoded url"
-                  }
-                ]
+                { name: "DecodedUrl", label: "Decoded url" } ]
               },
-              {
-                name: "ServerRelativePath", label: "Server relative path",
+              { name: "ServerRelativePath", label: "Server relative path",
                 type: :object, properties: [
-                  {
-                    name: "DecodedUrl", label: "Decoded url"
-                  }
-                ]
+                { name: "DecodedUrl", label: "Decoded url" } ]
               },
-              { name: "ServerRelativeUrl", label: "Server relative url" }
-            ]
+              { name: "ServerRelativeUrl", label: "Server relative url" } ]
           }
         ].concat(object_definitions["list_output"])
       end,
@@ -468,21 +467,17 @@
           { name: "DeletedDate", label: "Deleted date", type: :date_time },
           { name: "DirName", label: "Directory name" },
           { name: "DirNamePath", label: "Directory name path",
-            type: :object, properties:
-            [
-              { name: "DecodedUrl", label: "Decoded url" }
-            ]
-            },
+            type: :object, properties: [
+            { name: "DecodedUrl", label: "Decoded url" } ]
+          },
           { name: "Id" },
           { name: "ItemState", type: :integer, label: "Item state" },
           { name: "ItemType", type: :integer, label: "Item type" },
           { name: "LeafName", label: "Leaf name" },
           { name: "LeafNamePath", label: "Leaf name path",
-            type: :object, properties:
-            [
-              { name: "DecodedUrl", label: "Decoded url" }
-            ]
-            },
+            type: :object, properties: [
+            { name: "DecodedUrl", label: "Decoded url" } ]
+          },
           { name: "Size" },
           { name: "Title" },
         ]
