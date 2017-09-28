@@ -3,8 +3,8 @@
 
   connection: {
     fields: [
-      { name: "api_key", label: "API Key", optional: false },
-      { name: "api_secret", label: "API Secret", optional: false,
+      { name: "api_key", label: "API key", optional: false },
+      { name: "api_secret", label: "API secret", optional: false,
         control_type: "password" }
     ],
     authorization: {
@@ -27,7 +27,7 @@
         [
           { name: "id" },
           { name: "name" },
-          { name: "modifiedDate", type: :integer,
+          { name: "modifiedDate", label: "Modified date", type: :integer,
             hint:
             "Stores a particular Date & Time in UTC milliseconds past the epoch." },# milliseconds since epoch
         ].concat(
