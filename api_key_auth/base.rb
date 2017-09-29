@@ -76,10 +76,6 @@
         [
           { name: "ids", label: "Id's",
             hint: "Comma-separated list of lead IDs." },
-          { name: "address[city]", label: "City name" },
-          { name: "address[postal_code]", label: "Zip/postal code" },
-          { name: "address[state]", label: "State/region name" },
-          { name: "address[country]", label: "Country name" }
         ].concat(object_definitions["lead"].
           only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
