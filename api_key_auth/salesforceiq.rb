@@ -29,16 +29,15 @@
           { name: "modifiedDate", label: "Modified date", type: :integer,
             hint: "Stores a particular Date & Time in UTC milliseconds past" \
              " the epoch." },# milliseconds since epoch
-        ].concat(
-          get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
-          map do |field|
-            pick_list = field["listOptions"].
-              map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-            {
-              name: field["id"],
-              label: field["name"],
-              control_type: field["dataType"] == "List" ? "select" : "text",
-              pick_list: pick_list }
+        ].concat(get("https://api.salesforceiq.com/v2/accounts/fields")
+          ["fields"].map do |field|
+          pick_list = field["listOptions"].
+            map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
+          
+          { name: field["id"],
+            label: field["name"],
+            control_type: field["dataType"] == "List" ? "select" : "text",
+            pick_list: pick_list }
           end)
       end
     },
@@ -78,10 +77,9 @@
        " accounts, if blank.",
       input_fields: lambda do
         [
-          {
-            name: "_ids", label: "Account identifiers",
-            hint: "Comma separated list of Account identifiers"
-          }]
+          { name: "_ids", label: "Account identifiers",
+            hint: "Comma separated list of Account identifiers" }
+        ]
       end,
       execute: lambda do |_connection, input|
         accounts = get("https://api.salesforceiq.com/v2/accounts",
