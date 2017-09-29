@@ -37,7 +37,7 @@
                                  .payload(name: config_fields["template"])
                                  .dig("code")
                                  .scan(/mc:edit=\"([^\"]*)\"/)
-                                 .map do |var|
+                                 .map do |var| 
                                  {
                                    name: var.first,
                                    hint: "Include html tags for better" \
@@ -108,6 +108,9 @@
     create_message: {
       description: "Create <span class='provider'>message</span> from" \
         " template in <span class='provider'>Mandrill</span>",
+      subtitle: "Create message",
+      help: "Send a new transactional message through Mandrill"        \
+      " using a template",
 
       config_fields: [
         {
