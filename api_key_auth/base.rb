@@ -71,7 +71,7 @@
         <span class="provider">Base CRM</span>',
       subtitle: "Search leads in Base CRM",
       help: "Search will only return leads matching all inputs," \
-       " Returns all accounts, if blank",
+       " Returns all leads, if blank",
       input_fields: lambda do |object_definitions|
         [
           { name: "ids", label: "Id's",
