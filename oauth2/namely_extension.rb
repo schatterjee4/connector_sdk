@@ -247,19 +247,5 @@
     }
   },
 
-  pick_lists: {
-    employee_status: ->() {
-      [
-        ["Active", "active"], ["Inactive", "inactive"], ["Pending", "pending"]
-      ]
-    },
-
-    event_type: ->() {
-      [
-        ["Birthday", "birthday"], ["Announcement", "announcement"],
-        ["Recent arrival", "recent_arrival"], ["Anniversary", "anniversary"],
-        ["All", "all"]
-      ]
-    }
-  }
+  triggers: {}
 }
