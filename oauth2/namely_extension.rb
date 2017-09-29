@@ -195,56 +195,46 @@
       hint: "Use the input fields to add filters to employee profile results. "\
             "Leave input fields blank to return all employee profiles.",
 
-      input_fields: ->() {
+      input_fields: lambda do
         [
-          { name: "email", optional: true, sticky: true },
-          { name: "status", optional: true, sticky: true, control_type: :select, pick_list: "employee_status", toggle_hint: "Select from list",
+          { name: "first_name", optional: true, sticky: true },
+          { name: "last_name", optional: true, sticky: true },
+          { name: "email", label: "Company email", optional: true, sticky: true },
+          { name: "personal_email", optional: true },
+          { name: "job_title", optional: true },
+          { name: "reports_to", optional: true,
+            hint: "ID of employee profile whom employee profile reports to" },
+          { name: "status", optional: true, control_type: :select,
+            pick_list: "employee_status", toggle_hint: "Select from list",
             toggle_field: {
-              name: "status", type: :string, control_type: :text, label: "Status (Custom)", control_type: :text, toggle_hint: "Use custom value"
+              name: "status", type: :string, control_type: :text,
+              label: "Status (Custom)", toggle_hint: "Use custom value"
             }
           },
-          { name: "start_date", type: :date, optional: true, sticky: true }
+          { name: "start_date", type: :date, optional: true }
         ]
-      },
+      end,
 
-      execute: ->(connection, input) {
-        employees = get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
-        params(
-          email: input["email"],
-          status: input["status"]
-        )["profiles"]
+      execute: lambda do |connection, input|
+        params = (input["first_name"].present? ? "&filter[first_name]=#{input["first_name"]}" : "") +
+                 (input["last_name"].present? ? "&filter[last_name]=#{input["last_name"]}" : "") +
+                 (input["email"].present? ? "&filter[email]=#{input["email"]}" : "") +
+                 (input["personal_email"].present? ? "&filter[personal_email]=#{input["personal_email"]}" : "") +
+                 (input["job_title"].present? ? "&filter[job_title]=#{input["job_title"]}" : "") +
+                 (input["reports_to"].present? ? "&filter[reports_to]=#{input["reports_to"]}" : "") +
+                 (input["status"].present? ? "&filter[user_status]=#{input["user_status"]}" : "")
+
+        employees = get("https://#{connection["company"]}.namely.com/api/v1/profiles.json?" +
+                      params)["profiles"].to_a
         if input["start_date"].present?
           employees = employees.where("start_date" => input["start_date"].to_s)
-        else
-          employees = employees.to_a
         end
         { "profiles": employees }
-      },
+      end,
 
-      output_fields: ->(object_definitions) {
+      output_fields: lambda do |object_definitions|
         object_definitions["profile"]
-      }
-    }
-  },
-
-  triggers: {
-    new_event: {
-      description: 'New <span class="provider">event</span> '\
-                   'started in <span class="provider">Namely</span>',
-      subtitle: "New event started in Namely",
-      type: :paging_desc,
-
-      input_fields: ->() {
-        [
-          { name: "since", type: :date, optional: false },
-          { name: "type", optional: false, control_type: :select, pick_list: "event_type", toggle_hint: "Select from list",
-            toggle_field: {
-              name: "type", type: :string, control_type: :text, label: "Type (Custom)", toggle_hint: "Use custom value",
-              hint: "Either of birthday, announcement, recent_arrival, anniversary, or all" } },
-          { name: "profile_id", optional: true, sticky: true,
-            hint: "ID of the profile that you wish to pull all associated events from." }
-        ]
-      },
+      end,
 
       poll: ->(connection, input, page) {
         limit = 100
