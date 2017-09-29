@@ -16,13 +16,13 @@
     }
   },
 
-  test: lambda do |connection|
+  test: lambda do |_connection|
     get("https://api.salesforceiq.com/v2/accounts?_limit=1")
   end,
 
   object_definitions: {
     account: {
-      fields: lambda do |connection|
+      fields: lambda do |_connection|
         [
           { name: "id" },
           { name: "name", optional: false },
@@ -34,13 +34,13 @@
           map do |field|
             pick_list = field["listOptions"].
               map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-            {
-              name: field["id"],
-              label: field["name"],
-              control_type: field["dataType"] == "List" ? "select" : "text",
-              pick_list: pick_list
-            }
-        end)
+              {
+                name: field["id"],
+                label: field["name"],
+                control_type: field["dataType"] == "List" ? "select" : "text",
+                pick_list: pick_list
+              }
+          end)
       end
     },
   },
@@ -50,10 +50,11 @@
       description: "Create <span class='provider'>Account</span> in " \
       "<span class='provider'>SalesforceIQ</span>",
       input_fields: lambda do |object_definitions|
-        object_definitions["account"].ignored("id", "modifiedDate", "address_city", 
-        "address_state", "address_postal_code", "address_country")
+        object_definitions["account"].
+          ignored("id", "modifiedDate", "address_city",
+            "address_state", "address_postal_code", "address_country")
       end,
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         fields = {}
         input.each do |k, v|
           if k != "name"
@@ -67,7 +68,8 @@
         object_definitions["account"]
       end,
       sample_output: lambda do
-        get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
+        get("https://api.salesforceiq.com/v2/accounts").
+          params(_limit: 1).dig("objects", 0)
       end
     },
     search_account: {
@@ -80,13 +82,11 @@
           {
             name: "_ids", label: "Account identifiers",
             hint: "Comma separated list of Account identifiers"
-          }
-        ]
+          } ]
       end,
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         accounts = get("https://api.salesforceiq.com/v2/accounts",
-          input)["objects"].
-          each do |account| # add each custom field to account response object
+          input)["objects"].each do |account| # add each custom field to account response object
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
           end
@@ -104,7 +104,8 @@
         ]
       end,
       sample_output: lambda do
-        get("https://api.salesforceiq.com/v2/accounts")["objects"]&.first || {}
+        get("https://api.salesforceiq.com/v2/accounts").
+          params(_limit: 1).dig("objects", 0)
       end
     }
   },
@@ -125,7 +126,7 @@
           }
         ]
       end,
-      poll: lambda do |connection, input, modified_date_since|
+      poll: lambda do |_connection, input, modified_date_since|
         limit = 50
         modified_date ||= ((input["since"].presence || Time.now).
           to_time.to_f * 1000).to_i
