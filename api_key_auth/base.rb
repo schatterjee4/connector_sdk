@@ -30,10 +30,8 @@
           { name: "owner_id", type: :integer, label: "Owner id",
             control_type: :number },
           { name: "first_name" },
-          { name: "last_name", hint: "Enter Last name or organisation name " \
-           "to create account. It is not necessary to have both" },
-          { name: "organization_name", hint: "Enter organisation name or " \
-           "Last name to create account. It is not necessary to have both" },
+          { name: "last_name" },
+          { name: "organization_name" },
           { name: "title" },
           { name: "description" },
           { name: "industry" },
@@ -72,25 +70,41 @@
       subtitle: "Search leads in Base CRM",
       help: "Search will only return leads matching all inputs," \
        " Returns all leads, if blank",
+       
       input_fields: lambda do |object_definitions|
         [
           { name: "ids", label: "Id's",
             hint: "Comma-separated list of lead IDs." },
+          { name: "address_op_city_cl_", label: "City name" },
+          { name: "address_op_postal_code_cl_", label: "Zip/postal code" },
+          { name: "address_op_state_cl_", label: "State/region name" },
+          { name: "address_op_country_cl_", label: "Country name" }
         ].concat(object_definitions["lead"].
           only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
+
       execute: lambda do |connection, input|
+        query = {}
+        input.map do |key, value|
+          if key.include?("_op_") && value.present?
+            query[key.gsub("_op_","[").gsub("_cl_", "]")] = value
+          else
+            key == "quantity" && value.present?
+          end
+        end
         {
-          leads: get("https://api.getbase.com/v2/leads", input).dig("items")&.
+          leads: get("https://api.getbase.com/v2/leads", query).dig("items")&.
           	pluck("data")
         }
       end,
+
       output_fields: lambda do |object_definitions|
         [
           { name: "leads", type: :array, of: :object,
             properties: object_definitions["lead"] }
         ]
       end,
+
       sample_output: lambda do
         {
           leads:
@@ -103,10 +117,14 @@
       description:
       'Create <span>Lead</span> in <span class="provider">Base CRM</span>',
       subtitle: "Create lead in Base CRM",
+      help: "Enter Last name or organisation name " \
+       "to create account. It is not necessary to have both",
+
       input_fields: lambda do |object_definitions|
         object_definitions["lead"].required("last_name", "organization_name").
           ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
       end,
+
       execute: lambda do |connection, input|
         lead = post("https://api.getbase.com/v2/leads").
         	payload(data: input)["data"]
@@ -114,6 +132,7 @@
           lead: lead
         }
       end,
+
       output_fields: lambda do |object_definitions|
         [
           {
@@ -122,6 +141,7 @@
           }
         ]
       end,
+
       sample_output: lambda do
         {
           lead:
