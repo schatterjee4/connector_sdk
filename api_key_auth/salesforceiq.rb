@@ -32,8 +32,7 @@
         ].concat(get("https://api.salesforceiq.com/v2/accounts/fields")
           ["fields"].map do |field|
           pick_list = field["listOptions"].
-            map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-          
+          map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
           { name: field["id"],
             label: field["name"],
             control_type: field["dataType"] == "List" ? "select" : "text",
@@ -44,6 +43,7 @@
   },
 
   actions: {
+
     create_account: {
       description: "Create <span class='provider'>Account</span> in " \
       "<span class='provider'>SalesforceIQ</span>",
@@ -52,6 +52,7 @@
           ignored("id", "modifiedDate", "address_city", "address_state",
                   "address_postal_code", "address_country")
       end,
+
       execute: lambda do |_connection, input|
         fields = {}
         input.each do |k, v|
@@ -62,14 +63,17 @@
         post("https://api.salesforceiq.com/v2/accounts").
           payload(name: input["name"], fieldValues: fields)
       end,
+
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
       end,
+
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
           params(_limit: 1).dig("objects", 0)
       end
       },
+
     search_account: {
       description: "Search <span class='provider'>Account</span> in " \
        "<span class='provider'>SalesforceIQ</span>",
@@ -81,17 +85,19 @@
             hint: "Comma separated list of Account identifiers" }
         ]
       end,
+
       execute: lambda do |_connection, input|
         accounts = get("https://api.salesforceiq.com/v2/accounts",
           input)["objects"].each do |account| # add each custom field to account response object
             (account["fieldValues"] || {}).map do |k, v|
-            account[k] = v.first["raw"]
+              account[k] = v.first["raw"]
             end
         end
         {
           "accounts": accounts
         }
       end,
+
       output_fields: lambda do |object_definitions|
         [
           {
@@ -100,6 +106,7 @@
           }
         ]
       end,
+
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
           params(_limit: 1).dig("objects", 0)
@@ -108,9 +115,9 @@
     },
 
   triggers: {
+
     new_updated_accounts: {
-      description:
-      "New/Updated <span class='provider'>Account</span> in " \
+      description: "New/Updated <span class='provider'>Account</span> in " \
         "<span class='provider'>SalesforceIQ</span>",
       help: "Checks for new or updated accounts",
       input_fields: lambda do
@@ -119,8 +126,11 @@
             name: "since", type: :timestamp,
             sticky: true, label: "From",
             hint: "Fetch trigger events from specified time, If left blank," \
-             " accounts are processed from Recipe start time" }]
+             " accounts are processed from Recipe start time"
+          }
+        ]
       end,
+
       poll: lambda do |_connection, input, modified_date_since|
         limit = 50
         modified_date ||= ((input["since"].presence || Time.now).
@@ -141,12 +151,15 @@
           can_poll_more: accounts.size >= limit
         }
       end,
+
       dedup: lambda do |account|
         [account["id"], account["modifiedDate"]].join("_")
       end,
+
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
       end,
+
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
           params(_limit: 1).dig("objects", 0)
