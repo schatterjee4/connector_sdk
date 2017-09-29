@@ -81,14 +81,6 @@
         project_id = config_fields["project"]
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
-        table_fields = if project_id && dataset_id && table_id
-                         get("https://www.googleapis.com/bigquery/v2/"     \
-                           "projects/#{project_id}/datasets/#{dataset_id}" \
-                           "/tables/#{table_id}").
-                           dig("schema", "fields")
-                       else
-                         []
-                       end
         type_map = {
           "BYTES" => "string",
           "INTEGER" => "integer", "INT64" => "integer",
@@ -152,7 +144,7 @@
                " best-effort basis"
             }
           ].concat((if project_id && dataset_id && table_id
-                      get('https://www.googleapis.com/bigquery/v2/'     \
+                      get("https://www.googleapis.com/bigquery/v2/"     \
                         "projects/#{project_id}/datasets/#{dataset_id}" \
                         "/tables/#{table_id}").
                         dig("schema", "fields")
