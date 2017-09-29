@@ -192,7 +192,7 @@
       description: 'Search <span class="provider">employee profiles</span> '\
                    'in <span class="provider">Namely</span>',
       subtitle: "Search employee profiles in Namely",
-      hint: "Use the input fields to add filters to employee profile results."\
+      hint: "Use the input fields to add filters to employee profile results. "\
             "Leave input fields blank to return all employee profiles.",
 
       input_fields: ->() {
