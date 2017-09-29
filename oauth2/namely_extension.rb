@@ -236,31 +236,14 @@
         object_definitions["profile"]
       end,
 
-      poll: ->(connection, input, page) {
-        limit = 100
-        page ||= 0
-        since = input["since"].to_time.to_i
-        response = get("https://#{connection["company"]}.namely.com/api/v1/events.json").
-                   params(limit: limit,
-                          type: input["type"],
-                          profile: input["profile_id"])["events"]
+      sample_output: lambda do |connection|
         {
-          events: response.where("time >=" => since),
-          next_page: response.length >= limit ? page + 1 : nil
+          "profiles": get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
+                        params(
+                          page: 1,
+                          per_page: 1)["profiles"].to_a.values
         }
-      },
-
-      document_id: ->(response) {
-        response["id"] + "@" + response["time"]
-      },
-
-      sort_by: ->(response) {
-        response["time"]
-      },
-
-      output_fields: ->(object_definitions) {
-        object_definitions["event"]
-      }
+      end
     }
   },
 
