@@ -23,26 +23,26 @@
 
       acquire: ->(connection, auth_code) {
         response = post("https://#{connection["company"]}.namely.com/api/v1/oauth2/token").
-        payload(
-          grant_type: "authorization_code",
-          client_id: connection["client_id"],
-          client_secret: connection["client_secret"],
-          code: auth_code
-        ).request_format_www_form_urlencoded
-        [ { access_token: response["access_token"], refresh_token: response["refresh_token"] }, nil, nil ]
+                     payload(
+                       grant_type: "authorization_code",
+                       client_id: connection["client_id"],
+                       client_secret: connection["client_secret"],
+                       code: auth_code).
+                     request_format_www_form_urlencoded
+        [ response, nil, nil ]
       },
 
       refresh_on: [401, 403],
 
       refresh: ->(connection, refresh_token) {
         post("https://#{connection["company"]}.namely.com/api/v1/oauth2/token").
-        payload(
-          grant_type: "refresh_token",
-          client_id: connection["client_id"],
-          client_secret: connection["client_secret"],
-          refresh_token: refresh_token,
-          redirect_uri: "https://www.workato.com/oauth/callback"
-        ).request_format_www_form_urlencoded
+          payload(
+            grant_type: "refresh_token",
+            client_id: connection["client_id"],
+            client_secret: connection["client_secret"],
+            refresh_token: refresh_token,
+            redirect_uri: "https://www.workato.com/oauth/callback").
+          request_format_www_form_urlencoded
       },
 
       apply: ->(connection, access_token) {
