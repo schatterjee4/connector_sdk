@@ -82,7 +82,9 @@
         dataset_id = config_fields["dataset"]
         table_id = config_fields["table"]
         table_fields = if project_id && dataset_id && table_id
-                         get("https://www.googleapis.com/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables/#{table_id}").
+                         get("https://www.googleapis.com/bigquery/v2/"     \
+                           "projects/#{project_id}/datasets/#{dataset_id}" \
+                           "/tables/#{table_id}").
                            dig("schema", "fields")
                        else
                          []
@@ -99,19 +101,19 @@
           "RECORD" => "object", "STRUCT" => "object",
         }
         hint_map = {
-          "BOOLEAN" => " | Boolean values are represented by the keywords true and false (case insensitive). Example: true",
-          "TIME" => " | Represents a time, independent of a specific date. Example: 11:16:00.000000",
-          "DATETIME" => " | Represents a year, month, day, hour, minute, second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+          "BOOLEAN" => "Boolean values are represented by the keywords true" \
+            " and false (case insensitive). Example: true",
+          "TIME" => "Represents a time, independent of a specific date."     \
+            " Example: 11:16:00.000000",
+          "DATETIME" => "Represents a year, month, day, hour, minute,"       \
+            " second, and subsecond. Example: 2017-09-13T11:16:00.000000",
         }
 
         build_schema_field = lambda do |field|
           field_name = field["name"].downcase
           field_label = field["name"].humanize
-          field_hint = if field["description"] && hint_map[field["type"]]
-                         field["description"] + hint_map[field["type"]]
-                       else
-                         field["description"] || hint_map[field["type"]]
-                       end
+          field_hint = [field["description"], hint_map[field["type"]]].
+                       compact.join("<br/>")
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
           if %w[RECORD STRUCT].include? field["type"]
@@ -136,25 +138,30 @@
           end
         end
 
-        table_schema_fields = [
-          {
-            name: "insertId",
-            label: "Insert id",
-            hint: "A unique ID for each row. Google BigQuery uses this" \
-             "property to detect duplicate insertion requests on a"     \
-             " best-effort basis"
-          }
-        ].concat(table_fields.
-              map do |table_field|
-                build_schema_field[table_field]
-              end)
-
         [
           name: "rows",
           optional: false,
           type: "array",
           of: "object",
-          properties: table_schema_fields
+          properties: [
+            {
+              name: "insertId",
+              label: "Insert ID",
+              hint: "A unique ID for each row. Google BigQuery uses this" \
+               "property to detect duplicate insertion requests on a"     \
+               " best-effort basis"
+            }
+          ].concat((if project_id && dataset_id && table_id
+                      get('https://www.googleapis.com/bigquery/v2/'     \
+                        "projects/#{project_id}/datasets/#{dataset_id}" \
+                        "/tables/#{table_id}").
+                        dig("schema", "fields")
+                    else
+                      []
+                    end).
+                map do |table_field|
+                  build_schema_field[table_field]
+                end)
         ]
       end
     }
