@@ -37,7 +37,7 @@
                                  .payload(name: config_fields["template"])
                                  .dig("code")
                                  .scan(/mc:edit=\"([^\"]*)\"/)
-                                 .map do |var| 
+                                 .map do |var|
                                  {
                                    name: var.first,
                                    hint: "Include html tags for better" \
