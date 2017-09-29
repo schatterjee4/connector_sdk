@@ -30,8 +30,10 @@
           { name: "owner_id", type: :integer, label: "Owner id",
             control_type: :number },
           { name: "first_name" },
-          { name: "last_name" },
-          { name: "organization_name" },
+          { name: "last_name", hint: "Enter Last name or organisation name " \
+           "to create account. It is not necessary to have both" },
+          { name: "organization_name", hint: "Enter organisation name or " \
+           "Last name to create account. It is not necessary to have both" },
           { name: "title" },
           { name: "description" },
           { name: "industry" },
@@ -68,7 +70,8 @@
       description: 'Search <span class="provider">Leads</span> in
         <span class="provider">Base CRM</span>',
       subtitle: "Search leads in Base CRM",
-      help: "Search will only return leads matching all inputs",
+      help: "Search will only return leads matching all inputs," \
+       " Returns all accounts, if blank",
       input_fields: lambda do |object_definitions|
         [
           { name: "ids", label: "Id's",
