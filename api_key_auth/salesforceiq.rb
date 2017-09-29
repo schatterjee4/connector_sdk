@@ -9,7 +9,6 @@
     ],
     authorization: {
       type: "basic_auth",
-
       credentials: lambda do |connection|
         user(connection["api_key"])
         password(connection["api_secret"])
@@ -63,7 +62,7 @@
           end
         end
         post("https://api.salesforceiq.com/v2/accounts").
-          payload(name: input['name'], fieldValues: fields)
+          payload(name: input["name"], fieldValues: fields)
       end,
       output_fields: lambda do |object_definitions|
         object_definitions["account"]
@@ -75,16 +74,18 @@
     search_account: {
       description: "Search <span class='provider'>Account</span> in " \
        "<span class='provider'>SalesforceIQ</span>",
-      help: "Returns accounts matching the IDs. Returns all accounts, if blank.",
+      help: "Returns accounts matching the IDs. Returns all" \
+       " accounts, if blank.",
       input_fields: lambda do
-        [ 
+        [
           { name: "_ids", label: "Account identifiers",
             hint: "Comma separated list of Account identifiers" 
-          } 
+          }
         ]
       end,
       execute: lambda do |connection,input|
-        accounts = get("https://api.salesforceiq.com/v2/accounts",input)["objects"].
+        accounts = get("https://api.salesforceiq.com/v2/accounts",
+          input)["objects"].
           each do |account| # add each custom field to account response object
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
@@ -95,7 +96,7 @@
         }
       end,
       output_fields: lambda do |object_definitions|
-        [ 
+        [
           {
             name: "accounts", type: :array, of: :object,
             properties: object_definitions["account"]
