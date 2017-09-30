@@ -188,20 +188,17 @@
       end,
 
       execute: lambda do |connection, input|
-        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["profile_id"]}").
-                    params(
-                      profiles: {
-                        email: input["email"],
-                        first_name: input["first_name"],
-                        last_name: input["last_name"],
-                        user_status: input["status"],
-                        start_date: input["start_date"],
-                        personal_email: input["personal_email"],
-#                         reports_to: input["reports_to"],
-#                         job_title: input["job_title"]
-                      }
-                    )["profiles"]
-          { profile: profile }
+        params = (input["first_name"].present? ? "&profiles[first_name]=#{input["first_name"]}" : "") +
+                 (input["last_name"].present? ? "&profiles[last_name]=#{input["last_name"]}" : "") +
+                 (input["email"].present? ? "&profiles[email]=#{input["email"]}" : "") +
+                 (input["personal_email"].present? ? "&profiles[personal_email]=#{input["personal_email"]}" : "") +
+                 (input["job_title"].present? ? "&profiles[job_title]=#{input["job_title"]}" : "") +
+                 (input["reports_to"].present? ? "&profiles[reports_to]=#{input["reports_to"]}" : "") +
+                 (input["status"].present? ? "&profiles[user_status]=#{input["status"]}" : "") +
+                 (input["start_date"].present? ? "&profiles[start_date]=#{input["start_date"]}" : "")
+        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["profile_id"]}?" +
+                    params)["profiles"]
+        { profile: profile }
       end,
 
       output_fields: lambda do |object_definitions|
