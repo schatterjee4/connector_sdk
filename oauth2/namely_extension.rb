@@ -160,6 +160,66 @@
   end,
 
   actions: {
+    update_employee_profile: {
+      description: 'Update <span class="provider">employee profile</span> '\
+                   'in <span class="provider">Namely</span>',
+      subtitle: "Update employee profile in Namely",
+
+      input_fields: lambda do
+        [
+          { name: "profile_id", label: "Profile ID", optional: false },
+          { name: "email", label: "Company email", optional: true },
+          { name: "first_name", optional: true },
+          { name: "last_name", optional: true },
+          { name: "status", optional: true, control_type: :select,
+            pick_list: "employee_status", toggle_hint: "Select from list",
+            toggle_field: {
+              name: "status", type: :string, control_type: :text,
+              label: "Status (Custom)", toggle_hint: "Use custom value"
+            } },
+          { name: "start_date", type: :date, optional: true },
+          { name: "personal_email", optional: true,
+            hint: "Required if Namely profile user status is pending" },
+          { name: "reports_to", optional: true,
+            hint: "ID of employee profile whom employee reports to" },
+          { name: "job_title", optional: true },
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        array =
+        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles?").
+                    params(profiles: [{
+                      id: input["profile_id"],
+                      email: input["email"],
+                      first_name: input["first_name"],
+                      last_name: input["last_name"],
+                      status: input["user_status"],
+                      start_date: input["start_date"],
+                      personal_email: input["personal_email"],
+                      reports_to: input["reports_to"],
+                      job_title: input["job_title"]}]
+                    )["profiles"].where("id" => input["profile_id"])
+      end,
+
+      output_fields: lambda do |object_definitions|
+        [
+          { name: "profile", type: :object, properties: object_definitions["profile"] }
+        ]
+      end,
+
+      sample_output: lambda do |connection|
+        {
+          "profile":
+            get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
+              params(
+                page: 1,
+                per_page: 1
+              )["profiles"]
+        }
+      end
+    },
+
     search_employee_profiles: {
       description: 'Search <span class="provider">employee profiles</span> '\
                    'in <span class="provider">Namely</span>',
