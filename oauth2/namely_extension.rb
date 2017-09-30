@@ -55,137 +55,109 @@
     profile: {
       fields: ->() {
         [
-          { name: "profiles", type: :array, of: :object, properties: [
+          { name: "id", label: "ID" },
+          { name: "email" },
+          { name: "first_name" },
+          { name: "last_name" },
+          { name: "user_status" },
+          { name: "updated_at", type: :integer },
+          { name: "created_at" },
+          { name: "preferred_name" },
+          { name: "full_name" },
+          { name: "job_title", type: :object, properties: [
             { name: "id", label: "ID" },
-            { name: "email" },
+            { name: "title" }
+          ]},
+          { name: "reports_to", type: :object, properties: [
+            { name: "id", label: "ID" },
             { name: "first_name" },
             { name: "last_name" },
-            { name: "user_status" },
-            { name: "updated_at", type: :integer },
-            { name: "created_at" },
-            { name: "preferred_name" },
-            { name: "full_name" },
-            { name: "job_title", type: :object, properties: [
-              { name: "id", label: "ID" },
-              { name: "title" }
-            ]},
-            { name: "reports_to", type: :object, properties: [
-              { name: "id", label: "ID" },
-              { name: "first_name" },
-              { name: "last_name" },
-              { name: "email" }
-            ]},
-            { name: "employee_type", type: :object, properties: [
-              { name: "title" }
-            ]},
-            { name: "access_role" },
-            { name: "ethnicity" },
-            { name: "middle_name" },
-            { name: "gender" },
-            { name: "job_change_reason" },
-            { name: "start_date" },
-            { name: "departure_date" },
-            { name: "employee_id", label: "Employee ID" },
-            { name: "personal_email" },
-            { name: "dob", label: "Date of birth"},
-            { name: "ssn", label: "SSN" },
-            { name: "marital_status" },
-            { name: "bio" },
-            { name: "asset_management" },
-            { name: "laptop_asset_number" },
-            { name: "corporate_card_number" },
-            { name: "key_tag_number" },
-            { name: "linkedin_url" },
-            { name: "office_main_number" },
-            { name: "office_direct_dial" },
-            { name: "office_phone" },
-            { name: "office_fax" },
-            { name: "office_company_mobile" },
-            { name: "home_phone" },
-            { name: "mobile_phone" },
-            { name: "home", type: :object, properties: [
-              { name: "address1" },
-              { name: "address2" },
-              { name: "city" },
-              { name: "state_id", label: "State ID" },
-              { name: "country_id", label: "Country ID" },
-              { name: "zip" }
-            ]},
-            { name: "office", type: :object, properties: [
-              { name: "address1" },
-              { name: "address2" },
-              { name: "city" },
-              { name: "state_id", label: "State ID" },
-              { name: "country_id", label: "Country ID"},
-              { name: "zip" },
-              { name: "phone" }
-            ]},
-            { name: "emergency_contact" },
-            { name: "emergency_contact_phone" },
-            { name: "resume" },
-            { name: "current_job_description" },
-            { name: "job_description" },
-            { name: "salary", type: :object, properties: [
-              { name: "currency_type" },
-              { name: "date" },
-              { name: "guid", label: "GUID" },
-              { name: "pay_group_id", label: "Pay group ID", type: :integer },
-              { name: "payroll_job_id", label: "Payroll job ID" },
-              { name: "rate" },
-              { name: "yearly_amount", type: :integer },
-              { name: "is_hourly", label: "Is hourly?", type: :boolean },
-              { name: "amount_raw", label: "Raw amount" } ] },
-            { name: "healthcare", type: :object, properties: [
-              { name: "beneficiary" },
-              { name: "amount" },
-              { name: "currency_type" }
-            ]},
-            { name: "healthcare_info" },
-            { name: "dental", type: :object, properties: [
-              { name: "beneficiary" },
-              { name: "amount" },
-              { name: "currency_type" }
-            ]},
-            { name: "dental_info" },
-            { name: "vision_plan_info" },
-            { name: "life_insurance_info" },
-            { name: "namely_time_employee_role" },
-            { name: "namely_time_manager_role" }
+            { name: "email" }
           ]},
+          { name: "employee_type", type: :object, properties: [
+            { name: "title" }
+          ]},
+          { name: "access_role" },
+          { name: "ethnicity" },
+          { name: "middle_name" },
+          { name: "gender" },
+          { name: "job_change_reason" },
+          { name: "start_date" },
+          { name: "departure_date" },
+          { name: "employee_id", label: "Employee ID" },
+          { name: "personal_email" },
+          { name: "dob", label: "Date of birth"},
+          { name: "ssn", label: "SSN" },
+          { name: "marital_status" },
+          { name: "bio" },
+          { name: "asset_management" },
+          { name: "laptop_asset_number" },
+          { name: "corporate_card_number" },
+          { name: "key_tag_number" },
+          { name: "linkedin_url" },
+          { name: "office_main_number" },
+          { name: "office_direct_dial" },
+          { name: "office_phone" },
+          { name: "office_fax" },
+          { name: "office_company_mobile" },
+          { name: "home_phone" },
+          { name: "mobile_phone" },
+          { name: "home", type: :object, properties: [
+            { name: "address1" },
+            { name: "address2" },
+            { name: "city" },
+            { name: "state_id", label: "State ID" },
+            { name: "country_id", label: "Country ID" },
+            { name: "zip" }
+          ]},
+          { name: "office", type: :object, properties: [
+            { name: "address1" },
+            { name: "address2" },
+            { name: "city" },
+            { name: "state_id", label: "State ID" },
+            { name: "country_id", label: "Country ID"},
+            { name: "zip" },
+            { name: "phone" }
+          ]},
+          { name: "emergency_contact" },
+          { name: "emergency_contact_phone" },
+          { name: "resume" },
+          { name: "current_job_description" },
+          { name: "job_description" },
+          { name: "salary", type: :object, properties: [
+            { name: "currency_type" },
+            { name: "date" },
+            { name: "guid", label: "GUID" },
+            { name: "pay_group_id", label: "Pay group ID", type: :integer },
+            { name: "payroll_job_id", label: "Payroll job ID" },
+            { name: "rate" },
+            { name: "yearly_amount", type: :integer },
+            { name: "is_hourly", label: "Is hourly?", type: :boolean },
+            { name: "amount_raw", label: "Raw amount" } ] },
+          { name: "healthcare", type: :object, properties: [
+            { name: "beneficiary" },
+            { name: "amount" },
+            { name: "currency_type" }
+          ]},
+          { name: "healthcare_info" },
+          { name: "dental", type: :object, properties: [
+            { name: "beneficiary" },
+            { name: "amount" },
+            { name: "currency_type" }
+          ]},
+          { name: "dental_info" },
+          { name: "vision_plan_info" },
+          { name: "life_insurance_info" },
+          { name: "namely_time_employee_role" },
+          { name: "namely_time_manager_role" }
         ]
-      }
+      },
     },
-    event: {
-      fields: ->() {
-        [
-          { name: "id", label: "ID" },
-          { name: "href", label: "URL" },
-          { name: "type" },
-          { name: "time", type: :integer },
-          { name: "utc_offset", type: :integer },
-          { name: "content" },
-          { name: "html_content" },
-          { name: "years_at_company", type: :integer },
-          { name: "use_comments", label: "Use comments?", type: :boolean },
-          { name: "can_comment", label: "Can comment?", type: :boolean },
-          { name: "can_destroy", label: "Can destroy?", type: :boolean },
-          { name: "links", type: :object, properties: [
-            { name: "profile" },
-            { name: "comments", type: :array, of: :string },
-            { name: "file" },
-            { name: "appreciations", type: :array, of: :string },
-          ]},
-          { name: "can_like", label: "Can like?", type: :boolean },
-          { name: "likes_count", type: :integer },
-          { name: "liked_by_current_profile", type: :boolean },
-        ]
-      }
-    }
   },
 
-  test: ->(connection) {
+  test: lambda do |connection|
     get("https://#{connection["company"]}.namely.com/api/v1/profiles/me")
-  },
+  end,
 
   actions: {
     search_employee_profiles: {
@@ -233,7 +205,10 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["profile"]
+        [
+          { name: "profiles", type: :array, of: :object,
+          properties: object_definitions["profile"] }
+        ]
       end,
 
       sample_output: lambda do |connection|
@@ -241,7 +216,8 @@
           "profiles": get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
                         params(
                           page: 1,
-                          per_page: 1)["profiles"].to_a.values
+                          per_page: 1
+                        )["profiles"].to_a.values
         }
       end
     }
