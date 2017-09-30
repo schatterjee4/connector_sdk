@@ -12,16 +12,16 @@
     authorization: {
       type: "oauth2",
 
-      authorization_url: ->(connection) {
+      authorization_url: lambda do |connection|
         params = {
           response_type: "code",
           client_id: connection["client_id"],
           redirect_uri: "https://www.workato.com/oauth/callback",
         }.to_param
         "https://#{connection["company"]}.namely.com/api/v1/oauth2/authorize?" + params
-      },
+      end,
 
-      acquire: ->(connection, auth_code) {
+      acquire: lambda do |connection, auth_code|
         response = post("https://#{connection["company"]}.namely.com/api/v1/oauth2/token").
                      payload(
                        grant_type: "authorization_code",
@@ -30,11 +30,11 @@
                        code: auth_code).
                      request_format_www_form_urlencoded
         [ response, nil, nil ]
-      },
+      end,
 
       refresh_on: [401, 403],
 
-      refresh: ->(connection, refresh_token) {
+      refresh: lambda do |connection, refresh_token|
         post("https://#{connection["company"]}.namely.com/api/v1/oauth2/token").
           payload(
             grant_type: "refresh_token",
@@ -43,11 +43,11 @@
             refresh_token: refresh_token,
             redirect_uri: "https://www.workato.com/oauth/callback").
           request_format_www_form_urlencoded
-      },
+      end,
 
-      apply: ->(connection, access_token) {
+      apply: lambda do |connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
-      }
+      end
     }
   },
 
