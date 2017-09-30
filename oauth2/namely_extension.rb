@@ -235,13 +235,13 @@
           { name: "personal_email", optional: true },
           { name: "job_title", optional: true },
           { name: "reports_to", optional: true,
-            hint: "ID of employee profile whom employee profile reports to" },
+            hint: "ID of employee profile whom employee reports to" },
           { name: "status", optional: true, control_type: :select,
             pick_list: "employee_status", toggle_hint: "Select from list",
             toggle_field: {
               name: "status", type: :string, control_type: :text,
-              label: "Status (Custom)", toggle_hint: "Use custom value" }
-          },
+              label: "Status (Custom)", toggle_hint: "Use custom value"
+            } },
           { name: "start_date", type: :date, optional: true }
         ]
       end,
@@ -266,7 +266,7 @@
       output_fields: lambda do |object_definitions|
         [
           { name: "profiles", type: :array, of: :object,
-          properties: object_definitions["profile"] }
+            properties: object_definitions["profile"] }
         ]
       end,
 
