@@ -277,11 +277,31 @@
                         params(
                           page: 1,
                           per_page: 1
-                        )["profiles"].to_a.values
+                        )["profiles"]
         }
       end
     }
   },
 
-  triggers: {}
+  triggers: {},
+
+  pick_lists: {
+    employee_status: ->() {
+      [
+        ["Active", "active"],
+        ["Inactive", "inactive"],
+        ["Pending", "pending"]
+      ]
+    },
+
+    event_type: ->() {
+      [
+        ["Birthday", "birthday"],
+        ["Announcement", "announcement"],
+        ["Recent arrival", "recent_arrival"],
+        ["Anniversary", "anniversary"],
+        ["All", "all"]
+      ]
+    }
+  }
 }
