@@ -187,19 +187,20 @@
       end,
 
       execute: lambda do |connection, input|
-        array =
-        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles?").
-                    params(profiles: [{
-                      id: input["profile_id"],
-                      email: input["email"],
-                      first_name: input["first_name"],
-                      last_name: input["last_name"],
-                      status: input["user_status"],
-                      start_date: input["start_date"],
-                      personal_email: input["personal_email"],
-                      reports_to: input["reports_to"],
-                      job_title: input["job_title"]}]
-                    )["profiles"].where("id" => input["profile_id"])
+        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["profile_id"]}").
+                    params(
+                      profiles: {
+                        email: input["email"],
+                        first_name: input["first_name"],
+                        last_name: input["last_name"],
+                        user_status: input["status"],
+                        start_date: input["start_date"],
+                        personal_email: input["personal_email"],
+#                         reports_to: input["reports_to"],
+#                         job_title: input["job_title"]
+                      }
+                    )["profiles"]
+          { profile: profile }
       end,
 
       output_fields: lambda do |object_definitions|
