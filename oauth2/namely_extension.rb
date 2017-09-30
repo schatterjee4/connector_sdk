@@ -180,8 +180,7 @@
             pick_list: "employee_status", toggle_hint: "Select from list",
             toggle_field: {
               name: "status", type: :string, control_type: :text,
-              label: "Status (Custom)", toggle_hint: "Use custom value"
-            }
+              label: "Status (Custom)", toggle_hint: "Use custom value" }
           },
           { name: "start_date", type: :date, optional: true }
         ]
