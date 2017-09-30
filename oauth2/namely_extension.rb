@@ -255,9 +255,17 @@
                  (input["job_title"].present? ? "&filter[job_title]=#{input["job_title"]}" : "") +
                  (input["reports_to"].present? ? "&filter[reports_to]=#{input["reports_to"]}" : "") +
                  (input["status"].present? ? "&filter[user_status]=#{input["user_status"]}" : "")
-
-        employees = get("https://#{connection["company"]}.namely.com/api/v1/profiles.json?" +
-                      params)["profiles"].to_a
+        employees = []
+        page = 1
+        count = 1
+        while count != 0
+          response = get("https://#{connection["company"]}.namely.com/api/v1/profiles.json?" +
+                    params, page: page, per_page: 50)
+          count = response["meta"]["count"]
+          employees.concat(response["profiles"])
+          page = page+1
+        end
+        employees = employees.to_a
         if input["start_date"].present?
           employees = employees.where("start_date" => input["start_date"].to_s)
         end
