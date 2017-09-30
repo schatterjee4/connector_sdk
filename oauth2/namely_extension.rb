@@ -182,7 +182,8 @@
             hint: "Required if Namely profile user status is pending" },
           { name: "reports_to", optional: true,
             hint: "ID of employee profile whom employee reports to" },
-          { name: "job_title", optional: true },
+          { name: "job_title", optional: true,
+            hint: "ID of job title, or the name of the title as defined in your Namely instance" },
         ]
       end,
 
@@ -234,7 +235,8 @@
           { name: "last_name", optional: true, sticky: true },
           { name: "email", label: "Company email", optional: true, sticky: true },
           { name: "personal_email", optional: true },
-          { name: "job_title", optional: true },
+          { name: "job_title", optional: true,
+            hint: "ID of job title, or the name of the title as defined in your Namely instance" },
           { name: "reports_to", optional: true,
             hint: "ID of employee profile whom employee reports to" },
           { name: "status", optional: true, control_type: :select,
