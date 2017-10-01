@@ -153,6 +153,33 @@
         ]
       },
     },
+
+    event: {
+      fields: ->() {
+        [
+          { name: "id", label: "ID" },
+          { name: "href", label: "URL" },
+          { name: "type" },
+          { name: "time", type: :integer },
+          { name: "utc_offset", type: :integer },
+          { name: "content" },
+          { name: "html_content" },
+          { name: "years_at_company", type: :integer },
+          { name: "use_comments", label: "Use comments?", type: :boolean },
+          { name: "can_comment", label: "Can comment?", type: :boolean },
+          { name: "can_destroy", label: "Can destroy?", type: :boolean },
+          { name: "links", type: :object, properties: [
+            { name: "profile" },
+            { name: "comments", type: :array, of: :string },
+            { name: "file" },
+            { name: "appreciations", type: :array, of: :string },
+          ] },
+          { name: "can_like", label: "Can like?", type: :boolean },
+          { name: "likes_count", type: :integer },
+          { name: "liked_by_current_profile", type: :boolean },
+        ]
+      }
+    }
   },
 
   test: lambda do |connection|
@@ -160,6 +187,55 @@
   end,
 
   actions: {
+    # Currently does not support file attachments
+    create_announcement: {
+      description: 'Create <span class="provider">announcement</span> '\
+                   'in <span class="provider">Namely</span>',
+      subtitle: "Create announcement in Namely",
+
+      input_fields: lambda do
+        [
+          { name: "content", label: "Announcement text", optional: false,
+            hint: "Format in Markdown. Use @{profile_id} to mention a profile" },
+          { name: "is_appreciation", type: :boolean,
+            label: "Is appreciation?", optional: true,
+            hint: "If true, any @mentioned profile will be appreciated" },
+          { name: "email_all", type: :boolean,
+            label: "Email all employees?", optional: true },
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        announcement = post("https://#{connection["company"]}.namely.com/api/v1/events.json").
+                        payload(
+                          "events": [
+                            {
+                              "content": input["content"],
+                              "is_appreciation": input["is_appreciation"],
+                              "email_all": input["email_all"]
+                            }
+                          ]
+                        )["events"]
+        { announcement: announcement }
+      end,
+
+      output_fields: lambda do |object_definitions|
+        [
+          { name: "announcement", type: :object, properties: object_definitions["event"] }
+        ]
+      end,
+
+      sample_output: lambda do |connection|
+        {
+          "announcement":
+            get("https://#{connection["company"]}.namely.com/api/v1/events.json?type=announcement").
+              params(
+                page: 1,
+                per_page: 1
+              )["events"]
+        }
+      end
+    },
     update_employee_profile: {
       description: 'Update <span class="provider">employee profile</span> '\
                    'in <span class="provider">Namely</span>',
