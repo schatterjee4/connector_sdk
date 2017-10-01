@@ -214,7 +214,8 @@
       input_fields: lambda do
         [
           { name: "content", label: "Announcement text", optional: false,
-            hint: "Format in Markdown. Use @{profile_id} to mention a profile" },
+            hint: "Format in Markdown. Use syntax "\
+                  "[full_name](/people/profile_id) to mention a profile" },
           { name: "is_appreciation", type: :boolean,
             label: "Is appreciation?", optional: true,
             hint: "If true, any @mentioned profile will be appreciated" },
@@ -233,7 +234,7 @@
                               "email_all": input["email_all"]
                             }
                           ]
-                        )["events"]
+                        )["events"].first
         { announcement: announcement }
       end,
 
