@@ -183,7 +183,7 @@
   },
 
   test: lambda do |connection|
-    get("https://#{connection["company"]}.namely.com/api/v1/profiles/me")
+    get("https://#{connection["company"]}.namely.com/api/v1/profiles.json/me")
   end,
 
   actions: {
@@ -272,7 +272,7 @@
                  (input["reports_to"].present? ? "&profiles[reports_to]=#{input["reports_to"]}" : "") +
                  (input["status"].present? ? "&profiles[user_status]=#{input["status"]}" : "") +
                  (input["start_date"].present? ? "&profiles[start_date]=#{input["start_date"]}" : "")
-        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["profile_id"]}?" +
+        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles.json/#{input["profile_id"]}?" +
                     params)["profiles"]
         { profile: profile }
       end,
