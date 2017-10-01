@@ -179,6 +179,24 @@
           { name: "liked_by_current_profile", type: :boolean },
         ]
       }
+    },
+
+    comment: {
+      fields: ->() {
+        [
+          { name: "id", label: "ID" },
+          { name: "content" },
+          { name: "html_content" },
+          { name: "created_at", type: :integer },
+          { name: "can_destroy", label: "Can destroy?", type: :boolean },
+          { name: "links", type: :object, properties: [
+            { name: "profile" },
+          ] },
+          { name: "utc_offset", label: "UTC offset", type: :boolean },
+          { name: "likes_count", type: :integer },
+          { name: "liked_by_current_profile", type: :boolean },
+        ]
+      }
     }
   },
 
@@ -236,6 +254,51 @@
         }
       end
     },
+
+    create_event_comment: {
+      description: 'Create <span class="provider">event comment</span> '\
+                   'in <span class="provider">Namely</span>',
+      subtitle: "Create event comment in Namely",
+
+      input_fields: lambda do
+        [
+          { name: "event_id", label: "Event ID", optional: false },
+          { name: "content", label: "Comment", optional: false,
+            hint: "Format in Markdown. Use syntax "\
+                  "[full_name](/people/profile_id) to mention a profile" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        comment = post("https://#{connection["company"]}.namely.com/api/v1/events/#{input["event_id"]}/comments").
+                        payload(
+                          "comments": [
+                            {
+                              "content": input["content"],
+                            }
+                          ]
+                        )["comments"].first
+        { comment: comment }
+      end,
+
+      output_fields: lambda do |object_definitions|
+        [
+          { name: "comment", type: :object, properties: object_definitions["comment"] }
+        ]
+      end,
+
+      sample_output: lambda do |connection|
+        {
+          "comment":
+            get("https://#{connection["company"]}.namely.com/api/v1/events.json").
+              params(
+                page: 1,
+                per_page: 1
+              )["events"]
+        }
+      end
+    },
+
     update_employee_profile: {
       description: 'Update <span class="provider">employee profile</span> '\
                    'in <span class="provider">Namely</span>',
