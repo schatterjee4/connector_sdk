@@ -27,8 +27,8 @@
                        grant_type: "authorization_code",
                        client_id: connection["client_id"],
                        client_secret: connection["client_secret"],
-                       code: auth_code).
-                     request_format_www_form_urlencoded
+                       code: auth_code
+                     ).request_format_www_form_urlencoded
         [ response, nil, nil ]
       end,
 
@@ -41,8 +41,8 @@
             client_id: connection["client_id"],
             client_secret: connection["client_secret"],
             refresh_token: refresh_token,
-            redirect_uri: "https://www.workato.com/oauth/callback").
-          request_format_www_form_urlencoded
+            redirect_uri: "https://www.workato.com/oauth/callback"
+          ).request_format_www_form_urlencoded
       end,
 
       apply: lambda do |connection, access_token|
@@ -161,7 +161,7 @@
           { name: "href", label: "URL" },
           { name: "type" },
           { name: "time", type: :integer },
-          { name: "utc_offset", type: :integer },
+          { name: "utc_offset", label: "UTC offset", type: :integer },
           { name: "content" },
           { name: "html_content" },
           { name: "years_at_company", type: :integer },
@@ -183,7 +183,7 @@
   },
 
   test: lambda do |connection|
-    get("https://#{connection["company"]}.namely.com/api/v1/profiles.json/me")
+    get("https://#{connection["company"]}.namely.com/api/v1/profiles/me")
   end,
 
   actions: {
@@ -272,8 +272,8 @@
                  (input["reports_to"].present? ? "&profiles[reports_to]=#{input["reports_to"]}" : "") +
                  (input["status"].present? ? "&profiles[user_status]=#{input["status"]}" : "") +
                  (input["start_date"].present? ? "&profiles[start_date]=#{input["start_date"]}" : "")
-        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles.json/#{input["profile_id"]}?" +
-                    params)["profiles"]
+        profile = put("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["profile_id"]}?" +
+                    params)["profiles"].first
         { profile: profile }
       end,
 
