@@ -338,7 +338,7 @@
                     params, page: page, per_page: 50)
           count = response["meta"]["count"]
           employees.concat(response["profiles"])
-          page = page+1
+          page = page + 1
         end
         employees = employees.to_a
         if input["start_date"].present?
@@ -369,15 +369,15 @@
   triggers: {},
 
   pick_lists: {
-    employee_status: ->() {
+    employee_status: lambda do
       [
         ["Active", "active"],
         ["Inactive", "inactive"],
         ["Pending", "pending"]
       ]
-    },
+    end,
 
-    event_type: ->() {
+    event_type: lambda do
       [
         ["Birthday", "birthday"],
         ["Announcement", "announcement"],
@@ -385,6 +385,6 @@
         ["Anniversary", "anniversary"],
         ["All", "all"]
       ]
-    }
+    end
   }
 }
