@@ -41,7 +41,7 @@
               pick_list: pick_list
             }
           end
-          )
+                )
       end
     },
   },
@@ -94,8 +94,7 @@
         accounts = get("https://api.salesforceiq.com/v2/accounts",
                        input)["objects"].each do |account|
           (account["fieldValues"] || {}).map do |k, v|
-          # add each custom field to account response object
-              account[k] = v.first["raw"]
+            account[k] = v.first["raw"]
           end
         end
         {
@@ -142,8 +141,8 @@
           to_time.to_f * 1000).to_i
         # result returns in ascending order
         result = get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: limit, _start: 0,
-                 modifiedDate: modified_date)["objects"] 
+                  params(_limit: limit, _start: 0,
+                         modifiedDate: modified_date)["objects"]
         accounts = result.each do |account|
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
