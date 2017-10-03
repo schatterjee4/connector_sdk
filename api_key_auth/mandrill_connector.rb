@@ -16,14 +16,24 @@
     authorization: {
       type: "api_key",
 
-      credentials: lambda { |connection|
+      acquire: lambda { |connection|
+        {}
+      },
+      
+      detect_on: [
+        /"status"\:\s*"error"/,
+        /"reject_reason"\:"*"/,
+        /"status"\:\s*"invalid"/
+      ],
+
+      apply: lambda { |connection|
         payload(key: connection["api_key"])
       }
     }
   },
 
   test: lambda { |_connection|
-    post("https://mandrillapp.com/api/1.0/templates/list.json")
+    post("https://mandrillapp.com/api/1.0/users/ping.json")
   },
 
   object_definitions: {
@@ -38,12 +48,12 @@
                                  .dig("code")
                                  .scan(/mc:edit=\"([^\"]*)\"/)
                                  .map do |var|
-                                 {
-                                   name: var.first,
-                                   hint: "Include html tags for better" \
-                                    " formatting"
-                                 }
-                               end
+                                   {
+                                     name: var.first,
+                                     hint: "Include html tags for better" \
+                                     " formatting"
+                                   }
+                                 end
                              end
 
         [
@@ -105,12 +115,10 @@
   },
 
   actions: {
-    create_message: {
-      description: "Create <span class='provider'>message</span> from" \
+    send_message: {
+      description: "Send <span class='provider'>message</span> from" \
         " template in <span class='provider'>Mandrill</span>",
-      subtitle: "Create message",
-      help: "Send a new transactional message through Mandrill"        \
-      " using a template",
+      subtitle: "Send message",
 
       config_fields: [
         {
@@ -138,7 +146,9 @@
         post("https://mandrillapp.com/api/1.0/messages/send-template.json") \
           .payload(template_name: input["template"],
                    template_content: (input["template_content"] || [])
-                    .map { |key, val| { name: key, content: val } },
+                                       .map do |key, val|
+                                         { name: key, content: val }
+                                       end,
                    message:   message,
                    send_at: input["send_at"]) \
           &.first
@@ -148,8 +158,7 @@
         [
           { name: "email" },
           { name: "status" },
-          { name: "_id" },
-          { name: "reject_reason" }
+          { name: "_id" }
         ]
       },
 
