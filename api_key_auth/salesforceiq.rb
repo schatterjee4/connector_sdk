@@ -29,10 +29,11 @@
           { name: "modifiedDate", label: "Modified date", type: :integer,
             hint: "Stores a particular Date & Time in UTC milliseconds past" \
              " the epoch." },# milliseconds since epoch
-        ].concat(get("https://api.salesforceiq.com/v2/accounts/fields")
-          ["fields"].map do |field|
+        ].concat(
+          get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
+          map do |field|
           pick_list = field["listOptions"].
-          map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
+            map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
           { name: field["id"],
             label: field["name"],
             control_type: field["dataType"] == "List" ? "select" : "text",
@@ -88,10 +89,11 @@
 
       execute: lambda do |_connection, input|
         accounts = get("https://api.salesforceiq.com/v2/accounts",
-          input)["objects"].each do |account| # add each custom field to account response object
-            (account["fieldValues"] || {}).map do |k, v|
-              account[k] = v.first["raw"]
-            end
+                      input)["objects"].each do |account|
+          (account["fieldValues"] || {}).map do |k, v|
+            # add each custom field to account response object
+            account[k] = v.first["raw"]
+          end
         end
         {
           "accounts": accounts
@@ -111,8 +113,8 @@
         get("https://api.salesforceiq.com/v2/accounts").
           params(_limit: 1).dig("objects", 0)
       end
-      }
-    },
+    }
+  },
 
   triggers: {
 
