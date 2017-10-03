@@ -16,10 +16,10 @@
     authorization: {
       type: "api_key",
 
-      acquire: lambda { |connection|
+      acquire: lambda { |_connection|
         {}
       },
-      
+
       detect_on: [
         /"status"\:\s*"error"/,
         /"reject_reason"\:"*"/,
