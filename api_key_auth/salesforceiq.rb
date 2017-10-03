@@ -32,12 +32,14 @@
         ].concat(
           get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
           map do |field|
-            pick_list = field["listOptions"].
+          pick_list = field["listOptions"].
               map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-            { name: field["id"],
-              label: field["name"],
-              control_type: field["dataType"] == "List" ? "select" : "text",
-              pick_list: pick_list }
+          {
+            name: field["id"],
+            label: field["name"],
+            control_type: field["dataType"] == "List" ? "select" : "text",
+            pick_list: pick_list
+          }
           end)
       end
     },
@@ -91,8 +93,8 @@
         accounts = get("https://api.salesforceiq.com/v2/accounts",
                         input)["objects"].each do |account|
           (account["fieldValues"] || {}).map do |k, v|
-            # add each custom field to account response object
-              account[k] = v.first["raw"]
+          # add each custom field to account response object
+            account[k] = v.first["raw"]
           end
         end
         {
@@ -138,8 +140,8 @@
         modified_date ||= ((input["since"].presence || Time.now).
           to_time.to_f * 1000).to_i
         result = get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: limit, _start: 0,
-          modifiedDate: modified_date)["objects"] # result returns in ascending order
+                  params(_limit: limit, _start: 0,
+                        modifiedDate: modified_date)["objects"] # result returns in ascending order
         accounts = result.each do |account|
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
