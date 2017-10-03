@@ -140,7 +140,7 @@
               name: "insertId",
               label: "Insert ID",
               hint: "A unique ID for each row. Google BigQuery uses this" \
-               "property to detect duplicate insertion requests on a"     \
+               " property to detect duplicate insertion requests on a"    \
                " best-effort basis"
             }
           ].concat((if project_id && dataset_id && table_id
@@ -169,7 +169,7 @@
       config_fields: [
         {
           name: "project",
-          hint: "Select the appropriate Project to import data",
+          hint: "Select the appropriate project to insert data",
           optional: false,
           control_type: "select",
           pick_list: "projects",
