@@ -18,19 +18,19 @@
 
     authorization: {
       type: "oauth2",
-      authorization_url: ->(connection) {
+      authorization_url: lambda do |connection|
         "https://login.windows.net/common/oauth2/authorize?resource=
         https://#{connection['subdomain']}.sharepoint.com&response_type=code&
         prompt=login&client_id=#{connection['client_id']}"
-      },
+      end,
 
       acquire: lambda do |connection, auth_code, redirect_url|
         post("https://login.windows.net/common/oauth2/token").
-        payload(client_id: connection["client_id"],
-          grant_type: :authorization_code,
-          code: auth_code,
-          redirect_uri: redirect_url).
-        request_format_www_form_urlencoded
+          payload(client_id: connection["client_id"],
+                  grant_type: :authorization_code,
+                  code: auth_code,
+                  redirect_uri: redirect_url).
+          request_format_www_form_urlencoded
       end,
 
       refresh: lambda do |connection, refresh_token|
@@ -397,29 +397,22 @@
             type: :object,
             properties: [
               { name: "FileName", label: "File name" },
-              {
-                name: "FileNameAsPath", label: "File name as path",
+              { name: "FileNameAsPath", label: "File name as path",
                 type: :object,
                 properties: [
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-                ]
-              },
-              {
-                name: "ServerRelativePath", label: "Server relative path",
+                ] },
+              { name: "ServerRelativePath", label: "Server relative path",
                 type: :object,
                 properties: [
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-                ]
-              },
-              {
-                name: "ServerRelativeUrl", label: "Server relative url"
-              }
-            ]
-          }
+                ] },
+              { name: "ServerRelativeUrl", label: "Server relative url" }
+            ] }
         ].concat(object_definitions["list_output"])
       end,
 
@@ -438,15 +431,11 @@
 
       input_fields: lambda do
         [
-          {
-            name: "list_name", control_type: :select,
-            pick_list: :name_list, label: "List", optional: false
-          },
-          {
-            name: "since", type: :date_time,
+          { name: "list_name", control_type: :select,
+            pick_list: :name_list, label: "List", optional: false },
+          { name: "since", type: :date_time,
             label: "From", optional: false,
-            hint: "Fetch deleted row from specified time"
-          }
+            hint: "Fetch deleted row from specified time" }
         ]
       end,
 
@@ -483,8 +472,7 @@
           { name: "DirNamePath", label: "Directory name path",
             type: :object, properties: [
               { name: "DecodedUrl", label: "Decoded url" }
-            ]
-          },
+            ] },
           { name: "Id" },
           { name: "ItemState", type: :integer, label: "Item state" },
           { name: "ItemType", type: :integer, label: "Item type" },
@@ -492,8 +480,7 @@
           { name: "LeafNamePath", label: "Leaf name path",
             type: :object, properties: [
               { name: "DecodedUrl", label: "Decoded url" }
-            ]
-          },
+            ] },
           { name: "Size" },
           { name: "Title" },
         ]
