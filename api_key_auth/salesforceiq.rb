@@ -94,7 +94,7 @@
         accounts = get("https://api.salesforceiq.com/v2/accounts",
                        input)["objects"].each do |account|
           (account["fieldValues"] || {}).map do |k, v|
-            account[k] = v.first["raw"]
+              account[k] = v.first["raw"]
           end
         end
         {
@@ -142,7 +142,8 @@
         # result returns in ascending order
         result = get("https://api.salesforceiq.com/v2/accounts").
                   params(_limit: limit, _start: 0,
-                         modifiedDate: modified_date)["objects"]
+                         modifiedDate: modified_date
+                        )["objects"]
         accounts = result.each do |account|
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.first["raw"]
