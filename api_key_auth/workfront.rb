@@ -447,10 +447,12 @@
           in_time_zone("US/Central"))
         projects = get("https://#{connection['subdomain']}.workfront.com/" \
          "attask/api/project/search?fields=*&fields=parameterValues").
-                   params(portfolioID: input["port_id"],
-                          portfolioID_Mod: "eq",
-                          lastUpdateDate: last_updated_time.to_time.iso8601,
-                          lastUpdateDate_Mod: "gt")["data"]
+                   params(
+                    portfolioID: input["port_id"],
+                    portfolioID_Mod: "eq",
+                    lastUpdateDate: last_updated_time.to_time.iso8601,
+                    lastUpdateDate_Mod: "gt"
+                  )["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         projects.sort_by { |obj| obj["lastUpdateDate"] } unless projects.blank?
         last_modfied_time = projects.last["lastUpdateDate"] unless
