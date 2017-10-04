@@ -316,7 +316,7 @@
             " ex: <code>DE:Project Manager</code>"
         }
       ],
-      input_fields: lambda do |object_definitions|
+      input_fields: lambda do |_object_definitions|
         [
           {
             name: "name", type: :string, optional: false, label: "Program name",
@@ -327,7 +327,7 @@
       execute: lambda do |connection, input|
         programs = get("https://#{connection['subdomain']}.workfront.com/" \
          "attask/api/program/search?fields=*&fields=parameterValues&" \
-          "name=" + input["name"] +"&name_Mod=contains")["data"]
+          "name=" + input["name"] + "&name_Mod=contains")["data"]
         {
           programs: programs
         }
@@ -342,10 +342,10 @@
           }
         ]
       end,
-      sample_output: lambda do |connection, object_definitions|
+      sample_output: lambda do |connection, _object_definitions|
         {
-          programs: get("https://#{connection['subdomain']}.workfront.com/attask/api/" \
-         "program/search?fields=*&$$LIMIT=1").dig("data", 0)
+          programs: get("https://#{connection['subdomain']}.workfront.com/" \
+           "attask/api/program/search?fields=*&$$LIMIT=1").dig("data", 0)
         }
       end
     },
@@ -376,7 +376,7 @@
       end,
       execute: lambda do |connection, input|
         program = get("https://#{connection['subdomain']}.workfront.com/" \
-         "attask/api/program/"+input["ID"]+"?fields=*&" \
+         "attask/api/program/" + input["ID"] + "?fields=*&" \
           "fields=parameterValues")["data"]
         {
           program: program
@@ -388,14 +388,15 @@
          object_definitions["custom_object"].blank?
         [
           {
-            name: "program", type: :object, label: "Program", properties: properties
+            name: "program", type: :object,
+            label: "Program", properties: properties
           }
         ]
       end,
-      sample_output: lambda do |connection, object_definitions|
+      sample_output: lambda do |connection, _object_definitions|
         {
-          program: get("https://#{connection['subdomain']}.workfront.com/attask/api/" \
-         "program/search?fields=*&$$LIMIT=1").dig("data", 0)
+          program: get("https://#{connection['subdomain']}.workfront.com/" \
+           "attask/api/program/search?fields=*&$$LIMIT=1").dig("data", 0)
         }
       end
     }
@@ -434,7 +435,7 @@
             " ex: <code>DE:Project Manager</code>"
         }
       ],
-      input_fields: lambda do |object_definitions|
+      input_fields: lambda do |_object_definitions|
         [
           name: "since", type: :date_time, sticky: :true,
           label: "From", hint: "Fetch Projects from specified Date"
@@ -446,13 +447,12 @@
           in_time_zone("US/Central"))
         projects = get("https://#{connection['subdomain']}.workfront.com/" \
          "attask/api/project/search?fields=*&fields=parameterValues").
-          params(
-            portfolioID: input["port_id"],
-            portfolioID_Mod: "eq",
-            lastUpdateDate: last_updated_time.to_time.iso8601,
-            lastUpdateDate_Mod: "gt")["data"]
+                    params(portfolioID: input["port_id"],
+                          portfolioID_Mod: "eq",
+                          lastUpdateDate: last_updated_time.to_time.iso8601,
+                          lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
-        projects.sort_by {|obj| obj["lastUpdateDate"]} unless projects.blank?
+        projects.sort_by { |obj| obj["lastUpdateDate"] } unless projects.blank?
         last_modfied_time = projects.last["lastUpdateDate"] unless
          projects.blank?
         {
@@ -470,7 +470,7 @@
          object_definitions["custom_object"].blank?
         properties
       end,
-      sample_output: lambda do |connection, object_definitions|
+      sample_output: lambda do |connection, _object_definitions|
         get("https://#{connection['subdomain']}.workfront.com/attask/api/" \
          "project/search?fields=*&$$LIMIT=1").dig("data", 0)
       end
