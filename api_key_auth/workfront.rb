@@ -447,7 +447,7 @@
           in_time_zone("US/Central"))
         projects = get("https://#{connection['subdomain']}.workfront.com/" \
          "attask/api/project/search?fields=*&fields=parameterValues").
-                    params(portfolioID: input["port_id"],
+                   params(portfolioID: input["port_id"],
                           portfolioID_Mod: "eq",
                           lastUpdateDate: last_updated_time.to_time.iso8601,
                           lastUpdateDate_Mod: "gt")["data"]
