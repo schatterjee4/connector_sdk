@@ -20,6 +20,8 @@
         {}
       },
 
+      refresh_on: [/"name"\:\s*"Invalid_Key"/],
+
       detect_on: [
         /"status"\:\s*"error"/,
         /"reject_reason"\:"*"/,
@@ -94,10 +96,9 @@
           },
           {
             name: "send_at",
-            hint: "When this message should be sent as a UTC timestamp in" \
-              " YYYY-MM-DD HH:MM:SS format. If you specify a time in the"  \
-              " past, the message will be sent immediately. Example:"      \
-              " 2017-09-28 09:00:00"
+            hint: "When this message should be sent. If you specify a time " \
+              "in the past, the message will be sent immediately.",
+            type: "timestamp"
           }
         ].concat(if template_variables.blank?
                    []
@@ -150,7 +151,10 @@
                                          { name: key, content: val }
                                        end,
                    message:   message,
-                   send_at: input["send_at"]) \
+                   send_at: (input['send_at'] || '')
+                            .utc
+                            .to_s
+                            .gsub(/[TZ]/, 'T' => ' ', 'Z' => '')) \
           &.first
       },
 
@@ -166,8 +170,7 @@
         {
           email: "mail@workato.com",
           status: "send",
-          _id: "abc123abc123abc123abc123abc123",
-          reject_reason: "hard-bounce"
+          _id: "abc123abc123abc123abc123abc123"
         }
       }
     }
