@@ -152,9 +152,9 @@
                                        end,
                    message:   message,
                    send_at: (input["send_at"] || "")
-                            .utc
-                            .to_s
-                            .gsub(/[TZ]/, "T" => " ", "Z" => "")) \
+                              .utc
+                              .to_s
+                              .gsub(/[TZ]/, "T" => " ", "Z" => "")) \
           &.first
       },
 
