@@ -151,10 +151,10 @@
                                          { name: key, content: val }
                                        end,
                    message:   message,
-                   send_at: (input['send_at'] || '')
+                   send_at: (input["send_at"] || "")
                             .utc
                             .to_s
-                            .gsub(/[TZ]/, 'T' => ' ', 'Z' => '')) \
+                            .gsub(/[TZ]/, "T" => " ", "Z" => "")) \
           &.first
       },
 
