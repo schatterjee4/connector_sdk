@@ -177,7 +177,7 @@
             " e.g. <code>DE:Project Manager</code>"
         }
       ],
-      input_fields: lambda do |object_definitions|
+      input_fields: lambda do |_object_definitions|
         [
           { name: "ID", type: :string, optional: false, label: "Project ID" }
         ]
