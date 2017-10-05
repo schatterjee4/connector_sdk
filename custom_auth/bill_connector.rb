@@ -76,7 +76,7 @@
   },
 
   test: lambda { |connection|
-    post("#{connection["endpoint"]}GetSessionInfo.json")
+    post("#{connection['endpoint']}GetSessionInfo.json")
   },
 
   object_definitions: {
@@ -123,7 +123,7 @@
             {
               field: "updatedTime",
               op: ">=",
-              value: (input['since'].presence || 1.hour.ago).to_time.to_s
+              value: (input["since"].presence || 1.hour.ago).to_time.to_s
             }
           ],
           sort: [{ field: "updatedTime", asc: 0 }]
