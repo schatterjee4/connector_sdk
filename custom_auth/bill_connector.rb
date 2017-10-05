@@ -53,13 +53,13 @@
 
       acquire: lambda { |connection|
         {
-         session_id: post("#{connection["endpoint"]}Login.json")
-           .payload(userName: connection["user_name"],
-                    password: connection["password"],
-                    orgId: connection["org_id"],
-                    devKey: connection["dev_key"])
-           .request_format_www_form_urlencoded
-           .dig("response_data", "sessionId")
+          session_id: post("#{connection['endpoint']}Login.json")
+            .payload(userName: connection["user_name"],
+                     password: connection["password"],
+                     orgId: connection["org_id"],
+                     devKey: connection["dev_key"])
+            .request_format_www_form_urlencoded
+            .dig("response_data", "sessionId")
         }
       },
 
@@ -82,7 +82,7 @@
   object_definitions: {
     vendor: {
       fields: lambda { |connection, _config_fields|
-        post("#{connection["endpoint"]}GetEntityMetadata.json")
+        post("#{connection['endpoint']}GetEntityMetadata.json")
           .dig("response_data", "Vendor", "fields")
           .map do |key, _value|
             {
@@ -94,9 +94,10 @@
   },
 
   triggers: {
-    new_vendor: {
-      description: "New <span class='provider'>vendor</span> in " \
+    new_or_updated_vendor: {
+      description: "New or updated <span class='provider'>vendor</span> in " \
         "<span class='provider'>Bill.com</span>",
+      subtitle: "New/updated vendor",
       type: "paging_desc",
 
       input_fields: lambda { |_connection|
@@ -105,7 +106,7 @@
             name: "since",
             label: "From",
             type: "timestamp",
-            optional: false,
+            optional: true,
             sticky: true,
             hint: "Get vendors created or updated since given date/time. " \
               "Leave empty to get vendors created or updated one hour ago"
@@ -122,13 +123,13 @@
             {
               field: "updatedTime",
               op: ">=",
-              value: input["since"]
+              value: (input['since'].presence || 1.hour.ago).to_time.to_s
             }
           ],
           sort: [{ field: "updatedTime", asc: 0 }]
         }.to_json
 
-        vendors = post("#{connection["endpoint"]}List/Vendor.json")
+        vendors = post("#{connection['endpoint']}List/Vendor.json")
                   .payload(data: query)
                   .dig("response_data")
 
@@ -147,7 +148,7 @@
       },
 
       sample_output: lambda { |connection|
-        post("#{connection["endpoint"]}List/Vendor.json")
+        post("#{connection['endpoint']}List/Vendor.json")
           .payload(data: { start: 0, max: 1 }.to_json)
           .dig("response_data")
           &.first
