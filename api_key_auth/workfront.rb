@@ -162,9 +162,9 @@
 
   actions: {
     get_project_details_by_id: {
-      description: 'Get <span class="provider">Project</span> details by ID 
-    in <span class="provider">WorkFront</span>',
-      subtitle: "Get Project details in WorkFront",
+      description: 'Get <span class="provider">project</span> details by ID 
+    in <span class="provider">Workfront</span>',
+      subtitle: "Get project details in Workfront",
       help: "Fetches the project details for the given Project ID",
       config_fields: [
         {
@@ -172,14 +172,14 @@
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. One per line. " \
-           "Fields with only Colon and Space are allowed." \
-            " ex: <code>DE:Project Manager</code>"
+          hint: "Custom fields involved in this action. one per line. " \
+           "fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
         }
       ],
       input_fields: lambda do |object_definitions|
         [
-          { name: "ID", type: :string, optional: false, label: "Project id" }
+          { name: "ID", type: :string, optional: false, label: "Project ID" }
         ]
       end,
       execute: lambda do |connection, input|
@@ -209,19 +209,19 @@
     },
 
     search_projects: {
-      description: "Search <span class='provider'>Projects</span> in 
-      <span class='provider'>WorkFront</span>",
-      subtitle: "Search Projects with Project name in WorkFront",
-      help: "Search Projects which matches the criteria from WorkFront",
+      description: "Search <span class='provider'>projects</span> in 
+      <span class='provider'>Workfront</span>",
+      subtitle: "Search projects with project name in Workfront",
+      help: "Search projects which matches the criteria from Workfront",
       config_fields: [
         {
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. One per line. " \
-           "Fields with only Colon and Space are allowed." \
-            " ex: <code>DE:Project Manager</code>"
+          hint: "Custom fields involved in this action. one per line. " \
+           "fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
         }
       ],
       input_fields: lambda do |_object_definitions|
@@ -260,10 +260,10 @@
     },
 
     create_project: {
-      description: "Create <span class='provider'>Project</span> in 
-      <span class='provider'>WorkFront</span>",
-      subtitle: "Create Project with details in WorkFront",
-      help: "Select the feilds which are part of Project create action",
+      description: "Create <span class='provider'>project</span> in 
+      <span class='provider'>Workfront</span>",
+      subtitle: "Create project with details in Workfront",
+      help: "Select the feilds which are part of Project creation",
       input_fields: lambda do |object_definitions|
         object_definitions["project"].
           ignored("ID", "lastUpdateDate",
@@ -301,19 +301,19 @@
     },
 
     search_programs: {
-      description: 'Search <span class="provider">Programs</span> in
-       <span class="provider">WorkFront</span>',
-      subtitle: "Search Programs in WorkFront",
-      help: "Search Programs by Program name in WorkFront",
+      description: 'Search <span class="provider">programs</span> in
+       <span class="provider">Workfront</span>',
+      subtitle: "Search programs in Workfront",
+      help: "Search programs by program name in Workfront",
       config_fields: [
         {
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. One per line. " \
-           "Fields with only Colon and Space are allowed." \
-            " ex: <code>DE:Project Manager</code>"
+          hint: "Custom fields involved in this action. one per line. " \
+           "fields with only folon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
         }
       ],
       input_fields: lambda do |_object_definitions|
@@ -352,24 +352,24 @@
 
     get_program_details_by_id: {
       description: 'Get <span class="provider">Program</span> details in
-       <span class="provider">WorkFront</span>',
-      subtitle: "Get Program details by ID in WorkFront",
-      help: "Get Program details from WorkFront",
+       <span class="provider">Workfront</span>',
+      subtitle: "Get program details by ID in Workfront",
+      help: "Get program details from Workfront",
       config_fields: [
         {
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. One per line." \
-           " Fields with only Colon and Space are allowed." \
-            " ex: <code>DE:Project Manager</code>"
+          hint: "Custom fields involved in this action. one per line." \
+           " fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
         }
       ],
       input_fields: lambda do |_object_definitions|
         [
           {
-            name: "ID", type: :string, optional: false, label: "Program id",
+            name: "ID", type: :string, optional: false, label: "Program ID",
             hint: "Get Program details with Program ID"
           }
         ]
@@ -404,16 +404,16 @@
 
   triggers: {
     new_updated_project: {
-      description: "New or Updated <span class='provider'>Project</span> in
-       <span class='provider'>WorkFront</span>",
-      subtitle: "New or Updated Project in WorkFront",
-      help: "Trigger will poll based on the User plan",
+      description: "New or updated <span class='provider'>project</span> in
+       <span class='provider'>Workfront</span>",
+      subtitle: "New or updated project in Workfront",
+      help: "Trigger will poll based on the user plan",
       config_fields: [
         {
           name: "port_id", control_type: :select,
           pick_list: :portfolios, label: "Portfolio",
           optional: false,
-          hint: "Select Portfolio to process projects belongs",
+          hint: "Select portfolio to process projects belongs",
           toggle_hint: "Select from list",
           toggle_field: {
             name: "port_id",
@@ -421,8 +421,8 @@
             type: :string,
             control_type: :text,
             optional: false,
-            toggle_hint: "Use Custom Value",
-            hint: "Provide the Portfolio ID for reading Projects changes"
+            toggle_hint: "Use custom value",
+            hint: "Provide the Portfolio ID for reading projects changes"
           }
         },
         {
@@ -430,15 +430,15 @@
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. One per line." \
-           " Fields with only Colon and Space are allowed." \
-            " ex: <code>DE:Project Manager</code>"
+          hint: "Custom fields involved in this action. one per line." \
+           " fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
         }
       ],
       input_fields: lambda do |_object_definitions|
         [
           name: "since", type: :date_time, sticky: :true,
-          label: "From", hint: "Fetch Projects from specified Date"
+          label: "From", hint: "Fetch projects from specified Date"
         ]
       end,
       poll: lambda do |connection, input, last_updated_time|
