@@ -165,15 +165,15 @@
       description: 'Get <span class="provider">project</span> details by ID 
     in <span class="provider">Workfront</span>',
       subtitle: "Get project details in Workfront",
-      help: "Fetches the project details for the given Project ID",
+      help: "Fetches the project details for the given project ID",
       config_fields: [
         {
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. one per line. " \
-           "fields with only colon and space are allowed." \
+          hint: "Custom fields involved in this action. One per line." \
+           " Fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
         }
       ],
@@ -219,8 +219,8 @@
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. one per line. " \
-           "fields with only colon and space are allowed." \
+          hint: "Custom fields involved in this action. One per line." \
+           " Fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
         }
       ],
@@ -263,7 +263,7 @@
       description: "Create <span class='provider'>project</span> in 
       <span class='provider'>Workfront</span>",
       subtitle: "Create project with details in Workfront",
-      help: "Select the feilds which are part of Project creation",
+      help: "Select the fields which are part of project create action",
       input_fields: lambda do |object_definitions|
         object_definitions["project"].
           ignored("ID", "lastUpdateDate",
@@ -311,8 +311,8 @@
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. one per line. " \
-           "fields with only folon and space are allowed." \
+          hint: "Custom fields involved in this action. One per line. " \
+           "Fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
         }
       ],
@@ -320,7 +320,7 @@
         [
           {
             name: "name", type: :string, optional: false, label: "Program name",
-            hint: "Fetch Programs that contains this keyword"
+            hint: "Fetch programs that contains this keyword"
           }
         ]
       end,
@@ -361,8 +361,8 @@
           control_type: "text-area",
           change_on_blur: true,
           sticky: true,
-          hint: "Custom fields involved in this action. one per line." \
-           " fields with only colon and space are allowed." \
+          hint: "Custom fields involved in this action. One per line." \
+           " Fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
         }
       ],
@@ -370,7 +370,7 @@
         [
           {
             name: "ID", type: :string, optional: false, label: "Program ID",
-            hint: "Get Program details with Program ID"
+            hint: "Program ID to search for"
           }
         ]
       end,
