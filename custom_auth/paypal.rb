@@ -361,8 +361,8 @@
       end,
       webhook_subscribe: lambda do |webhook_url, connection, input, recipe_id|
         post("https://api.#{connection['environment']}/v1/notifications/" /
-         "webhooks", url: webhook_url, event_types: [
-         	{ name: "INVOICING.INVOICE.CREATED" } ]
+         "webhooks", url: webhook_url,
+                     event_types: [{ name: "INVOICING.INVOICE.CREATED" }]
          	  )
       end,
       webhook_notification: lambda do |input, payload|
@@ -391,17 +391,18 @@
         ["Mark as Paid", "MARKED_AS_PAID"],
         ["Cancelled", "CANCELLED"],
         ["Refunded", "REFUNDED"],
-        ["Partially Refunded","PARTIALLY_REFUNDED"],
+        ["Partially Refunded", "PARTIALLY_REFUNDED"],
         ["Mark as Refunded", "MARKED_AS_REFUNDED"],
         ["Un Paid", "UNPAID"],
         ["Payment Pending", "PAYMENT_PENDING"]
       ]
     end,
     units: lambda do
-      [ ["Quantity","QUANTITY"],
+      [
+        ["Quantity", "QUANTITY"],
         ["Hours", "HOURS"],
         ["Amount", "AMOUNT"]
-        ]
+      ]
     end
   },
 }
