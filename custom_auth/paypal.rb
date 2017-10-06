@@ -356,10 +356,8 @@
        <span class='provider'>PayPal</span>",
       title_hint: "New invoice in PayPal",
       hint: "Trigger will poll based on user plan",
-
       input_fields: lambda do
       end,
-
       webhook_subscribe: lambda do |webhook_url, connection, _input, _recipe_id|
         post(
           "https://api.#{connection['environment']}/v1/notifications/webhooks",
@@ -367,24 +365,19 @@
           event_types: [{ name: "INVOICING.INVOICE.CREATED" }]
             )
       end,
-
       webhook_notification: lambda do |_input, payload|
         payload["resource"]
       end,
-
       webhook_unsubscribe: lambda do |webhook, connection|
         delete("https://api.#{connection['environment']}/v1/notifications/" \
          "webhooks/#{webhook['id']}")
       end,
-
       dedup: lambda do |invoice|
         invoice["id"]
       end,
-
       output_fields: lambda do |object_definitions|
         object_definitions["invoice"]
-      end
-
+      end,
       sample_output: lambda do |connection|
         post("https://api.#{connection['environment']}/v1/invoicing/search")
           .payload(page: 0, page_size: 1).dig(0, "invoices")
