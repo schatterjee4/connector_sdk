@@ -357,12 +357,12 @@
       title_hint: "New invoice in PayPal",
       hint: "Trigger will poll based on user plan",
       input_fields: lambda do
+        []
       end,
       webhook_subscribe: lambda do |webhook_url, connection, _input, _recipe_id|
-                          post("https://api.#{connection['environment']}/v1/" \
-                           "notifications/webhooks",
-                           url: webhook_url,
-                           event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
+        post("https://api.#{connection['environment']}/v1/notifications/" \
+           "webhooks", url: webhook_url,
+           event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
       webhook_notification: lambda do |_input, payload|
         payload["resource"]
