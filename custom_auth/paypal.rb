@@ -359,11 +359,10 @@
       input_fields: lambda do
       end,
       webhook_subscribe: lambda do |webhook_url, connection, _input, _recipe_id|
-        post(
-          "https://api.#{connection['environment']}/v1/notifications/webhooks",
-          url: webhook_url,
-          event_types: [{ name: "INVOICING.INVOICE.CREATED" }]
-            )
+                          post("https://api.#{connection['environment']}/v1/" \
+                           "notifications/webhooks",
+                           url: webhook_url,
+                           event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
       webhook_notification: lambda do |_input, payload|
         payload["resource"]
@@ -379,8 +378,8 @@
         object_definitions["invoice"]
       end,
       sample_output: lambda do |connection|
-        post("https://api.#{connection['environment']}/v1/invoicing/search")
-          .payload(page: 0, page_size: 1).dig(0, "invoices")
+        post("https://api.#{connection['environment']}/v1/invoicing/search").
+          payload(page: 0, page_size: 1).dig(0, "invoices")
       end
     }
   },
