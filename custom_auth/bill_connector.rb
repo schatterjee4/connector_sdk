@@ -124,15 +124,15 @@
               field: "updatedTime",
               op: ">=",
               value: (input["since"].presence || 1.hour.ago)
-                     .utc
-                     .strftime("%Y-%m-%dT%H:%M:%S.%L%z")
+                .utc
+                .strftime("%Y-%m-%dT%H:%M:%S.%L%z")
             }
           ],
           sort: [{ field: "updatedTime", asc: 0 }]
-        }.to_json
+        }
 
         vendors = post("#{connection['endpoint']}List/Vendor.json")
-                  .payload(data: query)
+                  .payload(data: query.to_json)
                   .dig("response_data")
 
         {
