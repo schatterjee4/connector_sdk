@@ -26,9 +26,9 @@
       },
       {
         name: "dev_key",
-        label: "Developer API Key",
-        hint: "Sign up for the Developer Program to get API Developer Key." \
-          "You may find more info <a href='https://developer.bill.com/hc/"  \
+        label: "Developer API key",
+        hint: "Sign up for the developer program to get API key. "           \
+          "You may find more info <a href='https://developer.bill.com/hc/"   \
           "en-us/articles/208695076'>here</a>",
         optional: false,
         control_type: "password"
@@ -109,7 +109,7 @@
             optional: true,
             sticky: true,
             hint: "Get vendors created or updated since given date/time. " \
-              "Leave empty to get vendors created or updated one hour ago"
+              "Leave empty to get vendors created or updated one hour ago."
           }
         ]
       },
@@ -123,7 +123,9 @@
             {
               field: "updatedTime",
               op: ">=",
-              value: (input["since"].presence || 1.hour.ago).to_time.to_s
+              value: (input["since"].presence || 1.hour.ago)
+                     .utc
+                     .strftime("%Y-%m-%dT%H:%M:%S.%L%z")
             }
           ],
           sort: [{ field: "updatedTime", asc: 0 }]
