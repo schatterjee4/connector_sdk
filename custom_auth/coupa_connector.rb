@@ -251,8 +251,6 @@
             { name: "vat-number", label: "VAT number" },
             { name: "local-tax-number", label: "Local tax number" },
             { name: "country", type: :object, properties: [
-              { name: "id", label: "ID", type: :integer },
-              { name: "code" },
               { name: "name" },
             ] },
             { name: "vat-country", label: "VAT country" },
@@ -312,8 +310,6 @@
                 { name: "vat-number", label: "VAT number" },
                 { name: "local-tax-number", label: "Local tax number" },
                 { name: "country", type: :object, properties: [
-                  { name: "id", label: "ID", type: :integer },
-                  { name: "code" },
                   { name: "name" },
                 ] },
                 { name: "vat-country" },
@@ -351,8 +347,6 @@
               { name: "vat-number", label: "VAT number" },
               { name: "local-tax-number", label: "Local tax number" },
               { name: "country", type: :object, properties: [
-                { name: "id", label: "ID", type: :integer },
-                { name: "code" },
                 { name: "name" },
               ] },
               { name: "vat-country" },
@@ -755,6 +749,5 @@
       get("https://#{connection["host"]}.com/api/user_groups").
         map { |group| [ group["name"], group["id"] ] }
     end
-
   }
 }
