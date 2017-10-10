@@ -359,6 +359,34 @@
       end
     },
 
+    get_employee_profile_by_id: {
+      description: 'Get <span class="provider">employee profile</span> '\
+                   'by ID in <span class="provider">Namely</span>',
+      subtitle: "Get employee profile by ID in Namely",
+
+      input_fields: lambda do
+        [
+          { name: "id", optional: false }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        get("https://#{connection["company"]}.namely.com/api/v1/profiles/#{input["id"]}")["profiles"].first
+      end,
+
+      output_fields: lambda do |object_definitions|
+        object_definitions["profile"]
+      end,
+
+      sample_output: lambda do |connection|
+        get("https://#{connection["company"]}.namely.com/api/v1/profiles.json").
+                        params(
+                          page: 1,
+                          per_page: 1
+                        )["profiles"].first
+      end
+    },
+
     search_employee_profiles: {
       description: 'Search <span class="provider">employee profiles</span> '\
                    'in <span class="provider">Namely</span>',
