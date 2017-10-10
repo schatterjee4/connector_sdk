@@ -42,8 +42,8 @@
         hash = "#{connection['client_id']}:#{connection['client_secret']}".
           encode_base64
         {
-          access_token: (post("https://api.#{connection['environment']}/" \
-           "v1/oauth2/token").
+          access_token: (post("https://api.#{connection['environment']}/"\
+          	"v1/oauth2/token").
           	headers(Accept: "application/json",
           					"Accept-Language": "en_US",
           					Authorization: "Basic #{hash}").
@@ -124,8 +124,8 @@
             { name: "tax", type: :object, control_type: :text, properties: [
               { name: "name" },
               { name: "percent", type: :integer, control_type: :number,
-                hint: "The tax rate. Value is from 0 to 100. Supports up to " \
-                 "five decimal places." },
+                hint: "The tax rate. Value is from 0 to 100. Supports up to "\
+                "five decimal places." },
               { name: "amount", type: :object,
                 hint: "The calculated tax amount. (Read Only)",
                 properties: [
@@ -133,15 +133,15 @@
                   { name: "value", type: :string, control_type: :currency }
               ]}
             ]},
-            { name: "date", hint: "The date when the item or service was " \
-             "provided in yyyy-MM-dd z." },
+            { name: "date", hint: "The date when the item or service was "\
+            	"provided in yyyy-MM-dd z." },
             { name: "discount", type: :object, properties: [
               { name: "percent", type: :integer,
                 control_type: :number,
                 hint: "The discount as a percentage value." },
-              { name: "amount", type: :object, hint: "The invoice level " \
-               "discount amount. Value is from 0 to 1000000. Supports up to" \
-                " two decimal places.",
+              { name: "amount", type: :object, hint: "The invoice level "\
+              	"discount amount. Value is from 0 to 1000000. Supports up to"\
+              	" two decimal places.",
                 properties: [
                   { name: "currency" },
                   { name: "value", type: :string, control_type: :currency }
@@ -156,8 +156,8 @@
             }
           ]},
           { name: "invoice_date", label: "Invoice date",
-            hint: "The invoice date as specificed by the sender" \
-             " e.g. yyyy-MM-dd z" },
+            hint: "The invoice date as specificed by the sender"\
+            " e.g. yyyy-MM-dd z" },
           { name: "payment_term", type: :object, properties: [
             { name: "term_type", control_type: :select,
               pick_lists: :payment_terms },
@@ -166,15 +166,15 @@
           ]},
           { name: "reference" },
           { name: "discount", type: :object,
-            hint: "The invoice level discount, as a percent or an " \
-             "amount value.",
+            hint: "The invoice level discount, as a percent or an "\
+            "amount value.",
             properties: [
               { name: "percent", type: :integer,
                 control_type: :number,
                 hint: "The discount as a percentage value." },
               { name: "amount", type: :object,
-                hint: "The invoice level discount amount. Value is " \
-                 "from 0 to 1000000. Supports up to two decimal places.",
+                hint: "The invoice level discount amount. Value is "\
+                "from 0 to 1000000. Supports up to two decimal places.",
                  properties: [
                   { name: "currency" },
                   { name: "value", type: :string,
@@ -184,8 +184,8 @@
           { name: "shipping_cost", type: :object,
             properties: [
               { name: "amount", type: :object,
-                hint: "The invoice level discount amount. Value is" \
-                 " from 0 to 1000000. Supports up to two decimal places.",
+                hint: "The invoice level discount amount. Value is"\
+                " from 0 to 1000000. Supports up to two decimal places.",
                 properties: [
                   { name: "currency" },
                   { name: "value", type: :string,
@@ -194,8 +194,8 @@
               { name: "tax", type: :object, properties: [
                 { name: "name" },
                 { name: "percent", type: :integer, control_type: :number,
-                  hint: "The tax rate. Value is from 0 to 100. " \
-                   " Supports up to five decimal places." },
+                  hint: "The tax rate. Value is from 0 to 100. "\
+                  " Supports up to five decimal places." },
                 { name: "amount", type: :object,
                   hint: "The calculated tax amount. (Read Only)",
                   properties: [
@@ -217,8 +217,8 @@
           ]},
           { name: "allow_partial_payment", type: :boolean },
           { name: "minimum_amount_due", type: :object,
-            hint: "The minimum amount allowed for a partial payment." \
-             " Valid only if allow_partial_payment is <code>true</code>.",
+            hint: "The minimum amount allowed for a partial payment."\
+            " Valid only if allow_partial_payment is <code>true</code>.",
              properties: [
               { name: "currency" },
               { name: "value", type: :string,
@@ -226,8 +226,8 @@
           ]},
           { name: "tax_calculated_after_discount",
             type: :boolean,
-            hint: "Indicates whether the tax is calculated before or " \
-             "after a discount" },
+            hint: "Indicates whether the tax is calculated before or "\
+            "after a discount" },
           { name: "tax_inclusive", type: :boolean,
             hint: "Indicates whether the unit price includes tax." },
           { name: "terms", type: :string, control_type: "text-area" },
@@ -258,6 +258,7 @@
        <span class="provider">PayPal</span>',
       title_hint: "Search Invoices in PayPal",
       hint: "Returns invoices that match all criteria.",
+
       input_fields: lambda do
         [
           { name: "email" },
@@ -273,9 +274,9 @@
               type: :string, control_type: "text", 
               label: "Invoice Status",
               toggle_hint: "Use custom value",
-              hint: "For possible values, Refer https://" \
-                "developer.paypal.com/docs/api/invoicing/#" \
-                "invoices_search for status column " }
+              hint: "For possible values, Refer https://"\
+              "developer.paypal.com/docs/api/invoicing/#"\
+              "invoices_search for status column " }
           },
           { name: "lower_total_amount",
           	hint: "The lower limit of the total amount." },
@@ -299,84 +300,99 @@
           	hint: "Indicates whether the response shows the total count."},
           { name: "archived", type: :boolean,
           	label: "Archived?",
-          	hint: "<code>true</code> - only archieved, <code>false</code> " \
-          	 "- unarchived only, <code>null</code> - lists all invoices." }
+          	hint: "<code>true</code> - only archieved, <code>false</code> "\
+          	"- unarchived only, <code>null</code> - lists all invoices." }
         ]
       end,
+
       execute: lambda do |connection, input|
-        invoices = post("https://api.#{connection['environment']}/v1/" \
-         "invoicing/search", input)["invoices"]
+        invoices = post("https://api.#{connection['environment']}/v1/"\
+        	"invoicing/search", input)["invoices"]
         {
           invoices: invoices
         }
       end,
+
       output_fields: lambda do |object_definitions|
         [
           { name: "invoices", type: :array, of: :object,
           	properties: object_definitions["invoice"] }
         ]
       end,
+
       sample_output: lambda do |connection|
         [post("https://api.#{connection['environment']}/v1/invoicing/search")
         	.payload(page: 0, page_size: 1).dig(0, "invoices")]
       end
     },
+
     get_invoice_by_id: {
       description: "Get <span class='provider'>invoice</span> details from
        <span class='provider'>PayPal</span>",
       title_hint: "Get invoice in PayPal",
       hint: "Fetch the invoice details for the given Invoice ID",
+
       input_fields: lambda do |connection|
         [
           { name: "invoice_id", label: "Invoice ID", optional: false }
         ]
       end,
+
       execute: lambda do |connection, input|
         {
-          invoice: get("https://api.#{connection['environment']}/v1/" \
-           "invoicing/invoices/#{input['invoice_id']}")
+          invoice: get("https://api.#{connection['environment']}/v1/"\
+          "invoicing/invoices/#{input['invoice_id']}")
         }
       end,
+
       output_fields: lambda do |object_definitions|
         [
           { name: "invoice", type: :object, label: "Invoice",
           	properties: object_definitions["invoice"] }
         ]
       end,
+
       sample_output: lambda do |connection|
-        [(post("https://api.#{connection['environment']}/v1/" \
-         "invoicing/search").payload(page: 0, page_size: 1).dig("invoices", 0))]
+        [(post("https://api.#{connection['environment']}/v1/invoicing/search").
+        	payload(page: 0, page_size: 1).dig("invoices", 0))]
       end
     }
   },
 
   triggers: {
     new_invoice: {
-      title: "New <span class='provider'>invoice</span> in
-       <span class='provider'>PayPal</span>",
+      title: "New <span class='provider'>invoice</span> in"\
+      "<span class='provider'>PayPal</span>",
       title_hint: "New invoice in PayPal",
       hint: "Trigger will poll based on user plan",
+
       input_fields: lambda do
         []
       end,
+
       webhook_subscribe: lambda do |webhook_url, connection, _input, _recipe_id|
-        post("https://api.#{connection['environment']}/v1/notifications/" \
-           "webhooks", url: webhook_url,
-           event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
+        post("https://api.#{connection['environment']}/v1/notifications/webhooks").
+        	payload(url: webhook_url,
+        					event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
+
       webhook_notification: lambda do |_input, payload|
         payload["resource"]
       end,
+
       webhook_unsubscribe: lambda do |webhook, connection|
-        delete("https://api.#{connection['environment']}/v1/notifications/" \
-         "webhooks/#{webhook['id']}")
+        delete("https://api.#{connection['environment']}/v1/notifications/webhooks/"\
+        	"#{webhook['id']}")
       end,
+
       dedup: lambda do |invoice|
         invoice["id"]
       end,
+
       output_fields: lambda do |object_definitions|
         object_definitions["invoice"]
       end,
+
       sample_output: lambda do |connection|
         post("https://api.#{connection['environment']}/v1/invoicing/search").
           payload(page: 0, page_size: 1).dig(0, "invoices")
@@ -385,6 +401,7 @@
   },
 
   pick_lists: {
+
     status_list: lambda do
       [
         ["Draft", "DRAFT"],
@@ -399,6 +416,7 @@
         ["Payment Pending", "PAYMENT_PENDING"]
       ]
     end,
+
     units: lambda do
       [
         ["Quantity", "QUANTITY"],
