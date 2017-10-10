@@ -43,7 +43,7 @@
           encode_base64
         {
           access_token: (post("https://api.#{connection['environment']}/"\
-          	"v1/oauth2/token").
+          "v1/oauth2/token").
           	headers(Accept: "application/json",
           					"Accept-Language": "en_US",
           					Authorization: "Basic #{hash}").
@@ -307,7 +307,7 @@
 
       execute: lambda do |connection, input|
         invoices = post("https://api.#{connection['environment']}/v1/"\
-        	"invoicing/search", input)["invoices"]
+        "invoicing/search", input)["invoices"]
         {
           invoices: invoices
         }
@@ -321,8 +321,10 @@
       end,
 
       sample_output: lambda do |connection|
-        [post("https://api.#{connection['environment']}/v1/invoicing/search").
-        	payload(page: 0, page_size: 1).dig(0, "invoices")]
+        [
+        	post("https://api.#{connection['environment']}/v1/invoicing/search").
+        		payload(page: 0, page_size: 1).dig(0, "invoices")
+        ]
       end
     },
 
@@ -347,14 +349,14 @@
 
       output_fields: lambda do |object_definitions|
         [
-          { name: "invoice", type: :object, label: "Invoice",
+        	{ name: "invoice", type: :object, label: "Invoice",
           	properties: object_definitions["invoice"] }
         ]
       end,
 
       sample_output: lambda do |connection|
       	[post("https://api.#{connection['environment']}/v1/invoicing/search").
-        	payload(page: 0, page_size: 1).dig("invoices", 0)]
+      		payload(page: 0, page_size: 1).dig("invoices", 0)]
       end
     }
   },
