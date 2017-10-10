@@ -779,8 +779,8 @@
       end,
 
       sample_output: lambda do |connection|
-          get("https://#{connection["host"]}.com/api/users").
-                    params(limit: 1).first
+        get("https://#{connection["host"]}.com/api/users").
+          params(limit: 1).first
       end
     }
   },
@@ -788,37 +788,37 @@
   pick_lists: {
     accounts: lambda do |connection|
       get("https://#{connection["host"]}.com/api/accounts").
-        map { |account| [ (account["name"]? account["name"] : account["code"]), account["id"] ] }
+        map { |account| [(account["name"]? account["name"] : account["code"]), account["id"]] }
     end,
 
     account_types: lambda do |connection|
       get("https://#{connection["host"]}.com/api/account_types").
-        map { |type| [ type["name"], type["id"] ] }
+        map { |type| [type["name"], type["id"]] }
     end,
 
     content_groups: lambda do |connection|
       get("https://#{connection["host"]}.com/api/business_groups").
-        map { |group| [ group["name"], group["id"] ] }
+        map { |group| [group["name"], group["id"]] }
     end,
 
     currencies: lambda do |connection|
       get("https://#{connection["host"]}.com/api/currencies").
-        map { |currency| [ currency["code"], currency["id"] ] }
+        map { |currency| [currency["code"], currency["id"]] }
     end,
 
     departments: lambda do |connection|
       get("https://#{connection["host"]}.com/api/departments").
-        map { |department| [ department["name"], department["id"] ] }
+        map { |department| [department["name"], department["id"]] }
     end,
 
     users: lambda do |connection|
       get("https://#{connection["host"]}.com/api/users").
-        map { |user| [ user["fullname"], user["id"] ] }
+        map { |user| [user["fullname"], user["id"]] }
     end,
 
     user_groups: lambda do |connection|
       get("https://#{connection["host"]}.com/api/user_groups").
-        map { |group| [ group["name"], group["id"] ] }
+        map { |group| [group["name"], group["id"]] }
     end
   }
 }
