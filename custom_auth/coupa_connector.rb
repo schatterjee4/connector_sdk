@@ -742,6 +742,10 @@
   triggers: {
 
     new_or_updated_user: {
+      description: 'New or updated <span class="provider">user</span> '\
+                   'in <span class="provider">Coupa</span>',
+      subtitle: "New or updated user in Coupa",
+
       input_fields: lambda do
         [
           { name: "from", type: :timestamp,
