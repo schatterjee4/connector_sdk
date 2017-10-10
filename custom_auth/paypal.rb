@@ -321,8 +321,8 @@
       end,
 
       sample_output: lambda do |connection|
-        [post("https://api.#{connection['environment']}/v1/invoicing/search")
-        	.payload(page: 0, page_size: 1).dig(0, "invoices")]
+        [post("https://api.#{connection['environment']}/v1/invoicing/search").
+        	payload(page: 0, page_size: 1).dig(0, "invoices")]
       end
     },
 
@@ -332,7 +332,7 @@
       title_hint: "Get invoice in PayPal",
       hint: "Fetch the invoice details for the given Invoice ID",
 
-      input_fields: lambda do |connection|
+      input_fields: lambda do |_connection|
         [
           { name: "invoice_id", label: "Invoice ID", optional: false }
         ]
@@ -353,8 +353,8 @@
       end,
 
       sample_output: lambda do |connection|
-        [(post("https://api.#{connection['environment']}/v1/invoicing/search").
-        	payload(page: 0, page_size: 1).dig("invoices", 0))]
+      	[post("https://api.#{connection['environment']}/v1/invoicing/search").
+        	payload(page: 0, page_size: 1).dig("invoices", 0)]
       end
     }
   },
@@ -395,7 +395,7 @@
 
       sample_output: lambda do |connection|
         post("https://api.#{connection['environment']}/v1/invoicing/search").
-          payload(page: 0, page_size: 1).dig(0, "invoices")
+        	payload(page: 0, page_size: 1).dig(0, "invoices")
       end
     }
   },
