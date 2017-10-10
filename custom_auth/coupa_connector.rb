@@ -758,7 +758,9 @@
         page_size = 50
         updated_since = last_updated_since || input["from"] || Time.now.to_s
         users = get("https://#{connection["host"]}.com/api/users").
-                  params("updated_at[gt_or_eq]": updated_since)
+                  params(
+                    "updated_at[gt_or_eq]": updated_since,
+                    "limit": page_size)
         next_updated_since = users.last["updated-at"] unless users.blank?
 
         {
