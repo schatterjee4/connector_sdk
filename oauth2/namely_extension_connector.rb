@@ -66,16 +66,30 @@
         object_types = ["salary","address"]
         object_properties = {
           "salary" => [
+            { name: "id", hint: "If present, will find and update an existing salary" },
             { name: "yearly_amount" },
-            { name: "rate" },
-            { name: "currency_type", control_type: :select, pick_list: "currencies" },
-            { name: "date", label: "Start date" type: :date }
+            { name: "rate", hint: "One of 'annually', 'weekly', 'biweekly'. "\
+                                  "Refer to platform documentation for more examples" },
+            { name: "currency_type", control_type: :select, pick_list: "currencies",
+              toggle_hint: "Select from list",
+              toggle_field: {
+                name: "currency_type", type: :string, control_type: :text,
+                label: "Currency type (Custom)", toggle_hint: "Use custom value",
+                hint: "Must be a valid ISO currency code"
+              } },
+            { name: "date", label: "Start date", type: :date }
           ],
           "address" => [
             { name: "address1" },
             { name: "address2" },
             { name: "city" },
-            { name: "country_id", label: "Country", control_type: :select, pick_list: "countries" },
+            { name: "country_id", label: "Country", control_type: :select, pick_list: "countries",
+              toggle_hint: "Select from list",
+              toggle_field: {
+                name: "country_id", type: :string, control_type: :text,
+                label: "Country (Custom)", toggle_hint: "Use custom value",
+                hint: "Must be a valid 2-digit ISO country code"
+              } },
             { name: "state_id", hint: "US state only" },
             { name: "zip" }
           ]
@@ -158,7 +172,6 @@
   end,
 
   actions: {
-    # Currently does not support file attachments
     create_announcement: {
       description: 'Create <span class="provider">announcement</span> '\
                    'in <span class="provider">Namely</span>',
@@ -174,20 +187,13 @@
             hint: "If true, any @mentioned profile will be appreciated" },
           { name: "email_all", type: :boolean,
             label: "Email all employees?", optional: true },
+          { name: "file_id", optional: true, hint: "File ID of previously uploaded file" }
         ]
       end,
 
       execute: lambda do |connection, input|
-        announcement = post("https://#{connection["company"]}.namely.com/api/v1/events.json").
-                        payload(
-                          "events": [
-                            {
-                              "content": input["content"],
-                              "is_appreciation": input["is_appreciation"],
-                              "email_all": input["email_all"]
-                            }
-                          ]
-                        )["events"].first
+        announcement = post("https://#{connection["company"]}.namely.com/api/v1/events").
+                        payload(events: [input])["events"].first
         { announcement: announcement }
       end,
 
@@ -225,13 +231,7 @@
 
       execute: lambda do |connection, input|
         comment = post("https://#{connection["company"]}.namely.com/api/v1/events/#{input["event_id"]}/comments").
-                        payload(
-                          "comments": [
-                            {
-                              "content": input["content"],
-                            }
-                          ]
-                        )["comments"].first
+                        payload(comments: [input["content"]])["comments"].first
         { comment: comment }
       end,
 
@@ -435,12 +435,12 @@
             hint: "ID of job title, or the name of the title as defined in your Namely instance" },
           { name: "reports_to", optional: true,
             hint: "ID of employee profile whom employee reports to" },
-          { name: "status", optional: true, control_type: :select,
+          { name: "user_status", optional: true, control_type: :select,
             pick_list: "employee_status", toggle_hint: "Select from list",
             toggle_field: {
-              name: "status", type: :string, control_type: :text,
-              label: "Status (Custom)", toggle_hint: "Use custom value"
-            } },
+              name: "user_status", type: :string, control_type: :text,
+              label: "User status (Custom)", toggle_hint: "Use custom value"
+            }, hint: "Inactive user status also returns pending profiles" },
           { name: "start_date", type: :date, optional: true }
         ]
       end,
@@ -452,7 +452,7 @@
                  (input["personal_email"].present? ? "&filter[personal_email]=#{input["personal_email"]}" : "") +
                  (input["job_title"].present? ? "&filter[job_title]=#{input["job_title"]}" : "") +
                  (input["reports_to"].present? ? "&filter[reports_to]=#{input["reports_to"]}" : "") +
-                 (input["status"].present? ? "&filter[user_status]=#{input["user_status"]}" : "")
+                 (input["user_status"].present? ? "&filter[user_status]=#{input["user_status"]}" : "")
         employees = []
         page = 1
         count = 1
