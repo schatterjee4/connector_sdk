@@ -53,105 +53,58 @@
 
   object_definitions: {
     profile: {
-      fields: ->() {
-        [
-          { name: "id", label: "ID" },
-          { name: "email" },
-          { name: "first_name" },
-          { name: "last_name" },
-          { name: "user_status" },
-          { name: "updated_at", type: :integer },
-          { name: "created_at" },
-          { name: "preferred_name" },
-          { name: "full_name" },
-          { name: "job_title", type: :object, properties: [
-            { name: "id", label: "ID" },
-            { name: "title" }
-          ]},
-          { name: "reports_to", type: :object, properties: [
-            { name: "id", label: "ID" },
-            { name: "first_name" },
-            { name: "last_name" },
-            { name: "email" }
-          ]},
-          { name: "employee_type", type: :object, properties: [
-            { name: "title" }
-          ]},
-          { name: "access_role" },
-          { name: "ethnicity" },
-          { name: "middle_name" },
-          { name: "gender" },
-          { name: "job_change_reason" },
-          { name: "start_date" },
-          { name: "departure_date" },
-          { name: "employee_id", label: "Employee ID" },
-          { name: "personal_email" },
-          { name: "dob", label: "Date of birth"},
-          { name: "ssn", label: "SSN" },
-          { name: "marital_status" },
-          { name: "bio" },
-          { name: "asset_management" },
-          { name: "laptop_asset_number" },
-          { name: "corporate_card_number" },
-          { name: "key_tag_number" },
-          { name: "linkedin_url" },
-          { name: "office_main_number" },
-          { name: "office_direct_dial" },
-          { name: "office_phone" },
-          { name: "office_fax" },
-          { name: "office_company_mobile" },
-          { name: "home_phone" },
-          { name: "mobile_phone" },
-          { name: "home", type: :object, properties: [
-            { name: "address1" },
-            { name: "address2" },
-            { name: "city" },
-            { name: "state_id", label: "State ID" },
-            { name: "country_id", label: "Country ID" },
-            { name: "zip" }
-          ]},
-          { name: "office", type: :object, properties: [
-            { name: "address1" },
-            { name: "address2" },
-            { name: "city" },
-            { name: "state_id", label: "State ID" },
-            { name: "country_id", label: "Country ID"},
-            { name: "zip" },
-            { name: "phone" }
-          ]},
-          { name: "emergency_contact" },
-          { name: "emergency_contact_phone" },
-          { name: "resume" },
-          { name: "current_job_description" },
-          { name: "job_description" },
-          { name: "salary", type: :object, properties: [
-            { name: "currency_type" },
-            { name: "date" },
-            { name: "guid", label: "GUID" },
-            { name: "pay_group_id", label: "Pay group ID", type: :integer },
-            { name: "payroll_job_id", label: "Payroll job ID" },
+      fields: ->(connection) {
+        required_hints = {
+          "user_status" => "One of 'active', 'inactive' or 'pending'. "\
+                           "Must be 'pending' if onboarding session is enabled",
+          "personal_email" => "Required if Namely profile user status is pending,"\
+                              " or if onboarding session is enabled",
+          "reports_to" => "ID of employee profile whom employee reports to",
+          "job_title" => "ID of job title, or the name of the title as defined"\
+                         " in your Namely instance"
+        }
+        object_types = ["salary","address"]
+        object_properties = {
+          "salary" => [
+            { name: "yearly_amount" },
             { name: "rate" },
-            { name: "yearly_amount", type: :integer },
-            { name: "is_hourly", label: "Is hourly?", type: :boolean },
-            { name: "amount_raw", label: "Raw amount" } ] },
-          { name: "healthcare", type: :object, properties: [
-            { name: "beneficiary" },
-            { name: "amount" },
-            { name: "currency_type" }
-          ]},
-          { name: "healthcare_info" },
-          { name: "dental", type: :object, properties: [
-            { name: "beneficiary" },
-            { name: "amount" },
-            { name: "currency_type" }
-          ]},
-          { name: "dental_info" },
-          { name: "vision_plan_info" },
-          { name: "life_insurance_info" },
-          { name: "namely_time_employee_role" },
-          { name: "namely_time_manager_role" }
-        ]
-      },
+            { name: "currency_type", control_type: :select, pick_list: "currencies" },
+            { name: "date", label: "Start date" type: :date }
+          ],
+          "address" => [
+            { name: "address1" },
+            { name: "address2" },
+            { name: "city" },
+            { name: "country_id", label: "Country", control_type: :select, pick_list: "countries" },
+            { name: "state_id", hint: "US state only" },
+            { name: "zip" }
+          ]
+        }
+        fields = get("https://#{connection["company"]}.namely.com/api/v1/profiles/fields")["fields"]
+        special = fields.select { |f| object_types.include? f["type"] }.
+                         map do |field|
+                           {
+                             name: field["name"].downcase,
+                             label: field["label"].humanize,
+                             optional: true,
+                             type: :object,
+                             properties: object_properties[field["type"]]
+                           }
+                         end
+        regular = fields.select { |f| !object_types.include? f["type"] }.
+                         map do |field|
+                           {
+                             name: field["name"].downcase,
+                             label: field["label"].humanize,
+                             optional: true,
+                             hint: required_hints[field["name"]].present? ?
+                                     required_hints[field["name"]] :
+                                       ((field["valid_format_info"] != "generic text") ?
+                                         field["valid_format_info"].humanize : "")
+                           }
+                         end
+        special.concat(regular)
+      }
     },
 
     event: {
