@@ -84,11 +84,7 @@
       fields: lambda { |connection, _config_fields|
         post("#{connection['endpoint']}GetEntityMetadata.json")
           .dig("response_data", "Vendor", "fields")
-          .map do |key, _value|
-            {
-              name: key
-            }
-          end
+          .map { |key, _value| { name: key } }
       }
     }
   },
@@ -109,10 +105,11 @@
             optional: true,
             sticky: true,
             hint: "Get vendors created or updated since given date/time. " \
-              "Leave empty to get vendors created or updated one hour ago."
+              "Leave empty to get vendors created or updated one hour ago"
           }
         ]
       },
+
       poll: lambda { |connection, input, page|
         page ||= 0
         page_size = 50
