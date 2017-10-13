@@ -79,13 +79,13 @@
     }
   },
 
-  test: lambda { |connection|
+  test: lambda { |_connection|
     post("/api/v2/GetSessionInfo.json")
   },
 
   object_definitions: {
     vendor: {
-      fields: lambda { |connection, _config_fields|
+      fields: lambda { |_connection, _config_fields|
         post("/api/v2/GetEntityMetadata.json").
           dig("response_data", "Vendor", "fields").
           map { |key, _value| { name: key } }
@@ -115,7 +115,7 @@
         ]
       },
 
-      poll: lambda { |connection, input, page|
+      poll: lambda { |_connection, input, page|
         page ||= 0
         page_size = 50
         query = {
@@ -151,7 +151,7 @@
         object_definitions["vendor"]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         post("/api/v2/List/Vendor.json").
           payload(data: { start: 0, max: 1 }.to_json).
           dig("response_data", 0)
