@@ -1,6 +1,6 @@
 # Adds operations missing from the standard adapter.
 {
-  title: "Bill.com(custom)",
+  title: "Bill.com (custom)",
 
   connection: {
     fields: [
@@ -19,7 +19,7 @@
         name: "org_id",
         label: "Organisation ID",
         hint: "Log in to your Bill.com account, click on gear icon, click " \
-          "on settings then click on profiles under your company.<br>The "  \
+          "on settings then click on profiles under your company. The "  \
           "Organization ID is at the end of the URL, after "                \
           "https://[app/app-stage].bill.com/Organization?Id=",
         optional: false
@@ -29,20 +29,19 @@
         label: "Developer API key",
         hint: "Sign up for the developer program to get API key. "           \
           "You may find more info <a href='https://developer.bill.com/hc/"   \
-          "en-us/articles/208695076'>here</a>",
+          "en-us/articles/208695076' target='_blank'>here</a>",
         optional: false,
         control_type: "password"
       },
       {
-        name: "endpoint",
-        label: "Edition",
+        name: "environment",
         hint: "Find more info <a href='https://developer.bill.com/hc/en-us/" \
-          "articles/208249476-Sandbox-production-differences'>here</a>",
+          "articles/208249476-Sandbox-production-differences' " \
+          "target='_blank'>here</a>",
         control_type: "select",
         pick_list: [
-          ["Bill.com Sandbox/Stage Environment",
-           "https://api-stage.bill.com/api/v2/"],
-          ["Bill.com Production", "https://api.bill.com/api/v2/"]
+          %w[Production api],
+          ["Sandbox/Stage", "api-stage"]
         ],
         optional: false
       }
@@ -53,13 +52,14 @@
 
       acquire: lambda { |connection|
         {
-          session_id: post("#{connection['endpoint']}Login.json")
-            .payload(userName: connection["user_name"],
-                     password: connection["password"],
-                     orgId: connection["org_id"],
-                     devKey: connection["dev_key"])
-            .request_format_www_form_urlencoded
-            .dig("response_data", "sessionId")
+          session_id: post("https://#{connection['environment']}.bill.com" \
+            "/api/v2/Login.json").
+            payload(userName: connection["user_name"],
+                    password: connection["password"],
+                    orgId: connection["org_id"],
+                    devKey: connection["dev_key"]).
+            request_format_www_form_urlencoded.
+            dig("response_data", "sessionId")
         }
       },
 
@@ -72,28 +72,33 @@
                 devKey: connection["dev_key"])
         request_format_www_form_urlencoded
       }
+    },
+
+    base_uri: lambda { |connection|
+      "https://#{connection['environment']}.bill.com"
     }
   },
 
   test: lambda { |connection|
-    post("#{connection['endpoint']}GetSessionInfo.json")
+    post("/api/v2/GetSessionInfo.json")
   },
 
   object_definitions: {
     vendor: {
       fields: lambda { |connection, _config_fields|
-        post("#{connection['endpoint']}GetEntityMetadata.json")
-          .dig("response_data", "Vendor", "fields")
-          .map { |key, _value| { name: key } }
+        post("/api/v2/GetEntityMetadata.json").
+          dig("response_data", "Vendor", "fields").
+          map { |key, _value| { name: key } }
       }
     }
   },
 
   triggers: {
     new_or_updated_vendor: {
+      title: "New/updated vendor",
+      subtitle: "New/updated vendor",
       description: "New or updated <span class='provider'>vendor</span> in " \
         "<span class='provider'>Bill.com</span>",
-      subtitle: "New/updated vendor",
       type: "paging_desc",
 
       input_fields: lambda { |_connection|
@@ -120,17 +125,17 @@
             {
               field: "updatedTime",
               op: ">=",
-              value: (input["since"].presence || 1.hour.ago)
-                .utc
-                .strftime("%Y-%m-%dT%H:%M:%S.%L%z")
+              value: (input["since"].presence || 1.hour.ago).
+                utc.
+                strftime("%Y-%m-%dT%H:%M:%S.%L%z")
             }
           ],
           sort: [{ field: "updatedTime", asc: 0 }]
         }
 
-        vendors = post("#{connection['endpoint']}List/Vendor.json")
-                  .payload(data: query.to_json)
-                  .dig("response_data")
+        vendors = post("/api/v2/List/Vendor.json").
+                  payload(data: query.to_json).
+                  dig("response_data")
 
         {
           events: vendors,
@@ -147,10 +152,9 @@
       },
 
       sample_output: lambda { |connection|
-        post("#{connection['endpoint']}List/Vendor.json")
-          .payload(data: { start: 0, max: 1 }.to_json)
-          .dig("response_data")
-          &.first
+        post("/api/v2/List/Vendor.json").
+          payload(data: { start: 0, max: 1 }.to_json).
+          dig("response_data", 0)
       }
     }
   }
