@@ -30,8 +30,12 @@
           { name: "owner_id", type: :integer, label: "Owner id",
             control_type: :number },
           { name: "first_name" },
-          { name: "last_name" },
-          { name: "organization_name" },
+          { name: "last_name",
+          	hint: "Required only if a lead is an individual. "\
+          	"<code>company_name</code> is empty." },
+          { name: "organization_name",
+          	hint: "Required only if a lead is an organization. "\
+          	"<code>last_name</code> is empty." },
           { name: "title" },
           { name: "description" },
           { name: "industry" },
@@ -121,7 +125,7 @@
        "to create account. It is not necessary to have both",
 
       input_fields: lambda do |object_definitions|
-        object_definitions["lead"].required("last_name", "organization_name").
+        object_definitions["lead"].
           ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
       end,
 
