@@ -170,7 +170,7 @@
 
     test_action: {
       execute: lambda do |connection, input|
-        a = get("https://rally1.rallydev.com/slm/schema/v2.0/workspace/161272469544").
+        a = get("https://rally1.rallydev.com/slm/schema/v2.0/project/161272469544").
               dig("QueryResult", "Results").
               where("Name" => "Defect").first.
               dig("Attributes").
@@ -241,11 +241,11 @@
   },
 
   pick_lists: {
-    workspaces: lambda do |connection|
-      get("https://rally1.rallydev.com/slm/webservice/v2.0/workspace").
+    projects: lambda do |connection|
+      get("https://rally1.rallydev.com/slm/webservice/v2.0/project").
         params(fetch: "Name,ObjectID").
         dig("QueryResult", "Results").
-        map { |workspace| [workspace["Name"], workspace["ObjectID"].to_s] }
+        map { |project| [project["Name"], project["ObjectID"].to_s] }
     end
   }
 
