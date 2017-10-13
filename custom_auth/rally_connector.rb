@@ -34,9 +34,10 @@
   },
 
   object_definitions: {
-    # Preliminary
-    defect: {
-      fields: ->(connection, config_fields) {
+    defect_input: {
+      fields: lambda do |connection, config_fields|
+        schema = get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
+                  dig("QueryResult", "Results")
         type_map = {
           "DATE"=>:datetime,
           "INTEGER"=>:integer,
@@ -45,40 +46,63 @@
           "OBJECT"=>:object,
           "COLLECTION"=>:array
         }
-        if config_fields["workspace"]
-          attributes = get("https://rally1.rallydev.com/slm/schema/v2.0/workspace/#{config_fields["workspace"]}").
-                         dig("QueryResult", "Results").
-                         where("Name" => "Defect").first.
-                         dig("Attributes")
-          attributes.map do |field|
-            if !field["ReadOnly"]
-              {
-                name: field["ElementName"],
-                type: type_map["#{field["AttributeType"]}"]? type_map["#{field["AttributeType"]}"] : :string,
-                of: field["AttributeType"] == "COLLECTION"? :object : nil
-              }
-            end
+        has_inner_field = ["OBJECT", "COLLECTION"]
+        generate_schema = lambda do |object, level|
+          if level <= 1
+            fields = schema.where("Name" => object)
+            fields = fields.
+                      first.
+                      dig("Attributes").
+                      select { |field| !field["ReadOnly"] && field["ElementName"] != "Workspace" }.
+                      map do |field|
+                        {
+                          name: field["ElementName"],
+                          type: type_map["#{field["AttributeType"]}"]?
+                                 type_map["#{field["AttributeType"]}"] : :string,
+                          of: (field["AttributeType"] == "COLLECTION") ?
+                                :object : nil,
+                          properties: (has_inner_field.include? field["AttributeType"]) ?
+                                        generate_schema[field["SchemaType"].gsub("Type"), level+1] : nil
+                        }
+                      end unless !fields.present?
           end
-        else
-          [
-            { name: "Name" },
-            { name: "Description" },
-            { name: "Notes" },
-            { name: "Owner" },
-            { name: "DisplayColor" },
-            { name: "Expedite", label: "Expedite?", type: :boolean },
-            { name: "Ready", label: "Ready?", type: :boolean },
-            { name: "CreationDate", type: :datetime },
-            { name: "LastUpdateDate", type: :datetime },
-            { name: "ObjectID", type: :integer },
-            { name: "ObjectUUID" },
-            { name: "VersionId", type: :integer },
-            { name: "Description" },
-            { name: "Project" },
-          ]
         end
-      }
-    }
+        generate_schema["Defect", 0]
+      end
+    },
+
+    # defect_output: {
+    #   fields: lambda do |connection, config_fields|
+    #     type_map = {
+    #       "DATE"=>:datetime,
+    #       "INTEGER"=>:integer,
+    #       "DECIMAL"=>:number,
+    #       "BOOLEAN"=>:boolean,
+    #       "OBJECT"=>:object,
+    #       "COLLECTION"=>:array
+    #     }
+    #     has_inner_field = ["OBJECT, COLLECTION"]
+    #     generate_schema = lambda do |object|
+    #       get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
+    #         dig("QueryResult", "Results").
+    #         where("Name" => object).first.
+    #         dig("Attributes").
+    #         map do |field|
+    #           {
+    #             name: field["ElementName"],
+    #             type: type_map["#{field["AttributeType"]}"]?
+    #                    type_map["#{field["AttributeType"]}"] : :string,
+    #             of: (field["AttributeType"] == "COLLECTION"?
+    #                   :object : nil),
+    #             properties: (has_inner_field.include? field["AttributeType"] ?
+    #                           generate_schema[field["ElementName"]] : nil)
+    #           }
+    #         end
+    #     end
+    #     puts generate_schema["Defect"]
+    #   end
+    # }
+    #
   },
 
   actions: {
@@ -87,13 +111,29 @@
                    'in <span class="provider">Rally</span>',
       subtitle: "Create defect in Rally",
 
+      config_fields: [
+        { name: "project", optional: false, control_type: :select,
+          pick_list: "projects" }
+      ],
+
       input_fields: lambda do |object_definitions|
-        object_definitions["defect"]
+        object_definitions["defect_input"]
       end,
 
       execute: lambda do |connection, input|
         post("https://rally1.rallydev.com/slm/webservice/v2.0/defect/create").
           payload("Defect": input)["CreateResult"]
+      end,
+
+      output_fields: lambda do |object_definitions|
+        object_definitions["defect_input"]
+      end,
+
+      sample_output: lambda do |connection, input|
+        get(get("https://rally1.rallydev.com/slm/webservice/v2.0/defect").
+              dig("QueryResult", "Results").first.
+              dig("_ref")).
+          dig("Defect")
       end
     },
 
@@ -103,14 +143,14 @@
       subtitle: "Get defect by ID in Rally",
 
       config_fields: [
-        { name: "workspace", optional: false, control_type: :select,
-          pick_list: "workspaces" }
+        { name: "project", optional: false, control_type: :select,
+          pick_list: "projects" }
       ],
 
       input_fields: lambda do |object_definitions|
         [
           { name: "ObjectID", label: "ID", optional: false },
-        ].concat(object_definitions["defect"])
+        ]
       end,
 
       execute: lambda do |connection, input|
@@ -119,7 +159,7 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["defect"]
+        object_definitions["defect_input"]
       end,
 
       sample_output: lambda do |connection, input|
@@ -152,6 +192,11 @@
       subtitle: "New or updated defect logged in Rally",
       type: :paging_desc,
 
+      config_fields: [
+        { name: "project", optional: false, control_type: :select,
+          pick_list: "projects" }
+      ],
+
       input_fields: lambda do
         [
           { name: "from", type: :date, optional: false }
@@ -183,7 +228,7 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["defect"]
+        object_definitions["defect_input"]
       end,
 
       sample_output: lambda do |connection|
