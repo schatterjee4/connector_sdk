@@ -41,7 +41,7 @@
         control_type: "select",
         pick_list: [
           %w[Production api],
-          ["Sandbox/Stage", "api-stage"]
+          %w[Sandbox/Stage api-stage]
         ],
         optional: false
       }
@@ -144,7 +144,11 @@
       },
 
       document_id: lambda { |vendor|
-        vendor["id"].to_s + "@" + vendor["updatedTime"].to_s
+        vendor["id"]
+      },
+
+      sort_by: lambda { |vendor|
+        vendor["updatedTime"]
       },
 
       output_fields: lambda { |object_definitions|
@@ -153,7 +157,9 @@
 
       sample_output: lambda { |_connection|
         post("/api/v2/List/Vendor.json").
-          payload(data: { start: 0, max: 1 }.to_json).
+          payload(data: { start: 0,
+                          max: 1,
+                          sort: [{ field: "updatedTime", asc: 0 }] }.to_json).
           dig("response_data", 0)
       }
     }
