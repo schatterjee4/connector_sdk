@@ -40,8 +40,7 @@
               control_type: field["dataType"] == "List" ? "select" : "text",
               pick_list: pick_list
             }
-          end
-                )
+          end)
       end
     },
   },
@@ -58,12 +57,11 @@
       end,
 
       execute: lambda do |_connection, input|
-        fields = {}
-        input.each do |k, v|
-          if k != "name"
-            fields[k] = [ { raw: v } ]
-          end
-        end
+        fields = input.inject({}) do |hash, (key, value)|
+           hash.merge({
+             key => [{ raw: v }]
+           }) unless key == "name"
+         end
         post("https://api.salesforceiq.com/v2/accounts").
           payload(name: input["name"], fieldValues: fields)
       end,
@@ -74,7 +72,7 @@
 
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: 1).dig("objects", 0)
+          params(_limit: 1).dig("objects", 0) || {}
       end
       },
 
@@ -94,7 +92,7 @@
         accounts = get("https://api.salesforceiq.com/v2/accounts",
                        input)["objects"].each do |account|
           (account["fieldValues"] || {}).map do |k, v|
-            account[k] = v.first["raw"]
+            account[k] = v.dig(0, "raw")
           end
         end
         {
@@ -113,7 +111,7 @@
 
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: 1).dig("objects", 0)
+          params(_limit: 1).dig("objects", 0) || {}
       end
     }
   },
@@ -145,7 +143,7 @@
                         modifiedDate: modified_date)["objects"]
         accounts = result.each do |account|
           (account["fieldValues"] || {}).map do |k, v|
-            account[k] = v.first["raw"]
+            account[k] = v.dig(0, "raw")
           end
         end
         modified_date_since = accounts.dig(-1, "modifiedDate") ||
@@ -167,7 +165,7 @@
 
       sample_output: lambda do
         get("https://api.salesforceiq.com/v2/accounts").
-          params(_limit: 1).dig("objects", 0)
+          params(_limit: 1).dig("objects", 0) || {}
       end
     }
   }
