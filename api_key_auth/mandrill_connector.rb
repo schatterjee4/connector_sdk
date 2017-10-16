@@ -46,7 +46,7 @@
                              else
                                post("https://mandrillapp.com/api/1.0/" \
                                  "templates/info.json").
-                                 payload(name: config_fields["template"])
+                                 payload(name: config_fields["template"]).
                                  dig("code").
                                  scan(/mc:edit=\"([^\"]*)\"/).
                                  map do |var|
@@ -148,7 +148,7 @@
           payload(template_name: input["template"],
                   template_content: (input["template_content"] || []).
                     map do |key, val|
-                     { name: key, content: val }
+                      { name: key, content: val }
                     end,
                   message:   message,
                   send_at: (input["send_at"] || "").
