@@ -7,8 +7,8 @@
         name: "api_key",
         label: "API Key",
         control_type: "password",
-        hint: "You may find it " \
-          "<a href='https://mandrillapp.com//settings'>here</a>",
+        hint: "You may find it <a href='https://mandrillapp.com//settings' " \
+          "target='_blank'>here</a>",
         optional: false
       }
     ],
@@ -45,11 +45,11 @@
                                []
                              else
                                post("https://mandrillapp.com/api/1.0/" \
-                                 "templates/info.json")
-                                 .payload(name: config_fields["template"])
-                                 .dig("code")
-                                 .scan(/mc:edit=\"([^\"]*)\"/)
-                                 .map do |var|
+                                 "templates/info.json").
+                                 payload(name: config_fields["template"])
+                                 dig("code").
+                                 scan(/mc:edit=\"([^\"]*)\"/).
+                                 map do |var|
                                    {
                                      name: var.first,
                                      hint: "Include html tags for better" \
@@ -144,18 +144,18 @@
           track_clicks: input["track_clicks"]
         }
 
-        post("https://mandrillapp.com/api/1.0/messages/send-template.json") \
-          .payload(template_name: input["template"],
-                   template_content: (input["template_content"] || [])
-                                       .map do |key, val|
-                                         { name: key, content: val }
-                                       end,
-                   message:   message,
-                   send_at: (input["send_at"] || "")
-                              .utc
-                              .to_s
-                              .gsub(/[TZ]/, "T" => " ", "Z" => "")) \
-          &.first
+        post("https://mandrillapp.com/api/1.0/messages/send-template.json").
+          payload(template_name: input["template"],
+                  template_content: (input["template_content"] || []).
+                    map do |key, val|
+                     { name: key, content: val }
+                    end,
+                  message:   message,
+                  send_at: (input["send_at"] || "").
+                    utc.
+                    to_s.
+                    gsub(/[TZ]/, "T" => " ", "Z" => ""))&.
+          first
       },
 
       output_fields: lambda { |_object_definitions|
@@ -178,8 +178,8 @@
 
   pick_lists: {
     templates: lambda { |_connection|
-      post("https://mandrillapp.com/api/1.0/templates/list.json") \
-        .map { |template| [template["name"], template["slug"]] }
+      post("https://mandrillapp.com/api/1.0/templates/list.json").
+        pluck("name", "slug")
     }
   }
 }
