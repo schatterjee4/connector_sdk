@@ -7,7 +7,7 @@
         name: "api_key",
         label: "API Key",
         control_type: "password",
-        hint: "You may find it <a href='https://mandrillapp.com//settings' " \
+        hint: "You may find it <a href='https://mandrillapp.com/settings' " \
           "target='_blank'>here</a>",
         optional: false
       }
@@ -31,11 +31,15 @@
       apply: lambda { |connection|
         payload(key: connection["api_key"])
       }
+    },
+
+    base_uri: lambda { |_connection|
+      "https://mandrillapp.com"
     }
   },
 
   test: lambda { |_connection|
-    post("https://mandrillapp.com/api/1.0/users/ping.json")
+    post("/api/1.0/users/ping.json")
   },
 
   object_definitions: {
@@ -44,8 +48,7 @@
         template_variables = if config_fields.blank?
                                []
                              else
-                               post("https://mandrillapp.com/api/1.0/" \
-                                 "templates/info.json").
+                               post("/api/1.0/templates/info.json").
                                  payload(name: config_fields["template"]).
                                  dig("code").
                                  scan(/mc:edit=\"([^\"]*)\"/).
@@ -144,17 +147,21 @@
           track_clicks: input["track_clicks"]
         }
 
-        post("https://mandrillapp.com/api/1.0/messages/send-template.json").
+        post("/api/1.0/messages/send-template.json").
           payload(template_name: input["template"],
                   template_content: (input["template_content"] || []).
                     map do |key, val|
                       { name: key, content: val }
                     end,
                   message:   message,
-                  send_at: (input["send_at"] || "").
-                    utc.
-                    to_s.
-                    gsub(/[TZ]/, "T" => " ", "Z" => ""))&.
+                  send_at: if input["send_at"].present?
+                              input["send_at"].
+                                utc.
+                                to_s.
+                                gsub(/[TZ]/, "T" => " ", "Z" => "")
+                           else
+                             nil
+                           end)&.
           first
       },
 
@@ -178,7 +185,7 @@
 
   pick_lists: {
     templates: lambda { |_connection|
-      post("https://mandrillapp.com/api/1.0/templates/list.json").
+      post("/api/1.0/templates/list.json").
         pluck("name", "slug")
     }
   }
