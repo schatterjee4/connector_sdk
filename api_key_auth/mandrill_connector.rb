@@ -155,12 +155,10 @@
                     end,
                   message:   message,
                   send_at: if input["send_at"].present?
-                              input["send_at"].
-                                utc.
-                                to_s.
-                                gsub(/[TZ]/, "T" => " ", "Z" => "")
-                           else
-                             nil
+                             input["send_at"].
+                               utc.
+                               to_s.
+                               gsub(/[TZ]/, "T" => " ", "Z" => "")
                            end)&.
           first
       },
