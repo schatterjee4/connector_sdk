@@ -6,8 +6,8 @@
       {
         name: "api_key",
         label: "Secure Token",
-        hint: "You may find API key " \
-        "<a href='https://rightsignature.com/oauth_clients'>here</a>",
+        hint: "You may find API key <a href='https://rightsignature.com" \
+          "/oauth_clients' target='_blank'>here</a>",
         control_type: "password",
         optional: false
       }
@@ -16,9 +16,13 @@
     authorization: {
       type: "api_key",
 
-      credentials: lambda { |connection|
+      apply: lambda { |connection|
         headers(api_token: connection["api_key"])
       }
+    },
+
+    base_uri: lambda { |_connection|
+      "https://rightsignature.com"
     }
   },
 
@@ -90,24 +94,24 @@
   },
 
   test: lambda { |_connection|
-    get("https://rightsignature.com/api/documents.json")
+    get("/api/documents.json")
   },
 
   actions: {
     get_document_details: {
       description: "Get <span class='provider'>document details</span>" \
-        "by ID in <span class='provider'>RightSignature</span>",
+        " by ID in <span class='provider'>RightSignature</span>",
       subtitle: "Get document details by ID",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["document"]
-          .only("guid")
-          .required("guid")
+        object_definitions["document"].
+          only("guid").
+          required("guid")
       },
 
       execute: lambda { |_connection, input|
-        get("https://rightsignature.com/api/documents/#{input['guid']}.json")
-          .dig("document")
+        get("/api/documents/#{input['guid']}.json").
+          dig("document")
       },
 
       output_fields: lambda { |object_definitions|
@@ -115,10 +119,9 @@
       },
 
       sample_output: lambda { |_connection|
-        get("https://rightsignature.com/api/documents.json")
-          .payload(per_page: 1)
-          .dig("page", "documents")
-          &.first || {}
+        get("/api/documents.json").
+          payload(per_page: 1).
+          dig("page", "documents", 0) || {}
       }
     }
   },
@@ -126,7 +129,7 @@
   triggers: {
     new_signed_document: {
       description: "New <span class='provider'>signed document</span>" \
-        "in <span class='provider'>RightSignature</span>",
+        " in <span class='provider'>RightSignature</span>",
       subtitle: "New signed document in RightSignature",
       type: "paging_desc",
 
@@ -136,7 +139,10 @@
             name: "since",
             label: "From",
             type: "timestamp",
-            optional: false
+            optional: true,
+            sticky: true,
+            hint: "Get documents signed since given date/time. " \
+              "Leave empty to get the documents signed one hour ago"
           }
         ]
       },
@@ -144,14 +150,14 @@
       poll: lambda { |_connection, input, page|
         page ||= 1
         page_size = 50
-        documents = get("https://rightsignature.com/api/documents.json")
-                    .payload(page: page,
-                             per_page: page_size,
-                             state: "completed",
-                             sort: "completed")
-                    .dig("page", "documents")
-                    .select do |document|
-                      document["completed_at"].to_time >= input["since"].to_time
+        documents = get("/api/documents.json").
+                    payload(page: page,
+                            per_page: page_size,
+                            state: "signed").
+                    dig("page", "documents").
+                    select do |document|
+                      document["completed_at"].to_time >=
+                        (input["since"].presence || 1.hour.ago).to_time
                     end
 
         {
@@ -173,10 +179,9 @@
       },
 
       sample_output: lambda { |_connection|
-        get("https://rightsignature.com/api/documents.json")
-          .payload(per_page: 1)
-          .dig("page", "documents")
-          &.first || {}
+        get("/api/documents.json").
+          payload(per_page: 1).
+          dig("page", "documents", 0) || {}
       }
     }
   }
