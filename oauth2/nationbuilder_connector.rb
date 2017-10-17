@@ -179,7 +179,7 @@
     }
   },
 
-  test: lambda { |connection|
+  test: lambda { |_connection|
     get("/api/v1/people/count")
   },
 
@@ -199,7 +199,7 @@
                "external_id")
       },
 
-      execute: lambda { |connection, input|
+      execute: lambda { |_connection, input|
         {
           people: get("/api/v1/people/search").
             params({ per_page: 100 }.merge(input)).
@@ -218,7 +218,7 @@
         ]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         {
           people: get("/api/v1/people/search").
             params(per_page: 1).
@@ -240,7 +240,7 @@
           only("id", "external_id")
       },
 
-      execute: lambda { |connection, input|
+      execute: lambda { |_connection, input|
         get(if input["external_id"].present?
               "/api/v1/people/#{input['external_id']}?id_type=external"
             else
@@ -253,7 +253,7 @@
         object_definitions["person"]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         get("/api/v1/people/search").
           params(per_page: 1).
           dig("results", 0) || {}
@@ -273,7 +273,7 @@
           only("first_name", "last_name", "email", "phone", "mobile")
       },
 
-      execute: lambda { |connection, input|
+      execute: lambda { |_connection, input|
         get("/api/v1/people/match").
           params(input).
           dig("person") || {}
@@ -283,7 +283,7 @@
         object_definitions["person"]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         get("/api/v1/people/search").
           params(per_page: 1).
           dig("results", 0) || {}
@@ -311,7 +311,7 @@
         ]
       },
 
-      poll: lambda { |connection, input, next_page|
+      poll: lambda { |_connection, input, next_page|
         response = get(if next_page.present?
                          next_page
                        else
@@ -340,7 +340,7 @@
         object_definitions["person"]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         get("/api/v1/people/search").
           params(per_page: 1).
           dig("results", 0) || {}
@@ -366,7 +366,7 @@
         ]
       },
 
-      poll: lambda { |connection, input, next_page|
+      poll: lambda { |_connection, input, next_page|
         response = get(if next_page.present?
                          next_page
                        else
@@ -395,7 +395,7 @@
         object_definitions["survey_response"]
       },
 
-      sample_output: lambda { |connection|
+      sample_output: lambda { |_connection|
         get("/api/v1/survey_responses").
           params(per_page: 1).
           dig("results", 0) || {}
