@@ -59,10 +59,10 @@
                   "address_postal_code", "address_country")
       end,
       execute: lambda do |_connection, input|
-        fields = input.select {|key, _| key != "name" }.
-          inject({}) do |hash, (key, value)|
-            hash.merge(key => [{ raw: value }])
-          end
+        fields = input.select { |key, _| key != "name" }.
+                  inject({}) do |hash, (key, value)|
+                    hash.merge(key => [{ raw: value }])
+                  end
         post("/v2/accounts").
           payload(name: input["name"], fieldValues: fields)
       end,
