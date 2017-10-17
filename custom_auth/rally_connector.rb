@@ -253,7 +253,7 @@
       poll: lambda do |connection, input, page|
         limit = 20
         page ||= 0
-        from = input["from"].to_time
+        from = input["from"].to_time.iso8601.to_s
         response = get("https://rally1.rallydev.com/slm/webservice/v2.0/defect").
           params(
             order: "LastUpdateDate desc",
