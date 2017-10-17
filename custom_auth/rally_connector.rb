@@ -57,6 +57,7 @@
           "COLLECTION"=>:array
         }
         has_inner_field = ["OBJECT", "COLLECTION"]
+        must_ignore = ["Workspace", "Project", "Duplicates", "TestCase", "TestCaseResult"]
         generate_schema = lambda do |object, level|
           if level <= 1
             fields = schema.where("Name" => object)
