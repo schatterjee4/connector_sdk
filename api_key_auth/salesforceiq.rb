@@ -31,7 +31,7 @@
           { name: "name", optional: false },
           { name: "modifiedDate", label: "Modified date", type: :integer,
             hint: "Stores a particular Date & Time in UTC milliseconds past" \
-             " the epoch." },# milliseconds since epoch
+             " the epoch." }, # milliseconds since epoch
         ].concat(
           get("/v2/accounts/fields")["fields"].
           map do |field|
@@ -61,10 +61,10 @@
 
       execute: lambda do |_connection, input|
         fields = input.inject({}) do |hash, (key, value)|
-           hash.merge({
-             key => [{ raw: v }]
-           }) unless key == "name"
-         end
+          hash.merge({ 
+            key => [{ raw: value }] 
+          }) unless !hash.blank? && key == "name"
+        end
         post("/v2/accounts").
           payload(name: input["name"], fieldValues: fields)
       end,
