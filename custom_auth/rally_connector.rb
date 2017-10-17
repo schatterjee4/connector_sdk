@@ -49,7 +49,7 @@
         schema = get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
                   dig("QueryResult", "Results")
         type_map = {
-          "DATE"=>:datetime,
+          "DATE"=>:timestamp,
           "INTEGER"=>:integer,
           "DECIMAL"=>:number,
           "BOOLEAN"=>:boolean,
@@ -104,7 +104,7 @@
         schema = get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
                   dig("QueryResult", "Results")
         type_map = {
-          "DATE"=>:datetime,
+          "DATE"=>:timestamp,
           "INTEGER"=>:integer,
           "DECIMAL"=>:number,
           "BOOLEAN"=>:boolean,
