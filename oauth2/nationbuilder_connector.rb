@@ -1,10 +1,10 @@
 # Adds operations missing from the standard adapter.
 {
-  title: "NationBuilder(custom)",
+  title: "NationBuilder (custom)",
   connection: {
     fields: [
       {
-        name: "sub_domain",
+        name: "subdomain",
         label: "Nation slug",
         control_type: "subdomain",
         url: ".nationbuilder.com",
@@ -33,33 +33,33 @@
       type: "oauth2",
 
       authorization_url: lambda { |connection|
-        "https://#{connection['sub_domain']}.nationbuilder.com/" \
+        "https://#{connection['subdomain']}.nationbuilder.com/" \
           "oauth/authorize?response_type=code&client_id=" \
           "#{connection['client_id']}&redirect_uri=" \
           "https://www.workato.com/oauth/callback"
       },
 
       acquire: lambda { |connection, auth_code, redirect_uri|
-        response = post("https://#{connection['sub_domain']}" \
-                  ".nationbuilder.com/oauth/token") \
-                   .payload(client_id: connection["client_id"],
-                            redirect_uri: redirect_uri,
-                            grant_type: "authorization_code",
-                            client_secret: connection["client_secret"],
-                            code: auth_code) \
-                   .request_format_www_form_urlencoded
+        response = post("https://#{connection['subdomain']}" \
+                  ".nationbuilder.com/oauth/token").
+                   payload(client_id: connection["client_id"],
+                           redirect_uri: redirect_uri,
+                           grant_type: "authorization_code",
+                           client_secret: connection["client_secret"],
+                           code: auth_code).
+                   request_format_www_form_urlencoded
 
         [response, nil, nil]
       },
 
       refresh: lambda { |connection, refresh_token|
-        post("https://#{connection['sub_domain']}.nationbuilder.com" \
-          "/oauth/token") \
-          .payload(client_id: connection["client_id"],
-                   client_secret: connection["client_secret"],
-                   grant_type: "refresh_token",
-                   refresh_token: refresh_token) \
-          .request_format_www_form_urlencoded
+        post("https://#{connection['subdomain']}.nationbuilder.com" \
+          "/oauth/token").
+          payload(client_id: connection["client_id"],
+                  client_secret: connection["client_secret"],
+                  grant_type: "refresh_token",
+                  refresh_token: refresh_token).
+          request_format_www_form_urlencoded
       },
 
       refresh_on: [401],
@@ -67,6 +67,10 @@
       apply: lambda { |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
       }
+    },
+
+    base_uri: lambda { |connection|
+      "https://#{connection['subdomain']}.nationbuilder.com"
     }
   },
 
@@ -168,7 +172,6 @@
               { name: "id", type: "integer" },
               { name: "response" },
               { name: "question_id", type: "integer" }
-
             ]
           }
         ]
@@ -177,29 +180,30 @@
   },
 
   test: lambda { |connection|
-    get("https://#{connection['sub_domain']}.nationbuilder.com" \
-      "/api/v1/people/count")
+    get("/api/v1/people/count")
   },
 
   actions: {
-    search_person: {
-      description: "Search <span class='provider'>person</span> in " \
+    search_people: {
+      subtitle: "Search people",
+      description: "Search <span class='provider'>people</span> in " \
       "<span class='provider'>NationBuilder</span>",
-      subtitle: "Search person",
+      help: "Returns a list of people that have certain attributes. " \
+        "The documentation can be found <a " \
+        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["person"]
-          .only("first_name", "last_name", "email", "city", "state", "sex",
-                "birthdate", "updated_since", "with_mobile", "salesforce_id",
-                "external_id")
+        object_definitions["person"].
+          only("first_name", "last_name", "email", "city", "state", "sex",
+               "birthdate", "updated_since", "with_mobile", "salesforce_id",
+               "external_id")
       },
 
       execute: lambda { |connection, input|
         {
-          people: get("https://#{connection['sub_domain']}.nationbuilder.com" \
-            "/api/v1/people/search") \
-            .params({ per_page: 100 }.merge(input)) \
-            .dig("results") || []
+          people: get("/api/v1/people/search").
+            params({ per_page: 100 }.merge(input)).
+            dig("results") || []
         }
       },
 
@@ -216,33 +220,33 @@
 
       sample_output: lambda { |connection|
         {
-          people: get("https://#{connection['sub_domain']}.nationbuilder." \
-            "com/api/v1/people/search") \
-            .params(per_page: 1) \
-            .dig("results") || []
+          people: get("/api/v1/people/search").
+            params(per_page: 1).
+            dig("results") || []
         }
       }
     },
 
     get_person_by_id: {
+      subtitle: "Get person by ID",
       description: "Get <span class='provider'>person</span> by ID in " \
         "<span class='provider'>NationBuilder</span>",
-      subtitle: "Get person by ID",
+      help: "Retrieve the data of a person by its ID or external ID. " \
+        "The documentation can be found <a " \
+        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["person"] \
-          .only("id", "external_id")
+        object_definitions["person"].
+          only("id", "external_id")
       },
 
       execute: lambda { |connection, input|
         get(if input["external_id"].present?
-              "https://#{connection['sub_domain']}.nationbuilder." \
-                "com/api/v1/people/#{input['external_id']}?id_type=external"
+              "/api/v1/people/#{input['external_id']}?id_type=external"
             else
-              "https://#{connection['sub_domain']}.nationbuilder." \
-                "com/api/v1/people/#{input['id']}"
-            end) \
-          .dig("person") || {}
+              "/api/v1/people/#{input['id']}"
+            end).
+          dig("person") || {}
       },
 
       output_fields: lambda { |object_definitions|
@@ -250,30 +254,29 @@
       },
 
       sample_output: lambda { |connection|
-        get("https://#{connection['sub_domain']}.nationbuilder." \
-          "com/api/v1/people/search") \
-          .params(per_page: 1) \
-          .dig("results") \
-          &.first || {}
+        get("/api/v1/people/search").
+          params(per_page: 1).
+          dig("results", 0) || {}
       }
     },
 
     match_person: {
+      subtitle: "Match person",
       description: "Match <span class='provider'>person</span> in " \
         "<span class='provider'>NationBuilder</span>",
-      subtitle: "Match person",
-      help: "Use this match to find person that have certain attributes.",
+      help: "Use this match to find person that have certain attributes. " \
+        "The documentation can be found <a " \
+        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["person"] \
-          .only("first_name", "last_name", "email", "phone", "mobile")
+        object_definitions["person"].
+          only("first_name", "last_name", "email", "phone", "mobile")
       },
 
       execute: lambda { |connection, input|
-        get("https://#{connection['sub_domain']}.nationbuilder.com" \
-          "/api/v1/people/match") \
-          .params(input) \
-          .dig("person") || {}
+        get("/api/v1/people/match").
+          params(input).
+          dig("person") || {}
       },
 
       output_fields: lambda { |object_definitions|
@@ -281,30 +284,28 @@
       },
 
       sample_output: lambda { |connection|
-        get("https://#{connection['sub_domain']}.nationbuilder." \
-          "com/api/v1/people/search") \
-          .params(per_page: 1) \
-          .dig("results") \
-          &.first || {}
+        get("/api/v1/people/search").
+          params(per_page: 1).
+          dig("results", 0) || {}
       }
     }
   },
 
   triggers: {
     new_or_updated_person: {
+      subtitle: "New or updated person",
       description: "New or updated <span class='provider'>person</span> in " \
         "<span class='provider'>NationBuilder</span>",
-      subtitle: "New or updated person",
 
       input_fields: lambda { |_connection|
         [
           {
             name: "since",
             label: "From",
-            type: "date_time",
+            type: "timestamp",
             optional: true,
             sticky: true,
-            hint: "Get person created or updated since given date/time. " \
+            hint: "Fetch trigger events from specified time. " \
               "Leave empty to get person created or updated one hour ago"
           }
         ]
@@ -312,26 +313,27 @@
 
       poll: lambda { |connection, input, next_page|
         response = get(if next_page.present?
-                         "https://#{connection['sub_domain']}"  \
-                           ".nationbuilder.com" << next_page
+                         next_page
                        else
-                         "https://#{connection['sub_domain']}."  \
-                           "nationbuilder.com/api/v1/people/search"
-                       end)
-                   .params(per_page: 100,
-                           updated_since: (input["since"].presence || 1.hour.ago)
-                             .to_time.utc.iso8601)
+                         "/api/v1/people/search"
+                       end).
+                   params(per_page: 100,
+                          updated_since: (input["since"].presence ||
+                            1.hour.ago).to_time.utc.iso8601)
 
         {
-          events: (response.dig("results") || [])
-            .sort_by { |person| person["updated_at"] },
+          events: response.dig("results") || [],
           next_poll: response.dig("next").presence,
           can_poll_more: response.dig("next").present?
         }
       },
 
       dedup: lambda { |person|
-        person["id"].to_s << "@" << person["updated_at"].to_s
+        person["id"]
+      },
+
+      sort_by: lambda { |person|
+        person["updated_at"]
       },
 
       output_fields: lambda { |object_definitions|
@@ -339,56 +341,54 @@
       },
 
       sample_output: lambda { |connection|
-        get("https://#{connection['sub_domain']}.nationbuilder." \
-          "com/api/v1/people/search") \
-          .params(per_page: 1) \
-          .dig("results") \
-          &.first || {}
+        get("/api/v1/people/search").
+          params(per_page: 1).
+          dig("results", 0) || {}
       }
     },
 
     new_or_updated_survey_response: {
+      subtitle: "New or updated survey response",
       description: "New or updated <span class='provider'>survey response" \
         "</span> in <span class='provider'>NationBuilder</span>",
-      subtitle: "New or updated survey response",
 
       input_fields: lambda { |_connection|
         [
           {
-            name: "start_time",
-            label: "Since",
-            type: "date_time",
+            name: "since",
+            label: "From",
+            type: "timestamp",
             optional: true,
             sticky: true,
-            hint: "Get survey response created or updated since given " \
-              "date/time. Leave empty to get survey response created or " \
-              "updated one hour ago"
+            hint: "Fetch trigger events from specified time. Leave empty " \
+              "to get survey response created or updated one hour ago"
           }
         ]
       },
 
       poll: lambda { |connection, input, next_page|
         response = get(if next_page.present?
-                         "https://#{connection['sub_domain']}"  \
-                           ".nationbuilder.com" << next_page
+                         next_page
                        else
-                         "https://#{connection['sub_domain']}."  \
-                           "nationbuilder.com/api/v1/survey_responses"
-                       end)
-                   .params(per_page: 100,
-                           start_time: (input["since"].presence || 1.hour.ago)
-                             .to_time.to_i)
+                         "/api/v1/survey_responses"
+                       end).
+                   params(per_page: 100,
+                          start_time: (input["since"].presence || 1.hour.ago).
+                            to_time.to_i)
 
         {
-          events: (response.dig("results") || [])
-            .sort_by { |survey_response| survey_response["updated_at"] },
+          events: response.dig("results") || [],
           next_poll: response.dig("next").presence,
           can_poll_more: response.dig("next").present?
         }
       },
 
       dedup: lambda { |survey_response|
-        survey_response["id"].to_s << "@" << survey_response["updated_at"].to_s
+        survey_response["id"]
+      },
+
+      sort_by: lambda { |survey_response|
+        survey_response["updated_at"]
       },
 
       output_fields: lambda { |object_definitions|
@@ -396,11 +396,9 @@
       },
 
       sample_output: lambda { |connection|
-        get("https://#{connection['sub_domain']}.nationbuilder." \
-          "com/api/v1/survey_responses") \
-          .params(per_page: 1) \
-          .dig("results") \
-          &.first || {}
+        get("/api/v1/survey_responses").
+          params(per_page: 1).
+          dig("results", 0) || {}
       }
     }
   }
