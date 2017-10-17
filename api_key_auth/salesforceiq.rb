@@ -13,11 +13,14 @@
         user(connection["api_key"])
         password(connection["api_secret"])
       end
-    }
+    },
+    base_uri: lambda do
+      "https://api.salesforceiq.com"
+    end
   },
 
   test: lambda do |_connection|
-    get("https://api.salesforceiq.com/v2/accounts?_limit=1")
+    get("/v2/accounts?_limit=1")
   end,
 
   object_definitions: {
@@ -30,7 +33,7 @@
             hint: "Stores a particular Date & Time in UTC milliseconds past" \
              " the epoch." },# milliseconds since epoch
         ].concat(
-          get("https://api.salesforceiq.com/v2/accounts/fields")["fields"].
+          get("/v2/accounts/fields")["fields"].
           map do |field|
             pick_list = field["listOptions"].
               map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
@@ -62,7 +65,7 @@
              key => [{ raw: v }]
            }) unless key == "name"
          end
-        post("https://api.salesforceiq.com/v2/accounts").
+        post("/v2/accounts").
           payload(name: input["name"], fieldValues: fields)
       end,
 
@@ -71,7 +74,7 @@
       end,
 
       sample_output: lambda do
-        get("https://api.salesforceiq.com/v2/accounts").
+        get("/v2/accounts").
           params(_limit: 1).dig("objects", 0) || {}
       end
       },
@@ -89,7 +92,7 @@
       end,
 
       execute: lambda do |_connection, input|
-        accounts = get("https://api.salesforceiq.com/v2/accounts",
+        accounts = get("/v2/accounts",
                        input)["objects"].each do |account|
           (account["fieldValues"] || {}).map do |k, v|
             account[k] = v.dig(0, "raw")
@@ -110,7 +113,7 @@
       end,
 
       sample_output: lambda do
-        get("https://api.salesforceiq.com/v2/accounts").
+        get("/v2/accounts").
           params(_limit: 1).dig("objects", 0) || {}
       end
     }
@@ -138,7 +141,7 @@
         modified_date ||= ((input["since"].presence || Time.now).
           to_time.to_f * 1000).to_i
         # result returns in ascending order
-        result = get("https://api.salesforceiq.com/v2/accounts").
+        result = get("/v2/accounts").
                  params(_limit: limit, _start: 0,
                         modifiedDate: modified_date)["objects"]
         accounts = result.each do |account|
@@ -164,7 +167,7 @@
       end,
 
       sample_output: lambda do
-        get("https://api.salesforceiq.com/v2/accounts").
+        get("/v2/accounts").
           params(_limit: 1).dig("objects", 0) || {}
       end
     }
