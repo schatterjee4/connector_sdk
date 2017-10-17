@@ -34,6 +34,16 @@
   },
 
   object_definitions: {
+
+    ##
+    # Defect (Input)
+    # Workato queries the Rally schema endpoint, then recursively fetches each
+    # defect's write-supported attribute down to the second layer using its
+    # AllowedValueType.
+    # At the lowest level, collections and objects are excluded.
+    # Workspace and Project information excluded.
+    # TestCase and Result objects excluded because of associated collections.
+    # NB: Duplicates are only available in the output.
     defect_input: {
       fields: lambda do |connection, config_fields|
         schema = get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
