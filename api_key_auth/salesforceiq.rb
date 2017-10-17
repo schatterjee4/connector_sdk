@@ -58,7 +58,6 @@
           ignored("id", "modifiedDate", "address_city", "address_state",
                   "address_postal_code", "address_country")
       end,
-      
       execute: lambda do |_connection, input|
         fields = input.inject({}) do |hash, (key, value)|
           hash.merge({
