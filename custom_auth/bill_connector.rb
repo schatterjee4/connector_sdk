@@ -95,8 +95,7 @@
 
   triggers: {
     new_or_updated_vendor: {
-      title: "New/updated vendor",
-      subtitle: "New/updated vendor",
+      subtitle: "New or updated vendor",
       description: "New or updated <span class='provider'>vendor</span> in " \
         "<span class='provider'>Bill.com</span>",
       type: "paging_desc",
