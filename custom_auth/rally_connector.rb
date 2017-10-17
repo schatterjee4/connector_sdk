@@ -59,26 +59,34 @@
         has_inner_field = ["OBJECT", "COLLECTION"]
         must_ignore = ["Workspace", "Project", "Duplicates", "TestCase", "TestCaseResult"]
         generate_schema = lambda do |object, level|
-          if level <= 1
-            fields = schema.where("Name" => object)
+          if level <= 2
+            fields = schema.where("_refObjectName" => object)
             fields = fields.
                       first.
                       dig("Attributes").
-                      select { |field| !field["ReadOnly"] && field["ElementName"] != "Workspace" }.
+                      select { |field|
+                        !field["ReadOnly"] &&
+                        (!must_ignore.include? field["ElementName"]) &&
+                        (level == 1 || (!has_inner_field.include? field["AttributeType"]))
+                      }.
                       map do |field|
                         {
                           name: field["ElementName"],
-                          type: type_map["#{field["AttributeType"]}"]?
-                                 type_map["#{field["AttributeType"]}"] : :string,
+                          type: type_map[field["AttributeType"]]?
+                                 type_map[field["AttributeType"]] : :string,
                           of: (field["AttributeType"] == "COLLECTION") ?
                                 :object : nil,
                           properties: (has_inner_field.include? field["AttributeType"]) ?
-                                        generate_schema[field["SchemaType"].gsub("Type"), level+1] : nil
+                                        generate_schema[field["AllowedValueType"].
+                                                          dig("_refObjectName"),
+                                                        level+1]
+                                        : nil,
+                          optional: !field["Required"]
                         }
                       end unless !fields.present?
           end
         end
-        generate_schema["Defect", 0]
+        generate_schema["Defect", 1]
       end
     },
 
