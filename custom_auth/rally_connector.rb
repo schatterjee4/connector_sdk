@@ -90,38 +90,58 @@
       end
     },
 
-    # defect_output: {
-    #   fields: lambda do |connection, config_fields|
-    #     type_map = {
-    #       "DATE"=>:datetime,
-    #       "INTEGER"=>:integer,
-    #       "DECIMAL"=>:number,
-    #       "BOOLEAN"=>:boolean,
-    #       "OBJECT"=>:object,
-    #       "COLLECTION"=>:array
-    #     }
-    #     has_inner_field = ["OBJECT, COLLECTION"]
-    #     generate_schema = lambda do |object|
-    #       get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
-    #         dig("QueryResult", "Results").
-    #         where("Name" => object).first.
-    #         dig("Attributes").
-    #         map do |field|
-    #           {
-    #             name: field["ElementName"],
-    #             type: type_map["#{field["AttributeType"]}"]?
-    #                    type_map["#{field["AttributeType"]}"] : :string,
-    #             of: (field["AttributeType"] == "COLLECTION"?
-    #                   :object : nil),
-    #             properties: (has_inner_field.include? field["AttributeType"] ?
-    #                           generate_schema[field["ElementName"]] : nil)
-    #           }
-    #         end
-    #     end
-    #     puts generate_schema["Defect"]
-    #   end
-    # }
-    #
+    ##
+    # Defect (Output)
+    # Workato queries the Rally schema endpoint, then recursively fetches each
+    # defect's readwrite-supported attribute down to the second layer using
+    # its AllowedValueType.
+    # At the lowest level, collections and objects are excluded.
+    # Subscription, Workspace information excluded.
+    # TestCase and Result objects excluded because of associated collections.
+    # NB: Duplicates are returned as number of duplicates
+    defect_output: {
+      fields: lambda do |connection, config_fields|
+        schema = get("https://rally1.rallydev.com/slm/schema/v2.0/project/#{config_fields["project"]}").
+                  dig("QueryResult", "Results")
+        type_map = {
+          "DATE"=>:datetime,
+          "INTEGER"=>:integer,
+          "DECIMAL"=>:number,
+          "BOOLEAN"=>:boolean,
+          "OBJECT"=>:object,
+          "COLLECTION"=>:array
+        }
+        has_inner_field = ["OBJECT", "COLLECTION"]
+        must_ignore = ["Subscription", "Workspace", "TestCase", "TestCaseResult"]
+        generate_schema = lambda do |object, level|
+          if level <= 2
+            fields = schema.where("_refObjectName" => object)
+            fields = fields.
+                      first.
+                      dig("Attributes").
+                      select { |field|
+                        (!must_ignore.include? field["ElementName"]) &&
+                        (level == 1 || (!has_inner_field.include? field["AttributeType"]))
+                      }.
+                      map do |field|
+                        {
+                          name: field["ElementName"],
+                          type: type_map[field["AttributeType"]]?
+                                 type_map[field["AttributeType"]] : :string,
+                          of: (field["AttributeType"] == "COLLECTION") ?
+                                :object : nil,
+                          properties: (has_inner_field.include? field["AttributeType"]) ?
+                                        generate_schema[field["AllowedValueType"].
+                                                          dig("_refObjectName"),
+                                                        level+1]
+                                        : nil
+                        }
+                      end unless !fields.present?
+          end
+        end
+        generate_schema["Defect", 1]
+      end
+    },
   },
 
   actions: {
@@ -145,7 +165,7 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["defect_input"]
+        object_definitions["defect_output"]
       end,
 
       sample_output: lambda do |connection, input|
@@ -178,7 +198,7 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["defect_input"]
+        object_definitions["defect_output"]
       end,
 
       sample_output: lambda do |connection, input|
@@ -247,7 +267,7 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        object_definitions["defect_input"]
+        object_definitions["defect_output"]
       end,
 
       sample_output: lambda do |connection|
