@@ -161,6 +161,10 @@
 
       execute: lambda do |connection, input|
         post("https://rally1.rallydev.com/slm/webservice/v2.0/defect/create").
+          params(
+            project:
+              "https://rally1.rallydev.com/slm/webservice/v2.0/project/#{input["project"]}"
+          ).
           payload("Defect": input)["CreateResult"]
       end,
 
@@ -194,6 +198,10 @@
 
       execute: lambda do |connection, input|
         get("https://rally1.rallydev.com/slm/webservice/v2.0/defect/#{input["ObjectID"]}").
+          params(
+            project:
+              "https://rally1.rallydev.com/slm/webservice/v2.0/project/#{input["project"]}"
+          ).
           dig("Defect")
       end,
 
@@ -249,7 +257,10 @@
         response = get("https://rally1.rallydev.com/slm/webservice/v2.0/defect").
           params(
             order: "LastUpdateDate desc",
-            pagesize: limit)
+            pagesize: limit,
+            query: "(LastUpdateDate >= #{from})",
+            project:
+              "https://rally1.rallydev.com/slm/webservice/v2.0/project/#{input["project"]}")
         ref_defects = response.dig("QueryResult", "Results")
         defects = ref_defects.map { |d| get(d["_ref"])["Defect"] }
         {
