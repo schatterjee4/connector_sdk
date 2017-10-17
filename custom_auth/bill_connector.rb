@@ -88,7 +88,7 @@
       fields: lambda { |_connection, _config_fields|
         post("/api/v2/GetEntityMetadata.json").
           dig("response_data", "Vendor", "fields").
-          map { |key, _value| { name: key } } || {}
+          map { |key, _value| { name: key } } || []
       }
     }
   },
@@ -134,7 +134,7 @@
 
         vendors = post("/api/v2/List/Vendor.json").
                   payload(data: query.to_json).
-                  dig("response_data") || {}
+                  dig("response_data") || []
 
         {
           events: vendors,
