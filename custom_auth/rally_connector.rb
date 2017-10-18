@@ -197,12 +197,18 @@
       end,
 
       execute: lambda do |connection, input|
-        get("https://rally1.rallydev.com/slm/webservice/v2.0/defect/#{input["ObjectID"]}").
+        defect = get("https://rally1.rallydev.com/slm/webservice/v2.0/defect/#{input["ObjectID"]}").
           params(
             project:
               "https://rally1.rallydev.com/slm/webservice/v2.0/project/#{input["project"]}"
           ).
           dig("Defect")
+          defect.each do |k,v|
+            #TODO Streamline type checking
+            if v.to_s.starts_with?("{") && v["Count"]
+              defect[k] = get(v["_ref"]).dig("QueryResult", "Results")
+            end
+          end
       end,
 
       output_fields: lambda do |object_definitions|
@@ -262,7 +268,15 @@
             project:
               "https://rally1.rallydev.com/slm/webservice/v2.0/project/#{input["project"]}")
         ref_defects = response.dig("QueryResult", "Results")
-        defects = ref_defects.map { |d| get(d["_ref"])["Defect"] }
+        defects = ref_defects.map do |d|
+          defect = get(d["_ref"])["Defect"]
+          defect.each do |k,v|
+            #TODO Streamline type checking
+            if v.to_s.starts_with?("{") && v["Count"]
+              defect[k] = get(v["_ref"]).dig("QueryResult", "Results")
+            end
+          end
+        end
         {
           events: defects,
           next_page: defects.length >= limit ? page + 1 : nil
