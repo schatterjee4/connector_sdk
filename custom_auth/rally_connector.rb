@@ -252,7 +252,7 @@
 
       input_fields: lambda do
         [
-          { name: "from", type: :date, optional: false }
+          { name: "from", type: :timestamp, optional: false }
         ]
       end,
 
