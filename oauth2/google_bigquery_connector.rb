@@ -6,15 +6,15 @@
       {
         name: "client_id",
         hint: "Find it " \
-          "<a href='https://console.cloud.google.com/apis/credentials'>" \
-          "here</a>",
+          "<a href='https://console.cloud.google.com/apis/credentials' " \
+          "target='_blank'>here</a>",
         optional: false,
       },
       {
         name: "client_secret",
         hint: "Find it " \
-          "<a href='https://console.cloud.google.com/apis/credentials'>" \
-          "here</a>",
+          "<a href='https://console.cloud.google.com/apis/credentials' " \
+          "target='_blank'>here</a>",
         optional: false,
         control_type: "password",
       }
@@ -223,9 +223,7 @@
     projects: lambda do |_connection|
       get("https://www.googleapis.com/bigquery/v2/projects").
         dig("projects").
-        map do |project|
-          [project["friendlyName"], project["id"]]
-        end
+        pluck("friendlyName", "id")
     end,
 
     datasets: lambda do |_connection, project_id:|
@@ -243,7 +241,8 @@
     tables: lambda do |_connection, project_id:, dataset_id:|
       get("https://www.googleapis.com/bigquery/v2/projects/" \
         "#{project_id}/datasets/#{dataset_id}/tables").
-        dig("tables").map do |table|
+        dig("tables").
+        map do |table|
           [
             table["tableReference"]["tableId"],
             table["tableReference"]["tableId"]
