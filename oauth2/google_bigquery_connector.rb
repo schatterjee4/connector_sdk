@@ -68,10 +68,14 @@
         headers(Authorization: "Bearer #{access_token}")
       end,
     },
+
+    base_uri: lambda do |_connection|
+      "https://www.googleapis.com"
+    end
   },
 
   test: lambda do |_connection|
-    get("https://www.googleapis.com/bigquery/v2/projects").
+    get("/bigquery/v2/projects").
       params(maxResults: 1)
   end,
 
@@ -144,16 +148,15 @@
                " best-effort basis"
             }
           ].concat((if project_id && dataset_id && table_id
-                      get("https://www.googleapis.com/bigquery/v2/"     \
-                        "projects/#{project_id}/datasets/#{dataset_id}" \
-                        "/tables/#{table_id}").
+                      get("/bigquery/v2/projects/#{project_id}/datasets/" \
+                        "#{dataset_id}/tables/#{table_id}").
                         dig("schema", "fields")
                     else
                       []
                     end).
-                map do |table_field|
-                  build_schema_field[table_field]
-                end)
+            map do |table_field|
+              build_schema_field[table_field]
+            end)
         ]
       end
     }
@@ -197,9 +200,8 @@
       end,
 
       execute: lambda do |_connection, input|
-        post("https://www.googleapis.com/bigquery/v2/projects/" \
-          "#{input['project']}/datasets/#{input['dataset']}/"   \
-          "tables/#{input['table']}/insertAll").
+        post("/bigquery/v2/projects/#{input['project']}/datasets/" \
+          "#{input['dataset']}/tables/#{input['table']}/insertAll").
           params(fields: "kind,insertErrors").
           payload(rows: (input["rows"] || []).map do |row|
                           {
@@ -221,14 +223,13 @@
 
   pick_lists: {
     projects: lambda do |_connection|
-      get("https://www.googleapis.com/bigquery/v2/projects").
+      get("/bigquery/v2/projects").
         dig("projects").
         pluck("friendlyName", "id")
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" \
-        "#{project_id}/datasets").
+      get("/bigquery/v2/projects/#{project_id}/datasets").
         dig("datasets").
         map do |dataset|
           [
@@ -239,8 +240,7 @@
     end,
 
     tables: lambda do |_connection, project_id:, dataset_id:|
-      get("https://www.googleapis.com/bigquery/v2/projects/" \
-        "#{project_id}/datasets/#{dataset_id}/tables").
+      get("/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables").
         dig("tables").
         map do |table|
           [
