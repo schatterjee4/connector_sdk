@@ -111,7 +111,7 @@
 
       execute: lambda { |_connection, input|
         get("/api/documents/#{input['guid']}.json").
-          dig("document")
+          dig("document") || {}
       },
 
       output_fields: lambda { |object_definitions|
@@ -128,9 +128,9 @@
 
   triggers: {
     new_signed_document: {
+      subtitle: "New signed document",
       description: "New <span class='provider'>signed document</span>" \
         " in <span class='provider'>RightSignature</span>",
-      subtitle: "New signed document in RightSignature",
       type: "paging_desc",
 
       input_fields: lambda {
@@ -150,11 +150,11 @@
       poll: lambda { |_connection, input, page|
         page ||= 1
         page_size = 50
-        documents = get("/api/documents.json").
-                    payload(page: page,
-                            per_page: page_size,
-                            state: "signed").
-                    dig("page", "documents").
+        documents = (get("/api/documents.json").
+                       payload(page: page,
+                               per_page: page_size,
+                               state: "signed").
+                       dig("page", "documents") || []).
                     select do |document|
                       document["completed_at"].to_time >=
                         (input["since"].presence || 1.hour.ago).to_time
