@@ -64,14 +64,12 @@
         [
           {
             name: "from_email",
-            hint: "The default sender address for the template, if" \
-              " provided - draft version",
+            hint: "The sender email address",
             optional: false
           },
           {
             name: "from_name",
-            hint: "The default sender from name for the template, if" \
-              " provided - draft version"
+            hint: "The sender from name"
           },
           {
             name: "to",
