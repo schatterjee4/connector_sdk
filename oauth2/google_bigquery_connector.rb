@@ -145,7 +145,9 @@
               label: "Insert ID",
               hint: "A unique ID for each row. Google BigQuery uses this" \
                " property to detect duplicate insertion requests on a"    \
-               " best-effort basis"
+               " best-effort basis. Get more info <a "                    \
+               "href='https://cloud.google.com/bigquery/streaming-data-"  \
+               "into-bigquery#dataconsistency' target='_blank'>here</a>.",
             }
           ].concat((if project_id && dataset_id && table_id
                       get("/bigquery/v2/projects/#{project_id}/datasets/" \
