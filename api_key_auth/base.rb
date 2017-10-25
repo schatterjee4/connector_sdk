@@ -23,19 +23,19 @@
     lead: {
       fields: lambda do
         [
-          { name: "id", type: :integer, label: "Lead id",
+          { name: "id", type: :integer, label: "Lead ID",
             control_type: :number },
-          { name: "creator_id", type: :integer, label: "Created by(User ID)",
+          { name: "creator_id", type: :integer, label: "Created by (User ID)",
             control_type: :number },
-          { name: "owner_id", type: :integer, label: "Owner id",
+          { name: "owner_id", type: :integer, label: "Owner ID",
             control_type: :number },
           { name: "first_name" },
           { name: "last_name",
           	hint: "Required only if a lead is an individual. "\
-          	"<code>company_name</code> is empty." },
+          	"<code>Organisation name</code> should be left empty." },
           { name: "organization_name",
           	hint: "Required only if a lead is an organization. "\
-          	"<code>last_name</code> is empty." },
+          	"<code>Last name</code> should be left empty." },
           { name: "title" },
           { name: "description" },
           { name: "industry" },
@@ -72,12 +72,12 @@
       description: 'Search <span class="provider">Leads</span> in
         <span class="provider">Base CRM</span>',
       subtitle: "Search leads in Base CRM",
-      help: "Search will only return leads matching all inputs," \
-       " Returns all leads, if blank",
+      help: "Search will only return leads matching all inputs." \
+       " Returns all leads, if blank.",
        
       input_fields: lambda do |object_definitions|
         [
-          { name: "ids", label: "Id's",
+          { name: "ids", label: "ID",
             hint: "Comma-separated list of lead IDs." },
           { name: "address_op_city_cl_", label: "City name" },
           { name: "address_op_postal_code_cl_", label: "Zip/postal code" },
@@ -121,8 +121,8 @@
       description:
       'Create <span>Lead</span> in <span class="provider">Base CRM</span>',
       subtitle: "Create lead in Base CRM",
-      help: "Enter Last name or organisation name " \
-       "to create account. It is not necessary to have both",
+      help: "Either last name or organisation name is required " \
+       "to create account for individuals/organisations respectively.",
 
       input_fields: lambda do |object_definitions|
         object_definitions["lead"].
