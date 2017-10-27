@@ -3,7 +3,9 @@
 
   connection: {
     fields: [
-      { name: "api_key", label: "API key", optional: false },
+      { name: "api_key", label: "API key", hint: "Get more info from" \
+          "<a href='https://help.salesforceiq.com/articles/set-up-api-access'" \
+          "target='_blank'>here.</a>", optional: false },
       { name: "api_secret", label: "API secret", optional: false,
         control_type: "password" }
     ],
