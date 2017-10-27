@@ -85,7 +85,7 @@
       input_fields: lambda do
         [
           { name: "_ids", label: "Account identifiers",
-            hint: "Comma separated list of Account identifiers" }
+            hint: "Comma separated list of account identifiers" }
         ]
       end,
 
@@ -119,17 +119,17 @@
 
   triggers: {
 
-    new_updated_accounts: {
+    new_or_updated_accounts: {
       description: "New/Updated <span class='provider'>Account</span> in " \
         "<span class='provider'>SalesforceIQ</span>",
-      help: "Checks for new or updated accounts",
+      help: "Checks for new or updated accounts.",
       input_fields: lambda do
         [
           {
             name: "since", type: :timestamp,
             sticky: true, label: "From",
-            hint: "Fetch trigger events from specified time, If left blank," \
-             " accounts are processed from Recipe start time"
+            hint: "Fetch trigger events from specified time. If left blank," \
+             " accounts are processed from recipe start time"
           }
         ]
       end,
