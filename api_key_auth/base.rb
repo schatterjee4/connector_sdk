@@ -31,11 +31,11 @@
             control_type: :number },
           { name: "first_name" },
           { name: "last_name",
-          	hint: "Required only if a lead is an individual. "\
-          	"<code>Organisation name</code> should be left empty." },
+            hint: "Required only if a lead is an individual. "\
+            "<code>Organisation name</code> should be left empty." },
           { name: "organization_name",
-          	hint: "Required only if a lead is an organization. "\
-          	"<code>Last name</code> should be left empty." },
+            hint: "Required only if a lead is an organization. "\
+            "<code>Last name</code> should be left empty." },
           { name: "title" },
           { name: "description" },
           { name: "industry" },
@@ -88,17 +88,16 @@
       end,
 
       execute: lambda do |connection, input|
-        query = {}
-        input.map do |key, value|
+        params = input.map do |key, value|
           if key.include?("_op_") && value.present?
-            query[key.gsub("_op_","[").gsub("_cl_", "]")] = value
+            key.gsub("_op_","[").gsub("_cl_", "]") + "=" + value
           else
-            key == "quantity" && value.present?
+            key + "=" +  value
           end
-        end
+        end.join("&")
         {
-          leads: get("https://api.getbase.com/v2/leads", query).dig("items")&.
-          	pluck("data")
+          leads: get("https://api.getbase.com/v2/leads" + params).dig("items")&.
+            pluck("data")
         }
       end,
 
@@ -113,7 +112,7 @@
         {
           leads:
           [get("https://api.getbase.com/v2/leads").
-          	params(per_page: 1)["items"].dig(0, "data")]
+            params(per_page: 1)["items"].dig(0, "data") || {} ]
         }
       end
     },
@@ -131,7 +130,7 @@
 
       execute: lambda do |connection, input|
         lead = post("https://api.getbase.com/v2/leads").
-        	payload(data: input)["data"]
+          payload(data: input)["data"]
         {
           lead: lead
         }
