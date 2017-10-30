@@ -38,33 +38,33 @@
     },
     {
       "id":"7",
+      "name":"SalesforceIQ",
+      "image":"images/salesforceiq.png",
+      "link":"https://www.workato.com/custom_adapters/1747?token=457560e5"
+    },
+    {
+      "id":"8",
       "name":"Shopware",
       "image":"images/shopware.png",
       "link":"https://www.workato.com/custom_adapters/1324?token=bdb1c519"
     },
     {
-      "id":"8",
+      "id":"9",
       "name":"Spotify",
       "image":"images/spotify.png",
       "link":"https://www.workato.com/custom_adapters/1326?token=6f014f44"
     },
     {
-      "id":"9",
+      "id":"10",
       "name":"Stripe",
       "image":"images/stripe.png",
       "link":"https://www.workato.com/custom_adapters/1327?token=0f626598"
     },
     {
-      "id":"10",
+      "id":"11",
       "name":"Transdirect",
       "image":"images/transdirect.png",
       "link":"https://www.workato.com/custom_adapters/1329?token=d180f84e"
-    },
-    {
-      "id":"11",
-      "name":"SalesforceIQ",
-      "image":"images/salesforceiq.png",
-      "link":"https://www.workato.com/custom_adapters/1747?token=457560e5"
     }
   ]
 }
