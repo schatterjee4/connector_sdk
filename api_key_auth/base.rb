@@ -90,9 +90,9 @@
       execute: lambda do |connection, input|
         params = input.map do |key, value|
           if key.include?("_op_") && value.present?
-            key.gsub("_op_","[").gsub("_cl_", "]") + "=" + value
+            key.gsub("_op_", "[").gsub("_cl_", "]") + "=" + value
           else
-            key + "=" +  value
+            key + "=" + value
           end
         end.join("&")
         {
@@ -112,7 +112,7 @@
         {
           leads:
           [get("https://api.getbase.com/v2/leads").
-            params(per_page: 1)["items"].dig(0, "data") || {} ]
+            params(per_page: 1)["items"].dig(0, "data") || {}]
         }
       end
     },
