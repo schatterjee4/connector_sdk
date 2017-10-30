@@ -5,13 +5,13 @@
       "name":"Aftership",
       "image":"images/aftership.png",
       "link":"https://www.workato.com/custom_adapters/1316?token=b83769ad"
-    },		
+    },
     {
       "id":"2",
       "name":"Chartmogul",
       "image":"images/chartmogul.png",
       "link":"https://www.workato.com/custom_adapters/1319?token=51dd82ec"
-    },		
+    },
     {
       "id":"3",
       "name":"Constant Contact",
@@ -54,12 +54,17 @@
       "image":"images/stripe.png",
       "link":"https://www.workato.com/custom_adapters/1327?token=0f626598"
     },
-
     {
       "id":"10",
       "name":"Transdirect",
       "image":"images/transdirect.png",
       "link":"https://www.workato.com/custom_adapters/1329?token=d180f84e"
+    },
+    {
+      "id":"11",
+      "name":"SalesforceIQ",
+      "image":"images/salesforceiq.png",
+      "link":"https://www.workato.com/custom_adapters/1747?token=457560e5"
     }
   ]
 }
