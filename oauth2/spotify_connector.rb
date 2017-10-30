@@ -29,7 +29,7 @@
                       user(connection['client_id']).
                       password(connection['client_secret']).
                       request_format_www_form_urlencoded
-       	[ response, nil, nil ]
+         [ response, nil, nil ]
        end,
 
        refresh_on: 401,
