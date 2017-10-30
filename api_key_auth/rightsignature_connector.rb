@@ -6,8 +6,8 @@
       {
         name: "api_key",
         label: "Secure token",
-        hint: "You may find the secure token <a href='https://rightsignature.com" \
-          "/oauth_clients' target='_blank'>here</a>",
+        hint: "You may find the secure token <a href=" \
+          "'https://rightsignature.com/oauth_clients' target='_blank'>here</a>",
         control_type: "password",
         optional: false
       }
