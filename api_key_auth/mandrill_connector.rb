@@ -5,10 +5,10 @@
     fields: [
       {
         name: "api_key",
-        label: "API Key",
+        label: "API key",
         control_type: "password",
-        hint: "You may find it <a href='https://mandrillapp.com/settings' " \
-          "target='_blank'>here</a>",
+        hint: "You may find the API key <a href='https://mandrillapp.com" \
+          "/settings' target='_blank'>here</a>",
         optional: false
       }
     ],
@@ -69,7 +69,7 @@
           },
           {
             name: "from_name",
-            hint: "The sender from name"
+            hint: "The sender name"
           },
           {
             name: "to",
@@ -157,8 +157,7 @@
                                utc.
                                to_s.
                                gsub(/[TZ]/, "T" => " ", "Z" => "")
-                           end)&.
-          first
+                           end)&.first
       },
 
       output_fields: lambda { |_object_definitions|
