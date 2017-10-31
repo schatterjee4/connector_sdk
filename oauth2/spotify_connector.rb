@@ -383,7 +383,9 @@
           },
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
-            hint: "ID of the device to play on"
+            control_type: :select, pick_list: "devices",
+            hint: "ID of the device to play on. If blank, playback will commence"\
+                  " from last active device."
           }
         ]
       end,
@@ -412,7 +414,9 @@
         [
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
-            hint: "ID of the device to play on"
+            control_type: :select, pick_list: "devices",
+            hint: "ID of the device to pause on. If blank, playback will pause"\
+                  " on last active device."
           }
         ]
       end,
@@ -433,7 +437,9 @@
         [
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
-            hint: "ID of the device to play on"
+            control_type: :select, pick_list: "devices",
+            hint: "ID of the device to skip on. If blank, track will be skipped"\
+                  " on last active device."
           }
         ]
       end,
@@ -450,11 +456,15 @@
       description: "Rewind to <span class=\"provider\">previous track</span> "\
                     "in <span class=\"provider\">Spotify</span>",
 
+      hint: "Rewinds to the previous track.",
+
       input_fields: lambda do
         [
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
-            hint: "ID of the device to play on"
+            control_type: :select, pick_list: "devices",
+            hint: "ID of the device to rewind on. If blank, track will be rewound"\
+                  " on last active device."
           }
         ]
       end,
@@ -470,11 +480,11 @@
 
   triggers: {
   },
-  
+
   pick_lists: {
     devices: lambda do |connection|
       get("https://api.spotify.com/v1/me/player/devices")["devices"].
-      map { |device| [device["name"], device["id"]] }
+        map { |device| [device["name"], device["id"]] }
     end
   }
 }
