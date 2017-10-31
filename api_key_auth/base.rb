@@ -96,7 +96,7 @@
           end
         end.join("&")
         {
-          leads: get("https://api.getbase.com/v2/leads" + params).dig("items")&.
+          leads: get("https://api.getbase.com/v2/leads?" + params).dig("items")&.
             pluck("data")
         }
       end,
