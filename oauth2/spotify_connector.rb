@@ -22,15 +22,15 @@
 
       acquire: lambda do |connection, auth_code|
         response = post("https://accounts.spotify.com/api/token").
-                    payload(
-                      grant_type: "authorization_code",
-                      code: auth_code,
-                      redirect_uri: "https://www.workato.com/oauth/callback"
-                    ).
-                    user(connection["client_id"]).
-                    password(connection["client_secret"]).
-                    request_format_www_form_urlencoded
-        [ response, nil, nil ]
+                     payload(
+                       grant_type: "authorization_code",
+                       code: auth_code,
+                       redirect_uri: "https://www.workato.com/oauth/callback"
+                     ).
+                     user(connection["client_id"]).
+                     password(connection["client_secret"]).
+                     request_format_www_form_urlencoded
+        [response, nil, nil]
       end,
 
       refresh_on: 401,
@@ -117,7 +117,7 @@
             { name: "uri", label: "Spotify URI" },
             { name: "external_urls" },
             { name: "href", type: "string", control_type: "url" }
-          ] },
+            ] },
           { name: "uri", label: "Spotify URI" },
           { name: "external_urls" },
           { name: "href", type: "string", control_type: "url" },
@@ -126,7 +126,7 @@
           { name: "tracks", type: "object", properties: [
             { name: "href", type: "string", control_type: "url" },
             { name: "total", type: "integer" }
-          ] }
+            ] }
         ]
       end
     },
