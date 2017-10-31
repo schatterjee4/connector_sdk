@@ -179,8 +179,8 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
-        test = get("https://api.spotify.com/v1/search", input).
+      execute: lambda do |_connection, input|
+        get("https://api.spotify.com/v1/search", input).
           params(
             type: "track"
           )["tracks"]
@@ -216,7 +216,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         get("https://api.spotify.com/v1/search", input).
           params(
             type: "playlist"
@@ -253,7 +253,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         get("https://api.spotify.com/v1/search", input).
           params(
             type: "artist"
@@ -290,7 +290,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         get("https://api.spotify.com/v1/search", input).
           params(
             type: "album"
@@ -330,7 +330,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         if input["country"].present?
           input["country"] = input["country"].to_country_alpha2
         end
@@ -352,7 +352,7 @@
       input_fields: lambda do
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, _input|
         get("https://api.spotify.com/v1/me/player/devices").
           params(limit: 50)
       end,
@@ -391,7 +391,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         if input["play_uri"].present?
           if input["play_uri"].include?("track")
             input["uris"] = [input["play_uri"]]
@@ -422,7 +422,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         put("https://api.spotify.com/v1/me/player/pause", input)
       end,
 
@@ -445,7 +445,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         post("https://api.spotify.com/v1/me/player/next", input)
       end,
 
@@ -470,7 +470,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         post("https://api.spotify.com/v1/me/player/previous", input)
       end,
 
@@ -483,7 +483,7 @@
   },
 
   pick_lists: {
-    devices: lambda do |connection|
+    devices: lambda do |_connection|
       get("https://api.spotify.com/v1/me/player/devices")["devices"].
         map { |device| [device["name"], device["id"]] }
     end
