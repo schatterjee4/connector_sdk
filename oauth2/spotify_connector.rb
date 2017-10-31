@@ -1,54 +1,54 @@
 {
   title: "Spotify",
 
-   connection: {
-     fields: [
+  connection: {
+    fields: [
       { name: 'client_id', control_type: 'password', optional: false },
       { name: 'client_secret', control_type: 'password', optional: false }
-     ],
+    ],
 
-     authorization: {
-       type: "oauth2",
+    authorization: {
+      type: "oauth2",
 
-       authorization_url: lambda do |connection|
-         params = {
-           response_type: "code",
-           client_id: connection["client_id"],
-           redirect_uri: "https://www.workato.com/oauth/callback",
-           scope: "user-read-playback-state user-modify-playback-state"
-         }.to_param
-         "https://accounts.spotify.com/authorize?" + params
-       end,
-
-       acquire: lambda do |connection, auth_code|
-         response = post("https://accounts.spotify.com/api/token").
-                      payload(
-                       	grant_type: "authorization_code",
-                        code: auth_code,
-                        redirect_uri: "https://www.workato.com/oauth/callback").
-                      user(connection['client_id']).
-                      password(connection['client_secret']).
-                      request_format_www_form_urlencoded
-         [ response, nil, nil ]
-       end,
-
-       refresh_on: 401,
-
-       refresh: lambda do |connection, refresh_token|
-         post("https://accounts.spotify.com/api/token").
-           payload(
-             grant_type: "refresh_token",
-             refresh_token: refresh_token).
-           user(connection['client_id']).
-           password(connection['client_secret']).
-           request_format_www_form_urlencoded
+      authorization_url: lambda do |connection|
+        params = {
+          response_type: "code",
+          client_id: connection["client_id"],
+          redirect_uri: "https://www.workato.com/oauth/callback",
+          scope: "user-read-playback-state user-modify-playback-state"
+        }.to_param
+        "https://accounts.spotify.com/authorize?" + params
       end,
 
-       apply: lambda do |connection, access_token|
-         headers('Authorization': "Bearer #{access_token}")
-       end
-     }
-   },
+      acquire: lambda do |connection, auth_code|
+        response = post("https://accounts.spotify.com/api/token").
+        payload(
+          grant_type: "authorization_code",
+          code: auth_code,
+          redirect_uri: "https://www.workato.com/oauth/callback").
+          user(connection['client_id']).
+          password(connection['client_secret']).
+          request_format_www_form_urlencoded
+          [ response, nil, nil ]
+      end,
+
+      refresh_on: 401,
+
+      refresh: lambda do |connection, refresh_token|
+        post("https://accounts.spotify.com/api/token").
+        payload(
+          grant_type: "refresh_token",
+          refresh_token: refresh_token).
+          user(connection['client_id']).
+          password(connection['client_secret']).
+          request_format_www_form_urlencoded
+      end,
+
+      apply: lambda do |connection, access_token|
+        headers('Authorization': "Bearer #{access_token}")
+      end
+    }
+  },
 
   object_definitions: {
     device: {
@@ -72,24 +72,20 @@
           { name: "album_type" },
           { name: "href", type: "string", control_type: "url" },
           { name: "uri", label: "Spotify URI" },
-          {
-            name: "artists", type: "array", of: "object",
+          { name: "artists", type: "array", of: "object",
             properties: [
               { name: "id" },
               { name: "name" },
               { name: "uri", label: "Spotify URI" },
               { name: "external_urls" },
               { name: "href", type: "string", control_type: "url" }
-            ]
-          },
-          {
-            name: "images", type: "array", of: "object",
+            ] },
+          { name: "images", type: "array", of: "object",
             properties: [
               { name: "url", type: "string", control_type: "url" },
               { name: "height", type: "integer" },
               { name: "width", type: "integer" }
-            ]
-          },
+            ] },
           { name: "available_markets", type: "array", properties: [] },
           { name: "external_urls" }
         ]
@@ -113,26 +109,22 @@
         [
           { name: "id" },
           { name: "name" },
-          {
-            name: "owner", type: "object", properties: [
+          { name: "owner", type: "object", properties: [
               { name: "id" },
               { name: "name" },
               { name: "uri", label: "Spotify URI" },
               { name: "external_urls" },
               { name: "href", type: "string", control_type: "url" }
-            ]
-          },
+            ] },
           { name: "uri", label: "Spotify URI" },
           { name: "external_urls" },
           { name: "href", type: "string", control_type: "url" },
           { name: "collaborative", type: "boolean" },
           { name: "public", type: "boolean" },
-          {
-            name: "tracks", type: "object", properties: [
+          { name: "tracks", type: "object", properties: [
               { name: "href", type: "string", control_type: "url" },
               { name: "total", type: "integer" }
-            ]
-          }
+            ] }
         ]
       end
     },
@@ -150,16 +142,14 @@
           { name: "is_playable", type: "boolean", label: "Playable" },
           { name: "href", type: "string", control_type: "url" },
           { name: "preview_url", type: "string", control_type: "url" },
-          {
-            name: "artists", type: "array", of: "object",
+          { name: "artists", type: "array", of: "object",
             properties: [
               { name: "id" },
               { name: "name" },
               { name: "uri", label: "Spotify URI" },
               { name: "external_urls" },
               { name: "href", type: "string", control_type: "url" }
-            ]
-          },
+            ] },
           { name: "uri", label: "Spotify URI" }
         ]
       end
@@ -173,7 +163,7 @@
   actions: {
     search_tracks: {
       description: "Search <span class=\"provider\">Tracks</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -208,7 +198,7 @@
 
     search_playlists: {
       description: "Search <span class=\"provider\">Playlists</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -243,7 +233,7 @@
 
     search_artists: {
       description: "Search <span class=\"provider\">Artists</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -278,7 +268,7 @@
 
     search_albums: {
       description: "Search <span class=\"provider\">Albums</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -313,7 +303,7 @@
 
     get_new_releases: {
       description: "Get list of <span class=\"provider\">New Releases</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -330,7 +320,7 @@
           input["country"] = input["country"].to_country_alpha2
         end
         get("https://api.spotify.com/v1/browse/new-releases", input).
-        params( limit: 50 )
+          params( limit: 50 )
       end,
 
       output_fields: lambda do |object_definitions|
@@ -344,7 +334,7 @@
 
       execute: lambda do |connection, input|
         get("https://api.spotify.com/v1/me/player/devices").
-        params( limit: 50 )
+          params( limit: 50 )
       end,
 
       output_fields: lambda do |object_definitions|
@@ -361,7 +351,7 @@
 
     start_resume_playback: {
       description: "Start/Resume <span class=\"provider\">Playback</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -370,7 +360,7 @@
             optional: true,
             sticky: true,
             hint: "Spotify URI of the context to play, "\
-                  "e.g. albums, artists or playlists."
+            "e.g. albums, artists or playlists."
           },
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
@@ -388,7 +378,6 @@
           end
         end
         input = input.reject{ |k,v| k == "play_uri" }
-
         put("https://api.spotify.com/v1/me/player/play", input)
       end,
 
@@ -398,7 +387,7 @@
 
     pause_playback: {
       description: "Pause <span class=\"provider\">Playback</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -419,7 +408,7 @@
 
     skip_track: {
       description: "Skip to <span class=\"provider\">next track</span> in "\
-                   "<span class=\"provider\">Spotify</span>",
+                    "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -440,7 +429,7 @@
 
     rewind_track: {
       description: "Rewind to <span class=\"provider\">previous track</span> "\
-                   "in <span class=\"provider\">Spotify</span>",
+                    "in <span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -458,14 +447,15 @@
       output_fields: lambda do
       end
     },
+  },
 
   triggers: {
   },
-
+  
   pick_lists: {
     devices: lambda do |connection|
       get("https://api.spotify.com/v1/me/player/devices")["devices"].
-        map { |device| [device["name"], device["id"]] }
+      map { |device| [device["name"], device["id"]] }
     end
   }
 }
