@@ -22,30 +22,32 @@
 
       acquire: lambda do |connection, auth_code|
         response = post("https://accounts.spotify.com/api/token").
-        payload(
-          grant_type: "authorization_code",
-          code: auth_code,
-          redirect_uri: "https://www.workato.com/oauth/callback").
-          user(connection['client_id']).
-          password(connection['client_secret']).
-          request_format_www_form_urlencoded
-          [ response, nil, nil ]
+                    payload(
+                      grant_type: "authorization_code",
+                      code: auth_code,
+                      redirect_uri: "https://www.workato.com/oauth/callback"
+                    ).
+                    user(connection["client_id"]).
+                    password(connection["client_secret"]).
+                    request_format_www_form_urlencoded
+        [ response, nil, nil ]
       end,
 
       refresh_on: 401,
 
-      refresh: lambda do |connection, refresh_token|
+      refresh: lambda do |_connection, refresh_token|
         post("https://accounts.spotify.com/api/token").
-        payload(
-          grant_type: "refresh_token",
-          refresh_token: refresh_token).
-          user(connection['client_id']).
-          password(connection['client_secret']).
+          payload(
+            grant_type: "refresh_token",
+            refresh_token: refresh_token
+          ).
+          user(connection["client_id"]).
+          password(connection["client_secret"]).
           request_format_www_form_urlencoded
       end,
 
-      apply: lambda do |connection, access_token|
-        headers('Authorization': "Bearer #{access_token}")
+      apply: lambda do |_connection, access_token|
+        headers("Authorization": "Bearer #{access_token}")
       end
     }
   },
@@ -110,21 +112,21 @@
           { name: "id" },
           { name: "name" },
           { name: "owner", type: "object", properties: [
-              { name: "id" },
-              { name: "name" },
-              { name: "uri", label: "Spotify URI" },
-              { name: "external_urls" },
-              { name: "href", type: "string", control_type: "url" }
-            ] },
+            { name: "id" },
+            { name: "name" },
+            { name: "uri", label: "Spotify URI" },
+            { name: "external_urls" },
+            { name: "href", type: "string", control_type: "url" }
+          ] },
           { name: "uri", label: "Spotify URI" },
           { name: "external_urls" },
           { name: "href", type: "string", control_type: "url" },
           { name: "collaborative", type: "boolean" },
           { name: "public", type: "boolean" },
           { name: "tracks", type: "object", properties: [
-              { name: "href", type: "string", control_type: "url" },
-              { name: "total", type: "integer" }
-            ] }
+            { name: "href", type: "string", control_type: "url" },
+            { name: "total", type: "integer" }
+          ] }
         ]
       end
     },
@@ -156,7 +158,7 @@
     }
   },
 
-  test: lambda do |connection|
+  test: lambda do |_connection|
     get("https://api.spotify.com/v1/me")
   end,
 
@@ -399,7 +401,7 @@
             input["context_uri"] = input["play_uri"]
           end
         end
-        input = input.reject { |k,v| k == "play_uri" }
+        input = input.reject { |k, _v| k == "play_uri" }
         put("https://api.spotify.com/v1/me/player/play", input)
       end,
 
