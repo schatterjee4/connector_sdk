@@ -3,8 +3,8 @@
 
   connection: {
     fields: [
-      { name: 'client_id', control_type: 'password', optional: false },
-      { name: 'client_secret', control_type: 'password', optional: false }
+      { name: "client_id", control_type: "password", optional: false },
+      { name: "client_secret", control_type: "password", optional: false }
     ],
 
     authorization: {
