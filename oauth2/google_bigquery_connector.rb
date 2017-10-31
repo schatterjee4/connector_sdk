@@ -5,14 +5,14 @@
     fields: [
       {
         name: "client_id",
-        hint: "Find it " \
+        hint: "Find client ID " \
           "<a href='https://console.cloud.google.com/apis/credentials' " \
           "target='_blank'>here</a>",
         optional: false,
       },
       {
         name: "client_secret",
-        hint: "Find it " \
+        hint: "Find client secret " \
           "<a href='https://console.cloud.google.com/apis/credentials' " \
           "target='_blank'>here</a>",
         optional: false,
@@ -34,7 +34,7 @@
           "https://www.googleapis.com/auth/devstorage.read_write",
         ].join(" ")
 
-        "https://accounts.google.com/o/oauth2/auth?client_id=" \
+        "https://accounts.google.com/o/oauth2/auth?client_id="            \
           "#{connection['client_id']}&response_type=code&scope=#{scopes}" \
           "&access_type=offline&include_granted_scopes=true&prompt=consent"
       end,
@@ -75,8 +75,7 @@
   },
 
   test: lambda do |_connection|
-    get("/bigquery/v2/projects").
-      params(maxResults: 1)
+    get("/bigquery/v2/projects").params(maxResults: 1)
   end,
 
   object_definitions: {
@@ -106,16 +105,15 @@
         }
 
         build_schema_field = lambda do |field|
-          field_name = field["name"].downcase
-          field_label = field["name"].humanize
           field_hint = [field["description"], hint_map[field["type"]]].
                        compact.join("<br/>")
           field_optional = (field["mode"] != "REQUIRED")
           field_type = type_map[field["type"]]
+
           if %w[RECORD STRUCT].include? field["type"]
             {
-              name: field_name,
-              label: field_label,
+              name: field["name"],
+              label: field["name"],
               hint: field_hint,
               optional: field_optional,
               type: field_type,
@@ -125,8 +123,8 @@
             }
           else
             {
-              name: field_name,
-              label: field_label,
+              name: field["name"],
+              label: field["name"],
               hint: field_hint,
               optional: field_optional,
               type: field_type,
@@ -142,23 +140,19 @@
           properties: [
             {
               name: "insertId",
-              label: "Insert ID",
-              hint: "A unique ID for each row. Google BigQuery uses this" \
-               " property to detect duplicate insertion requests on a"    \
-               " best-effort basis. Get more info <a "                    \
-               "href='https://cloud.google.com/bigquery/streaming-data-"  \
+              hint: "A unique ID for each row. Google BigQuery uses this " \
+               "property to detect duplicate insertion requests on a "     \
+               "best-effort basis. Find more information <a "              \
+               "href='https://cloud.google.com/bigquery/streaming-data-"   \
                "into-bigquery#dataconsistency' target='_blank'>here</a>.",
             }
           ].concat((if project_id && dataset_id && table_id
-                      get("/bigquery/v2/projects/#{project_id}/datasets/" \
+                      get("/bigquery/v2/projects/#{project_id}/datasets/"  \
                         "#{dataset_id}/tables/#{table_id}").
                         dig("schema", "fields")
                     else
                       []
-                    end).
-            map do |table_field|
-              build_schema_field[table_field]
-            end)
+                    end).map { |table_field| build_schema_field[table_field] })
         ]
       end
     }
@@ -166,9 +160,9 @@
 
   actions: {
     add_rows: {
+      subtitle: "Add data rows",
       description: "Add <span class='provider'>rows</span> to dataset" \
         " in <span class='provider'>Google BigQuery</span>",
-      subtitle: "Add data rows",
       help: "Streams data into a table of Google BigQuery.",
 
       config_fields: [
@@ -225,9 +219,7 @@
 
   pick_lists: {
     projects: lambda do |_connection|
-      get("/bigquery/v2/projects").
-        dig("projects").
-        pluck("friendlyName", "id")
+      get("/bigquery/v2/projects").dig("projects").pluck("friendlyName", "id")
     end,
 
     datasets: lambda do |_connection, project_id:|
