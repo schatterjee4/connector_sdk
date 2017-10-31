@@ -334,7 +334,7 @@
           input["country"] = input["country"].to_country_alpha2
         end
         get("https://api.spotify.com/v1/browse/new-releases", input).
-          params( limit: 50 )
+          params(limit: 50)
       end,
 
       output_fields: lambda do |object_definitions|
@@ -353,7 +353,7 @@
 
       execute: lambda do |connection, input|
         get("https://api.spotify.com/v1/me/player/devices").
-          params( limit: 50 )
+          params(limit: 50)
       end,
 
       output_fields: lambda do |object_definitions|
@@ -398,7 +398,7 @@
             input["context_uri"] = input["play_uri"]
           end
         end
-        input = input.reject{ |k,v| k == "play_uri" }
+        input = input.reject { |k,v| k == "play_uri" }
         put("https://api.spotify.com/v1/me/player/play", input)
       end,
 
