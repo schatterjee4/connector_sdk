@@ -165,6 +165,8 @@
       description: "Search <span class=\"provider\">Tracks</span> in "\
                     "<span class=\"provider\">Spotify</span>",
 
+      hint: "Returns a list of tracks matching the search criteria.",
+
       input_fields: lambda do
         [
           {
@@ -199,6 +201,8 @@
     search_playlists: {
       description: "Search <span class=\"provider\">Playlists</span> in "\
                     "<span class=\"provider\">Spotify</span>",
+
+      hint: "Returns a list of public playlists matching the search criteria.",
 
       input_fields: lambda do
         [
@@ -235,6 +239,8 @@
       description: "Search <span class=\"provider\">Artists</span> in "\
                     "<span class=\"provider\">Spotify</span>",
 
+      hint: "Returns a list of artists matching the search criteria.",
+
       input_fields: lambda do
         [
           {
@@ -269,6 +275,8 @@
     search_albums: {
       description: "Search <span class=\"provider\">Albums</span> in "\
                     "<span class=\"provider\">Spotify</span>",
+
+      hint: "Returns a list of albums matching the search criteria.",
 
       input_fields: lambda do
         [
@@ -305,12 +313,18 @@
       description: "Get list of <span class=\"provider\">New Releases</span> in "\
                     "<span class=\"provider\">Spotify</span>",
 
+      hint: "Returns a list of new releases by a particular country, if provided. "\
+            "If omitted, returned items will be relevant to all countries.",
+
       input_fields: lambda do
         [
           {
             name: "country",
             optional: true,
-            sticky: true
+            sticky: true,
+            hint: "Use ISO 3166-1 alpha-2 country code format. More information "\
+                  "<a href=\"https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2\">"\
+                  "here</a>."
           }
         ]
       end,
@@ -329,6 +343,11 @@
     },
 
     get_devices: {
+      description: "Get list of connected <span class=\"provider\">Devices</span> in "\
+                    "<span class=\"provider\">Spotify</span>",
+
+      hint: "Returns a list of information about all connected devices.",
+
       input_fields: lambda do
       end,
 
@@ -349,8 +368,8 @@
       end
     },
 
-    start_resume_playback: {
-      description: "Start/Resume <span class=\"provider\">Playback</span> in "\
+    start_or_resume_playback: {
+      description: "Start or resume <span class=\"provider\">Playback</span> in "\
                     "<span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
