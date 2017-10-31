@@ -310,11 +310,12 @@
     },
 
     get_new_releases: {
-      description: "Get list of <span class=\"provider\">New Releases</span> in "\
-                    "<span class=\"provider\">Spotify</span>",
+      description: "Get list of <span class=\"provider\">New Releases</span> "\
+                    "in <span class=\"provider\">Spotify</span>",
 
-      hint: "Returns a list of new releases by a particular country, if provided. "\
-            "If omitted, returned items will be relevant to all countries.",
+      hint: "Returns a list of new releases by a particular country, if "\
+            "provided. If omitted, returned items will be relevant to "\
+            "all countries.",
 
       input_fields: lambda do
         [
@@ -322,7 +323,7 @@
             name: "country",
             optional: true,
             sticky: true,
-            hint: "Use ISO 3166-1 alpha-2 country code format. More information "\
+            hint: "Use ISO 3166-1 alpha-2 country code format. More information"\
                   "<a href=\"https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2\">"\
                   "here</a>."
           }
@@ -343,7 +344,7 @@
     },
 
     get_devices: {
-      description: "Get list of connected <span class=\"provider\">Devices</span> in "\
+      description: "Get list of <span class=\"provider\">Devices</span> in "\
                     "<span class=\"provider\">Spotify</span>",
 
       hint: "Returns a list of information about all connected devices.",
@@ -369,8 +370,8 @@
     },
 
     start_or_resume_playback: {
-      description: "Start or resume <span class=\"provider\">Playback</span> in "\
-                    "<span class=\"provider\">Spotify</span>",
+      description: "Start or resume <span class=\"provider\">Playback</span> "\
+                    "in <span class=\"provider\">Spotify</span>",
 
       input_fields: lambda do
         [
@@ -384,8 +385,8 @@
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
             control_type: :select, pick_list: "devices",
-            hint: "ID of the device to play on. If blank, playback will commence"\
-                  " from last active device."
+            hint: "ID of the device to play on. If blank, playback will "\
+                  "commence from last active device."
           }
         ]
       end,
@@ -438,8 +439,8 @@
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
             control_type: :select, pick_list: "devices",
-            hint: "ID of the device to skip on. If blank, track will be skipped"\
-                  " on last active device."
+            hint: "ID of the device to skip on. If blank, track will be "\
+                  "skipped on last active device."
           }
         ]
       end,
@@ -463,8 +464,8 @@
           {
             name: "device_id", label: "Device", optional: true, sticky: true,
             control_type: :select, pick_list: "devices",
-            hint: "ID of the device to rewind on. If blank, track will be rewound"\
-                  " on last active device."
+            hint: "ID of the device to rewind on. If blank, track will be "\
+                  "rewound on last active device."
           }
         ]
       end,
