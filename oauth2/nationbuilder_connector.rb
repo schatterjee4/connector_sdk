@@ -14,14 +14,14 @@
       },
       {
         name: "client_id",
-        hint: "Find it " \
+        hint: "Find client ID " \
           "<a href='https://workato.nationbuilder.com/admin/apps'>" \
           "here</a>",
         optional: false
       },
       {
         name: "client_secret",
-        hint: "Find it " \
+        hint: "Find client secret " \
           "<a href='https://workato.nationbuilder.com/admin/apps'>" \
           "here</a>",
         optional: false,
@@ -132,15 +132,7 @@
           { name: "rnc_regid" },
           { name: "school_district" },
           { name: "school_sub_district" },
-          {
-            name: "sex",
-            control_type: "select",
-            pick_list: [
-              %w[Male M],
-              %w[Female F],
-              %w[Other O]
-            ]
-          },
+          { name: "sex", control_type: "select", pick_list: "genders" },
           { name: "state_file_id" },
           { name: "state_lower_district" },
           { name: "state_upper_district" },
@@ -188,8 +180,8 @@
       subtitle: "Search people",
       description: "Search <span class='provider'>people</span> in " \
       "<span class='provider'>NationBuilder</span>",
-      help: "Returns a list of people that have certain attributes. " \
-        "The documentation can be found <a " \
+      help: "Returns a list of people based on search criteria. " \
+        "Find more information <a " \
         "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
@@ -201,8 +193,8 @@
 
       execute: lambda { |_connection, input|
         {
-          people: get("/api/v1/people/search").
-            params({ per_page: 100 }.merge(input)).
+          people: get("/api/v1/people/search", input).
+            params(per_page: 100).
             dig("results") || []
         }
       },
@@ -231,13 +223,12 @@
       subtitle: "Get person by ID",
       description: "Get <span class='provider'>person</span> by ID in " \
         "<span class='provider'>NationBuilder</span>",
-      help: "Retrieve the data of a person by its ID or external ID. " \
-        "The documentation can be found <a " \
+      help: "Retrieve the data of a person by ID or external ID. " \
+        "Find more information <a " \
         "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["person"].
-          only("id", "external_id")
+        object_definitions["person"].only("id", "external_id")
       },
 
       execute: lambda { |_connection, input|
@@ -254,9 +245,7 @@
       },
 
       sample_output: lambda { |_connection|
-        get("/api/v1/people/search").
-          params(per_page: 1).
-          dig("results", 0) || {}
+        get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
       }
     },
 
@@ -265,7 +254,7 @@
       description: "Match <span class='provider'>person</span> in " \
         "<span class='provider'>NationBuilder</span>",
       help: "Use this match to find person that have certain attributes. " \
-        "The documentation can be found <a " \
+        "Find more information <a " \
         "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
 
       input_fields: lambda { |object_definitions|
@@ -274,9 +263,7 @@
       },
 
       execute: lambda { |_connection, input|
-        get("/api/v1/people/match").
-          params(input).
-          dig("person") || {}
+        get("/api/v1/people/match").params(input).dig("person") || {}
       },
 
       output_fields: lambda { |object_definitions|
@@ -284,9 +271,7 @@
       },
 
       sample_output: lambda { |_connection|
-        get("/api/v1/people/search").
-          params(per_page: 1).
-          dig("results", 0) || {}
+        get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
       }
     }
   },
@@ -341,9 +326,7 @@
       },
 
       sample_output: lambda { |_connection|
-        get("/api/v1/people/search").
-          params(per_page: 1).
-          dig("results", 0) || {}
+        get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
       }
     },
 
@@ -400,6 +383,16 @@
           params(per_page: 1).
           dig("results", 0) || {}
       }
+    }
+  },
+
+  pick_lists: {
+    genders: lambda { |_connection|
+      [
+        %w[Male M],
+        %w[Female F],
+        %w[Other O]
+      ]
     }
   }
 }
