@@ -307,18 +307,15 @@
                             1.hour.ago).to_time.utc.iso8601)
 
         {
-          events: response.dig("results") || [],
+          events: (response.dig("results") || []).
+            sort_by { |person| person["updated_at"] },
           next_poll: response.dig("next").presence,
           can_poll_more: response.dig("next").present?
         }
       },
 
       dedup: lambda { |person|
-        person["id"]
-      },
-
-      sort_by: lambda { |person|
-        person["updated_at"]
+        person["id"].to_s + "@" + person["updated_at"]
       },
 
       output_fields: lambda { |object_definitions|
@@ -360,18 +357,15 @@
                             to_time.to_i)
 
         {
-          events: response.dig("results") || [],
+          events: (response.dig("results") || []).
+            sort_by { |survey_response| survey_response["updated_at"] },
           next_poll: response.dig("next").presence,
           can_poll_more: response.dig("next").present?
         }
       },
 
       dedup: lambda { |survey_response|
-        survey_response["id"]
-      },
-
-      sort_by: lambda { |survey_response|
-        survey_response["updated_at"]
+        survey_response["id"].to_s + "@" + survey_response["updated_at"]
       },
 
       output_fields: lambda { |object_definitions|
