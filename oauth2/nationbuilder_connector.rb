@@ -327,10 +327,11 @@
       }
     },
 
-    new_or_updated_survey_response: {
-      subtitle: "New or updated survey response",
-      description: "New or updated <span class='provider'>survey response" \
+    new_survey_response: {
+      subtitle: "New survey response",
+      description: "New <span class='provider'>survey response" \
         "</span> in <span class='provider'>NationBuilder</span>",
+      type: "paging_desc",
 
       input_fields: lambda { |_connection|
         [
@@ -341,7 +342,7 @@
             optional: true,
             sticky: true,
             hint: "Fetch trigger events from specified time. Leave empty " \
-              "to get survey response created or updated one hour ago"
+              "to get survey response created one hour ago"
           }
         ]
       },
@@ -357,15 +358,17 @@
                             to_time.to_i)
 
         {
-          events: (response.dig("results") || []).
-            sort_by { |survey_response| survey_response["updated_at"] },
-          next_poll: response.dig("next").presence,
-          can_poll_more: response.dig("next").present?
+          events: response.dig("results") || [],
+          next_page: response.dig("next").presence
         }
       },
 
-      dedup: lambda { |survey_response|
-        survey_response["id"].to_s + "@" + survey_response["updated_at"]
+      document_id: lambda { |survey_response|
+        survey_response["id"]
+      },
+
+      sort_by: lambda { |survey_response|
+        survey_response["created_at"]
       },
 
       output_fields: lambda { |object_definitions|
