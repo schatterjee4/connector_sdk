@@ -1,5 +1,6 @@
 {
   title: "Zuora",
+
   connection: {
     fields: [
       {
@@ -283,33 +284,6 @@
   },
 
   actions: {
-    get_customer_account_by_id: {
-      subtitle: "Get customer account by ID",
-      description: "Get <span class='provider'>customer account</span> by ID " \
-        "in <span class='provider'>Zuora</span>",
-
-      input_fields: lambda { |_object_definitions|
-        [{ name: "id", optional: false }]
-      },
-
-      execute: lambda { |_connection, input|
-        get("/v1/accounts/#{input['id']}") || {}
-      },
-
-      output_fields: lambda { |object_definitions|
-        object_definitions["customer_account_get"]
-      },
-
-      sample_output: lambda { |_connection|
-        account_id = post("/v1/action/query").
-                     params(batchSize: 1).
-                     payload(queryString: "select Id from account where " \
-                               "Status='Active'").
-                     dig("records", 0, "Id") || ""
-        account_id.blank? ? {} : get("/v1/accounts/#{account_id}") || {}
-      }
-    },
-
     get_customer_account_by_id: {
       subtitle: "Get customer account by ID",
       description: "Get <span class='provider'>customer account</span> by ID " \
