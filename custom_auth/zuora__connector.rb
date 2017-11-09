@@ -30,8 +30,8 @@
           ["US Production", "rest"],
           ["US Sandbox", "rest.apisandbox"],
           ["US Performance Test", "rest.pt1"],
-          ["EU Production", "rest.eu"],
-          ["EU Sandbox", "rest.sandbox.eu"]
+          ["EU Production", "rest.eu."],
+          ["EU Sandbox", "rest.sandbox.eu."]
         ],
         optional: false
       }
