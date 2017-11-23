@@ -34,25 +34,23 @@
           { name: "modifiedDate", label: "Modified date", type: :integer,
             hint: "Stores a particular Date & Time in UTC milliseconds past" \
              " the epoch." }, # milliseconds since epoch
-        ].concat(
-          get("/v2/accounts/fields")["fields"].
-          map do |field| 
-            if field["dataType"] == "List"
-              pick_list = field["listOptions"].
+        ].concat(get("/v2/accounts/fields")["fields"].map do |field|
+          if field["dataType"] == "List"
+            pick_list = field["listOptions"].
               map { |o| [o["display"], o["id"]] }
-              {
-                name: field["id"],
-                label: field["name"],
-                control_type: "select",
-                pick_list: pick_list
-              }
-            else
-              {
-                name: field["id"],
-                label: field["name"]
-              }
-            end
-            end)
+            {
+              name: field["id"],
+              label: field["name"],
+              control_type: "select",
+              pick_list: pick_list
+            }
+          else
+            {
+              name: field["id"],
+              label: field["name"]
+            }
+          end
+        end)
       end
     },
   },
@@ -143,7 +141,7 @@
         ]
       end,
 
-      poll: lambda do |_connection, input, modified_date_since|
+      poll: lambda do |_connection, input, modified_date|
         limit = 50
         modified_date ||= ((input["since"].presence || now).
           to_time.to_f * 1000).to_i
