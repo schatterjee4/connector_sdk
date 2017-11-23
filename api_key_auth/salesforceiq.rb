@@ -36,16 +36,23 @@
              " the epoch." }, # milliseconds since epoch
         ].concat(
           get("/v2/accounts/fields")["fields"].
-          map do |field|
-            pick_list = field["listOptions"].
-              map { |o| [o["display"], o["id"]] } if field["dataType"] == "List"
-            {
-              name: field["id"],
-              label: field["name"],
-              control_type: field["dataType"] == "List" ? "select" : "text",
-              pick_list: pick_list
-            }
-          end)
+          map do |field| 
+            if field["dataType"] == "List"
+              pick_list = field["listOptions"].
+              map { |o| [o["display"], o["id"]] }
+              {
+                name: field["id"],
+                label: field["name"],
+                control_type: "select",
+                pick_list: pick_list
+              }
+            else
+              {
+                name: field["id"],
+                label: field["name"]
+              }
+            end
+            end)
       end
     },
   },
@@ -138,7 +145,7 @@
 
       poll: lambda do |_connection, input, modified_date_since|
         limit = 50
-        modified_date ||= ((input["since"].presence || Time.now).
+        modified_date ||= ((input["since"].presence || now).
           to_time.to_f * 1000).to_i
         # result returns in ascending order
         result = get("/v2/accounts").
@@ -150,7 +157,7 @@
           end
         end
         modified_date_since = accounts.dig(-1, "modifiedDate") ||
-         (Time.now.to_f * 1000).to_i
+         (now.to_f * 1000).to_i
         {
           events: accounts,
           next_poll: modified_date_since,
