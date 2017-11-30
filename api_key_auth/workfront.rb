@@ -303,8 +303,7 @@
                 name: field,
                 label: field
               }
-            end
-          }
+            end }
         end
       end },
     custom_fields_input: {
@@ -677,8 +676,8 @@
 
       execute: lambda do |connection, input|
         handle = post("/attask/api/#{connection['version']}/upload").
-                  request_format_multipart_form.
-                  payload(uploadedFile: input["file"]) ["data"]["handle"]
+                   request_format_multipart_form.
+                   payload(uploadedFile: input["file"]) ["data"]["handle"]
         if handle.present?
           post("/attask/api/#{connection['version']}/document").
             payload(name: input["name"],
@@ -686,7 +685,7 @@
                     docObjCode: input["docObjCode"],
                     objID: input["objID"],
                     currentVersion: { "version": input["version"],
-                      "fileName": input["fileName"] }) ["data"]
+                                      "fileName": input["fileName"] }) ["data"]
         end
       end,
       output_fields: lambda do
@@ -746,10 +745,10 @@
           in_time_zone("US/Central"))
         projects = get("/attask/api/#{connection['version']}/project/" \
           "search?fields=*&fields=parameterValues").
-        params(portfolioID: input["port_id"],
-               portfolioID_Mod: "eq",
-               lastUpdateDate: last_updated_time.to_time.iso8601,
-               lastUpdateDate_Mod: "gt")["data"]
+                     params(portfolioID: input["port_id"],
+                            portfolioID_Mod: "eq",
+                            lastUpdateDate: last_updated_time.to_time.iso8601,
+                            lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         projects.sort_by { |obj| obj["lastUpdateDate"] } unless projects.blank?
         last_modfied_time = projects.last["lastUpdateDate"] unless
@@ -801,13 +800,13 @@
         ]
       end,
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= (input["since"].presence || Time.now).
+        last_updated_time ||= ((input["since"].presence || Time.now).
           to_time.strftime("%Y-%m-%dT%H:%M:%S %z").to_time.
-          in_time_zone("US/Central")
+          in_time_zone("US/Central"))
         issues = get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&fields=parameterValues").
-                  params(lastUpdateDate: last_updated_time.to_time.iso8601,
-                         lastUpdateDate_Mod: "gt")["data"]
+                   params(lastUpdateDate: last_updated_time.to_time.iso8601,
+                          lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         issues.sort_by { |obj| obj["lastUpdateDate"] } unless issues.blank?
         last_modfied_time = issues.last["lastUpdateDate"] unless
