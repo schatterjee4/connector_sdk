@@ -306,8 +306,7 @@
             end
           }
         end
-      end
-    },
+      end },
     custom_fields_input: {
       fields: lambda do |connection, config|
         char_mapping = {
@@ -401,7 +400,7 @@
       execute: lambda do |connection, input|
         projects = get("/attask/api/#{connection['version']}/project/search?" \
           "fields=*&fields=parameterValues&" \
-          "name=" + input["name"] +"&name_Mod=contains")["data"]
+          "name=" + input["name"] + "&name_Mod=contains")["data"]
         {
           projects: projects
         }
@@ -596,50 +595,6 @@
           "fields=*&$$LIMIT=1").dig("data", 0) || {}
       end
     },
-    create_issue_obsolete: {
-      description: "Create <span class='provider'>issue</span> in 
-      <span class='provider'>Workfront</span>",
-      subtitle: "Create issue with details in Workfront",
-      help: "Select the feilds which are part of Issue creation",
-      
-      input_fields: lambda do |object_definitions|
-        
-        object_definitions["issue"].
-          ignored("ID", "lastUpdateDate",
-                  "lastUpdatedByID", "entryDate",
-                  "enteredByID").required("projectID", "name")
-      end,
-
-      execute: lambda do |connection, input|
-        params = input.map do |key, value|
-          if key.downcase.include?("date")
-            "#{key}=" + value.to_time.in_time_zone("US/Eastern").iso8601
-          else
-            "#{key}=#{value}"
-          end
-        end.join("&")
-        issue = post("/attask/api/#{connection['version']}/optask").params(input) ["data"] 
-        {
-          issue: issue
-        }
-      end,
-
-      output_fields: lambda do |object_definitions|
-        [
-          {
-            name: "issue", type: :object, label: "Issue",
-            properties: object_definitions["issue"]
-          }
-        ]
-      end,
-
-      sample_output: lambda do |connection, object_definitions|
-        {
-          issue: get("/attask/api/#{connection['version']}/optask/search?" \
-            "fields=*&$$LIMIT=1").dig("data", 0) 
-        }
-      end
-    },
     create_issue: {
       description: "Create <span class='provider'>issue</span> in 
       <span class='provider'>Workfront</span>",
@@ -722,18 +677,16 @@
 
       execute: lambda do |connection, input|
         handle = post("/attask/api/#{connection['version']}/upload").
-          request_format_multipart_form.
-          payload(uploadedFile: input["file"]) ["data"]["handle"]
-        
+                  request_format_multipart_form.
+                  payload(uploadedFile: input["file"]) ["data"]["handle"]
         if handle.present?
           post("/attask/api/#{connection['version']}/document").
             payload(name: input["name"],
-                  handle: handle,
+                    handle: handle,
                     docObjCode: input["docObjCode"],
                     objID: input["objID"],
                     currentVersion: { "version": input["version"],
-                      "fileName": input["fileName"]}
-                    ) ["data"]
+                      "fileName": input["fileName"] }) ["data"]
         end
       end,
       output_fields: lambda do
@@ -782,7 +735,7 @@
       ],
       input_fields: lambda do
         [
-          name: "since", type: :date_time, sticky: :true,
+          name: "since", type: :date_time, sticky: true,
           label: "From", hint: "Fetch projects from specified Date"
         ]
       end,
@@ -793,7 +746,8 @@
           in_time_zone("US/Central"))
         projects = get("/attask/api/#{connection['version']}/project/" \
           "search?fields=*&fields=parameterValues").
-        params(portfolioID: input["port_id"],portfolioID_Mod: "eq",
+        params(portfolioID: input["port_id"],
+               portfolioID_Mod: "eq",
                lastUpdateDate: last_updated_time.to_time.iso8601,
                lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
@@ -842,19 +796,18 @@
       ],
       input_fields: lambda do |_object_definitions|
         [
-          name: "since", type: :date_time, sticky: :true,
+          name: "since", type: :date_time, sticky: true,
           label: "From", hint: "Fetch projects from specified Date"
         ]
       end,
-      
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= ((input["since"].presence || Time.now).
+        last_updated_time ||= (input["since"].presence || Time.now).
           to_time.strftime("%Y-%m-%dT%H:%M:%S %z").to_time.
-          in_time_zone("US/Central"))
+          in_time_zone("US/Central")
         issues = get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&fields=parameterValues").
-          params(lastUpdateDate: last_updated_time.to_time.iso8601,
-                lastUpdateDate_Mod: "gt")["data"]
+                  params(lastUpdateDate: last_updated_time.to_time.iso8601,
+                         lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         issues.sort_by { |obj| obj["lastUpdateDate"] } unless issues.blank?
         last_modfied_time = issues.last["lastUpdateDate"] unless
@@ -888,12 +841,10 @@
       get("/attask/api/#{connection['version']}/program/search?" \
         "fields=name,ID&$$LIMIT=500")["data"].pluck("name", "ID")
     end,
-
     portfolios: lambda do |connection|
       get("/attask/api/#{connection['version']}/port/search?" \
          "fields=name,ID&$$LIMIT=500")["data"].pluck("name", "ID")
     end,
-    
     projects: lambda do |connection|
       get("/attask/api/#{connection['version']}/project/search?" \
         "fields=name,ID&$$LIMIT=500")["data"].pluck("name", "ID")
