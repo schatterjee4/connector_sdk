@@ -298,12 +298,12 @@
           { name: "parameterValues",
             type: "object",
             properties: config["custom_fields"].split("\n").
-            map do |field|
-              {
-                name: field,
-                label: field
-              }
-            end }
+              map do |field|
+                {
+                  name: field,
+                  label: field
+                }
+              end }
         end
       end },
     custom_fields_input: {
@@ -345,7 +345,6 @@
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
-          sticky: true,
           hint: "Custom fields involved in this action. one per line. " \
            "fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
@@ -624,39 +623,39 @@
               optional: false,
               toggle_hint: "Use custom value" } }
         ].
-        concat(object_definitions["issue"].
-                      ignored("ID", "lastUpdateDate",
-                              "lastUpdatedByID", "entryDate",
-                              "enteredByID", "projectID").
-                      required("projectID", "name")).
-        concat(object_definitions["custom_fields_input"])
+          concat(object_definitions["issue"].
+            ignored("ID", "lastUpdateDate",
+                    "lastUpdatedByID", "entryDate",
+                    "enteredByID", "projectID").
+            required("projectID", "name")).
+          concat(object_definitions["custom_fields_input"])
       end,
 
       execute: lambda do |connection, input|
         input.delete("custom_fields")
         parameters = input.map do |key, value|
           if key.downcase.include?("date")
-           { "#{key}" => value.to_time.in_time_zone("US/Eastern").iso8601 }
+            { key => value.to_time.in_time_zone("US/Eastern").iso8601 }
           else
-            { "#{key}".gsub("_space_", " ").gsub("_colon_", ":") => "#{value}" }
+            { key.gsub("_space_", " ").gsub("_colon_", ":") => "#{value}" }
           end
         end.inject(:merge)
         post("/attask/api/#{connection['version']}/issue?fields=*").
-        params(parameters) ["data"]
+          params(parameters) ["data"]
       end,
 
       output_fields: lambda do |object_definitions|
         object_definitions["issue"]
       end,
 
-      sample_output: lambda do |connection, object_definitions|
+      sample_output: lambda do |connection|
         get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&$$LIMIT=1").dig("data", 0) || {}
       end
     },
     upload_document: {
-      description: "Upload <span class='provider'>document</span> in 
-      <span class='provider'> to Object in Workfront</span>",
+      description: "Upload <span class='provider'>document</span> in
+       <span class='provider'> to Object in Workfront</span>",
       subtitle: "Upload document to Object e.g. Project, Issue in Workfront",
       hint: "Upload supports only with Project, Issue objects",
       input_fields: lambda do
@@ -665,9 +664,9 @@
             hint: "File name with extension" },
           { name: "docObjCode", optional: false, label: "Document object code",
             hint: "e.g. PROJ for Project" },
-          { name: "objID", optional: false, label: "Object ID", 
+          { name: "objID", optional: false, label: "Object ID",
             hint: "e.g. Project ID for Project Object" },
-          { name: "fileName", optional: false, label: "File name"},
+          { name: "fileName", optional: false, label: "File name" },
           { name: "file", type: :file, optional: false, label: "File content" },
           { name: "version", type: :file, optional: false,
             label: "File version", hint: "only numbers allowed e.g. 1.0" }
@@ -676,8 +675,8 @@
 
       execute: lambda do |connection, input|
         handle = post("/attask/api/#{connection['version']}/upload").
-                   request_format_multipart_form.
-                   payload(uploadedFile: input["file"]) ["data"]["handle"]
+          request_format_multipart_form.
+          payload(uploadedFile: input["file"]) ["data"]["handle"]
         if handle.present?
           post("/attask/api/#{connection['version']}/document").
             payload(name: input["name"],
@@ -745,10 +744,10 @@
           in_time_zone("US/Central"))
         projects = get("/attask/api/#{connection['version']}/project/" \
           "search?fields=*&fields=parameterValues").
-                     params(portfolioID: input["port_id"],
-                            portfolioID_Mod: "eq",
-                            lastUpdateDate: last_updated_time.to_time.iso8601,
-                            lastUpdateDate_Mod: "gt")["data"]
+          params(portfolioID: input["port_id"],
+                portfolioID_Mod: "eq",
+                lastUpdateDate: last_updated_time.to_time.iso8601,
+                lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         projects.sort_by { |obj| obj["lastUpdateDate"] } unless projects.blank?
         last_modfied_time = projects.last["lastUpdateDate"] unless
@@ -805,8 +804,8 @@
           in_time_zone("US/Central"))
         issues = get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&fields=parameterValues").
-                   params(lastUpdateDate: last_updated_time.to_time.iso8601,
-                          lastUpdateDate_Mod: "gt")["data"]
+          params(lastUpdateDate: last_updated_time.to_time.iso8601,
+                lastUpdateDate_Mod: "gt")["data"]
         # Not sure about result order, to be on safer side, sorting explicitly
         issues.sort_by { |obj| obj["lastUpdateDate"] } unless issues.blank?
         last_modfied_time = issues.last["lastUpdateDate"] unless
@@ -848,6 +847,5 @@
       get("/attask/api/#{connection['version']}/project/search?" \
         "fields=name,ID&$$LIMIT=500")["data"].pluck("name", "ID")
     end,
-    
   }
 }
