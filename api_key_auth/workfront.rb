@@ -380,7 +380,6 @@
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
-          sticky: true,
           hint: "Custom fields involved in this action. one per line. " \
            "fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
@@ -449,9 +448,9 @@
         input.delete("custom_fields")
         parameters = input.map do |key, value|
           if key.downcase.include?("date")
-           { "#{key}" => value.to_time.in_time_zone("US/Eastern").iso8601 }
+            { key => value.to_time.in_time_zone("US/Eastern").iso8601 }
           else
-            { "#{key}".gsub("_space_", " ").gsub("_colon_", ":") => "#{value}" }
+            { key.gsub("_space_", " ").gsub("_colon_", ":") => value }
           end
         end.inject(:merge)
         post("/attask/api/#{connection['version']}/project", parameters).
@@ -594,8 +593,8 @@
       end
     },
     create_issue: {
-      description: "Create <span class='provider'>issue</span> in 
-      <span class='provider'>Workfront</span>",
+      description: "Create <span class='provider'>issue</span> in
+       <span class='provider'>Workfront</span>",
       subtitle: "Create issue with details in Workfront",
       help: "Select the feilds which are part of Issue creation",
        config_fields: [
@@ -603,7 +602,6 @@
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
-          sticky: true,
           hint: "Custom fields involved in this action. one per line." \
            " fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
