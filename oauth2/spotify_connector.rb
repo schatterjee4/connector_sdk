@@ -35,7 +35,7 @@
 
       refresh_on: 401,
 
-      refresh: lambda do |_connection, refresh_token|
+      refresh: lambda do |connection, refresh_token|
         post("https://accounts.spotify.com/api/token").
           payload(
             grant_type: "refresh_token",
