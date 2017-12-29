@@ -572,7 +572,7 @@
                       "RECORDNO of the line from the created from " \
                       "transaction document."
                   },
-                  { name: "overridetaxamount", name: "Override tax amount" },
+                  { name: "overridetaxamount", label: "Override tax amount" },
                   { name: "tax", hint: "Tax amount" },
                   { name: "locationid" },
                   { name: "departmentid" },
@@ -860,7 +860,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdoc"].
           ignored("creationdate", "createdby", "lastmodified",
-                   "lastmodifiedby").
+                  "lastmodifiedby").
           ignored("folder", "description").
           required("supdocname", "supdocfoldername")
       },
@@ -905,9 +905,9 @@
           }
         }
         attachment_response = (post("/ia/xml/xmlgw.phtml").
-                   payload(payload)
+                   payload(payload).
                    dig("response", 0, "operation", 0, "result", 0,
-                        "data", 0, "supdoc", 0) || {})
+                       "data", 0, "supdoc", 0) || {})
         call("parse_nested_elements", object: attachment_response)
       },
 
@@ -925,7 +925,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdoc"].
           ignored("creationdate", "createdby", "lastmodified",
-                   "lastmodifiedby").
+                  "lastmodifiedby").
           ignored("folder", "description").
           required("supdocid")
       },
@@ -957,7 +957,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
           ignored("creationdate", "createdby",
-                   "lastmodified", "lastmodifiedby").
+                  "lastmodified", "lastmodifiedby").
           ignored("name", "description", "parentfolder").
           required("supdocfoldername")
       },
@@ -1004,14 +1004,14 @@
         attachment_folder_response = (post("/ia/xml/xmlgw.phtml").
                    payload(payload).
                    dig("response", 0, "operation", 0, "result", 0,
-                        "data", 0, "supdocfolder", 0) || {})
+                       "data", 0, "supdocfolder", 0) || {})
         call("parse_nested_elements", object: attachment_folder_response)
       },
 
       output_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
           ignored("supdocfoldername", "supdocfolderdescription",
-                   "supdocparentfoldername")
+                  "supdocparentfoldername")
       }
     },
 
@@ -1023,7 +1023,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
           ignored("creationdate", "createdby", "lastmodified",
-                   "lastmodifiedby").
+                  "lastmodifiedby").
           ignored("name", "description", "parentfolder").
           required("supdocfoldername")
       },
@@ -1081,7 +1081,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["employee_create"].
           ignored("RECORDNO", "CREATEDBY", "MODIFIEDBY", "WHENCREATED",
-                   "WHENMODIFIED").
+                  "WHENMODIFIED").
           required("EMPLOYEEID", "PERSONALINFO")
       },
 
@@ -1097,7 +1097,7 @@
         employee_response = (post("/ia/xml/xmlgw.phtml").
                    payload(payload).
                    dig("response", 0, "operation", 0, "result", 0,
-                        "data", 0, "employee", 0) || {})
+                       "data", 0, "employee", 0) || {})
         call("parse_nested_elements", object: employee_response)
       },
 
@@ -1133,7 +1133,7 @@
         employee_response = (post("/ia/xml/xmlgw.phtml").
                    payload(payload).
                    dig("response", 0, "operation", 0, "result", 0,
-                        "data", 0, "EMPLOYEE", 0) || {})
+                       "data", 0, "EMPLOYEE", 0) || {})
         call("parse_nested_elements", object: employee_response)
       },
 
@@ -1150,7 +1150,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["employee_get"].
           ignored("RECORDNO", "CREATEDBY", "MODIFIEDBY", "WHENCREATED",
-                   "WHENMODIFIED").
+                  "WHENMODIFIED").
           required("EMPLOYEEID", "PERSONALINFO")
       },
 
