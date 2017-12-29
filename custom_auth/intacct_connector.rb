@@ -15,9 +15,9 @@
 
       refresh_on: [/Expired Token/],
 
-      acquire: ->(connection){},
+      acquire: ->(connection) {},
 
-      detect_on: [/<status>failure<\/status>/],
+      detect_on: [%r{<status>failure</status>}],
 
       apply: lambda { |connection|
         headers("Content-Type" => "x-intacct-xml-request")
@@ -423,7 +423,7 @@
       }
     },
 
-    #  Purchase Order Transaction
+    # Purchase order transaction
     po_txn_header: {
       fields: lambda { |_connection|
         [
