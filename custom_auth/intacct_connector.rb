@@ -860,8 +860,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdoc"].
           ignored("creationdate", "createdby", "lastmodified",
-                  "lastmodifiedby").
-          ignored("folder", "description").
+                  "lastmodifiedby", "folder", "description").
           required("supdocname", "supdocfoldername")
       },
 
@@ -925,8 +924,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdoc"].
           ignored("creationdate", "createdby", "lastmodified",
-                  "lastmodifiedby").
-          ignored("folder", "description").
+                  "lastmodifiedby", "folder", "description").
           required("supdocid")
       },
 
@@ -956,9 +954,8 @@
 
       input_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
-          ignored("creationdate", "createdby",
-                  "lastmodified", "lastmodifiedby").
-          ignored("name", "description", "parentfolder").
+          ignored("creationdate", "createdby", "lastmodified", 
+                  "lastmodifiedby", "name", "description", "parentfolder").
           required("supdocfoldername")
       },
 
@@ -1023,8 +1020,7 @@
       input_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
           ignored("creationdate", "createdby", "lastmodified",
-                  "lastmodifiedby").
-          ignored("name", "description", "parentfolder").
+                  "lastmodifiedby", "name", "description", "parentfolder").
           required("supdocfoldername")
       },
 
