@@ -954,7 +954,7 @@
 
       input_fields: lambda { |object_definitions|
         object_definitions["supdocfolder"].
-          ignored("creationdate", "createdby", "lastmodified", 
+          ignored("creationdate", "createdby", "lastmodified",
                   "lastmodifiedby", "name", "description", "parentfolder").
           required("supdocfoldername")
       },
