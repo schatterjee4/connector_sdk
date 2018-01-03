@@ -62,8 +62,8 @@
       fields: lambda { |_connection|
         [{ name: "status", label: "Job status" },
          { name: "function", label: "Job function" },
-         { name: "controlid", label: "control ID" },
-         { name: "key", label: "Record Key" }]
+         { name: "controlid", label: "Control ID" },
+         { name: "key", label: "Record key" }]
       }
     },
 
