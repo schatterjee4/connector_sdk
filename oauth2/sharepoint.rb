@@ -859,17 +859,17 @@
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-              ] },
+                ] },
               { name: "ServerRelativePath", label: "Server relative path",
                 type: :object,
                 properties: [
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-              ] },
+                ] },
               { name: "ServerRelativeUrl", label: "Server relative url" }
-          ] }
-        ].concat(object_definitions["list_output"])
+            ] }
+          ].concat(object_definitions["list_output"])
       end,
 
       sample_output: lambda do |connection, input|
@@ -900,12 +900,13 @@
           item = get(link)
         else
           item = get("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/web/RecycleBin").
-            params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
-                   "and (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
+            "_api/web/RecycleBin").
+          params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
+                   "and (DeletedDate ge " \
+                   "datetime'#{input['since'].to_time.utc.iso8601}'))",
                    "$orderby": "DeletedDate asc",
                    "$top": 100)
-            end
+        end
         {
           events: item["value"],
           next_poll: item["@odata.nextLink"],
@@ -953,43 +954,44 @@
     list: lambda do |connection|
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists").
         params("$select": "Title,Id,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Id"]]
-      end
+        select { |f| f["BaseType"] == 0 }.map do |i|
+          [i["Title"], i["Id"]]
+        end
     end,
 
     name_list: lambda do |connection|
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists").
         params("$select": "Title,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Title"]]
-      end
+        select { |f| f["BaseType"] == 0 }.map do |i|
+          [i["Title"], i["Title"]]
+        end
     end,
 
     folders_list: lambda do |connection|
       get("https://#{connection['subdomain']}.sharepoint.com/_api/web/Folders").
-      params("$select": "Id,ServerRelativeUrl,Name")["value"].map do |field|
-        [field["Name"], field["ServerRelativeUrl"]]
-      end
+        params("$select": "Id,ServerRelativeUrl,Name")["value"].
+        map do |field|
+          [field["Name"], field["ServerRelativeUrl"]]
+        end
     end,
 
     folders: lambda do |connection, **args|
       if parentId = args&.[](:__parent_id).presence
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-        map do |field|
-          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
-        end
+          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+          map do |field|
+            [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+            end
       else
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
           "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
-        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-        map do |field|
-          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
-        end
+          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+          map do |field|
+            [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+          end
       end
     end
   }
