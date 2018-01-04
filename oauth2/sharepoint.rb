@@ -775,24 +775,6 @@
           ]}
         ]
       end
-    },
-
-    test: {
-      execute: lambda do |connection|
-        res = get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists").
-          params("$select": "Title,BaseType")["value"].
-        select { |f| f["BaseType"] == 0 }.map do |i|
-          [i["Title"], i["Title"]]
-        end
-        file_name = { "file_name" => "this is tes file.jpeg" }.encode_www_form.
-          gsub(/file_name\=/, "")
-        puts file_name
-        #         puts get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists/GetByTitle('demolist')/items(2)").to_json
-        #         lists  = get("https://#{connection['subdomain']}.sharepoint.com/_api/Web/Files").
-        #           headers("Content-Type": "application/json;odata=verbose")
-
-        #         puts lists
-      end
     }
   },
 
@@ -827,11 +809,12 @@
         else
           items = get("https://#{connection['subdomain']}.sharepoint.com/" \
           "_api/web/lists(guid%27#{input['list_id']}%27)/items").
-            params("$filter": "Created ge datetime%27#{input['since'].to_time.utc.iso8601}%27",
-                   "$orderby": "Created asc",
-                   "$top": "100",
-                   "$expand": "AttachmentFiles")
-            end
+          params("$filter": "Created ge datetime" \
+                            "%27#{input['since'].to_time.utc.iso8601}%27",
+                  "$orderby": "Created asc",
+                  "$top": "100",
+                  "$expand": "AttachmentFiles")
+        end
         {
           events: items["value"],
           next_poll: items["@odata.nextLink"],
@@ -868,14 +851,14 @@
                   }
                 ] },
               { name: "ServerRelativeUrl", label: "Server relative url" }
-            ] }
+              ] }
           ].concat(object_definitions["list_output"])
       end,
 
       sample_output: lambda do |connection, input|
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
         "lists(guid%27#{input['list_id']}%27)/items").
-          params("$top": 1)["value"]&.first || {}
+        params("$top": 1)["value"]&.first || {}
       end
     },
 
@@ -902,10 +885,10 @@
           item = get("https://#{connection['subdomain']}.sharepoint.com/" \
             "_api/web/RecycleBin").
           params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
-                   "and (DeletedDate ge " \
-                   "datetime'#{input['since'].to_time.utc.iso8601}'))",
-                   "$orderby": "DeletedDate asc",
-                   "$top": 100)
+                            "and (DeletedDate ge " \
+                            "datetime'#{input['since'].to_time.utc.iso8601}'))",
+                  "$orderby": "DeletedDate asc",
+                  "$top": 100)
         end
         {
           events: item["value"],
@@ -979,19 +962,19 @@
       if parentId = args&.[](:__parent_id).presence
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-          map do |field|
-            [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+            params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+            map do |field|
+              [field["Name"].labelize, field["ServerRelativeUrl"].
+                gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
             end
       else
         get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
           "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
-          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-          map do |field|
-            [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-          end
+            params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+            map do |field|
+              [field["Name"].labelize, field["ServerRelativeUrl"].
+                gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+            end
       end
     end
   }
