@@ -16,9 +16,7 @@
     authorization: {
       type: "api_key",
 
-      acquire: lambda { |_connection|
-        {}
-      },
+      acquire: ->(_connection) {},
 
       refresh_on: [/"name"\:\s*"Invalid_Key"/],
 
@@ -28,22 +26,16 @@
         /"status"\:\s*"invalid"/
       ],
 
-      apply: lambda { |connection|
-        payload(key: connection["api_key"])
-      }
+      apply: ->(connection) { payload(key: connection["api_key"]) }
     },
 
-    base_uri: lambda { |_connection|
-      "https://mandrillapp.com"
-    }
+    base_uri: ->(_connection) { "https://mandrillapp.com" }
   },
 
-  test: lambda { |_connection|
-    post("/api/1.0/users/ping.json")
-  },
+  test: ->(_connection) { post("/api/1.0/users/ping.json") },
 
   object_definitions: {
-    send_template_input: {
+    send_template: {
       fields: lambda { |_connection, config_fields|
         template_variables = if config_fields.blank?
                                []
@@ -55,13 +47,21 @@
                                  map do |var|
                                    {
                                      name: var.first,
-                                     hint: "Include html tags for better" \
-                                     " formatting"
+                                     hint: "Include html tags for better " \
+                                      "formatting"
                                    }
                                  end
                              end
 
-        [
+        if template_variables.blank?
+          []
+        else
+          [{
+            name: "template_content",
+            type: "object",
+            properties: template_variables
+            }]
+        end.concat([
           {
             name: "from_email",
             hint: "The sender email address",
@@ -101,26 +101,15 @@
               "in the past, the message will be sent immediately.",
             type: "timestamp"
           }
-        ].concat(if template_variables.blank?
-                   []
-                 else
-                   [
-                     {
-                       name: "template_content",
-                       type: "object",
-                       properties: template_variables
-                     }
-                   ]
-                 end)
+        ])
       }
     }
   },
 
   actions: {
     send_message: {
-      description: "Send <span class='provider'>message</span> from" \
+      description: "Send <span class='provider'>message</span> using" \
         " template in <span class='provider'>Mandrill</span>",
-      subtitle: "Send message",
 
       config_fields: [
         {
@@ -132,7 +121,7 @@
       ],
 
       input_fields: lambda { |object_definitions|
-        object_definitions["send_template_input"]
+        object_definitions["send_template"]
       },
 
       execute: lambda { |_connection, input|
@@ -148,24 +137,20 @@
         post("/api/1.0/messages/send-template.json").
           payload(template_name: input["template"],
                   template_content: (input["template_content"] || []).
-                    map do |key, val|
-                      { name: key, content: val }
-                    end,
-                  message:   message,
+                    map { |key, val| { name: key, content: val } },
+                  message: message,
                   send_at: if input["send_at"].present?
                              input["send_at"].
+                               to_time.
                                utc.
-                               to_s.
-                               gsub(/[TZ]/, "T" => " ", "Z" => "")
-                           end)&.first
+                               strftime("%Y-%m-%d %H:%M:%S.%6N")
+                           end).dig(0) || {}
       },
 
       output_fields: lambda { |_object_definitions|
-        [
-          { name: "email" },
-          { name: "status" },
-          { name: "_id" }
-        ]
+        [{ name: "email" },
+         { name: "status" },
+         { name: "_id" }]
       },
 
       sample_output: lambda {
@@ -180,8 +165,7 @@
 
   pick_lists: {
     templates: lambda { |_connection|
-      post("/api/1.0/templates/list.json").
-        pluck("name", "slug")
+      post("/api/1.0/templates/list.json").pluck("name", "slug")
     }
   }
 }
