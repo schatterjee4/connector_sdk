@@ -927,6 +927,79 @@
           "fields=*&$$LIMIT=1").dig("data", 0) || {}
       end
     },
+    new_object: {
+      description: "New <span class='provider'>Object</span> in
+       <span class='provider'>Workfront</span>",
+      subtitle: "New Object in Workfront",
+      help: "Trigger polling time interval is based on user subscription.",
+      config_fields: [
+        {
+          name: "objCode", control_type: :select,
+          pick_list: :objects, label: "Object",
+          optional: false,
+          hint: "Select Object",
+          toggle_hint: "Select from list",
+          toggle_field: {
+            name: "objCode",
+            label: "Object Code",
+            type: :string,
+            control_type: :text,
+            optional: false,
+            toggle_hint: "Use custom value",
+            hint: "Provide the Object code"
+          }
+        },
+        {
+          name: "custom_fields",
+          control_type: "text-area",
+          change_on_blur: true,
+          sticky: true,
+          hint: "Custom fields involved in this action. one per line." \
+           " fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
+        }
+      ],
+      input_fields: lambda do
+        [
+          name: "since", type: :date_time, sticky: true,
+          label: "From", hint: "Fetch objects from specified Date"
+        ]
+      end,
+
+      poll: lambda do |connection, input, last_entered_time|
+        last_entered_time ||= (input["since"].presence || Time.now).to_time.
+          in_time_zone("US/Central").iso8601
+        objects = get("/attask/api/#{connection['version']}/" \
+          "#{input['objCode']}/search?fields=*&fields=parameterValues").
+          params(entryDate: last_entered_time,
+                entryDate_Mod: "gt",
+                lastUpdateDate_Sort: "asc")["data"]
+        last_entered_time = objects.last["entryDate"] unless
+         objects.blank?
+         {
+          events: objects,
+          next_poll: last_entered_time,
+          can_poll_more: !objects.blank?
+          }
+      end,
+
+      dedup: lambda do |object|
+        object["ID"] + "@" + object["entryDate"]
+      end,
+
+      output_fields: lambda do |object_definitions|
+        properties =  object_definitions["object_output"]
+        properties << object_definitions["custom_object"] unless
+         object_definitions["custom_object"].blank?
+        properties
+      end,
+
+      sample_output: lambda do |connection, input|
+        get("/attask/api/#{connection['version']}/#{input['objCode']}/search?" \
+          "fields=*&$$LIMIT=1").dig("data", 0) || {}
+      end
+
+    },
     new_updated_object: {
       description: "New or updated <span class='provider'>Object</span> in
        <span class='provider'>Workfront</span>",
