@@ -60,56 +60,60 @@
             name: "template_content",
             type: "object",
             properties: template_variables
-            }]
+          }]
         end.concat([
-          {
-            name: "from_email",
-            hint: "The sender email address",
-            optional: false
-          },
-          {
-            name: "from_name",
-            hint: "The sender name"
-          },
-          {
-            name: "to",
-            hint: "List of email recipients, one per line.",
-            optional: false
-          },
-          {
-            name: "important",
-            hint: "Whether or not this message is important, and should be" \
-              " delivered ahead of non-important messages.",
-            control_type: "checkbox",
-            type: "boolean"
-          },
-          {
-            name: "track_opens",
-            hint: "Whether or not to turn on open tracking for the message",
-            control_type: "checkbox",
-            type: "boolean"
-          },
-          {
-            name: "track_clicks",
-            hint: "Whether or not to turn on click tracking for the message",
-            control_type: "checkbox",
-            type: "boolean"
-          },
-          {
-            name: "send_at",
-            hint: "When this message should be sent. If you specify a time " \
-              "in the past, the message will be sent immediately.",
-            type: "timestamp"
-          }
-        ])
+                     {
+                       name: "from_email",
+                       hint: "The sender email address",
+                       optional: false
+                     },
+                     {
+                       name: "from_name",
+                       hint: "The sender name"
+                     },
+                     {
+                       name: "to",
+                       hint: "List of email recipients, one per line.",
+                       optional: false
+                     },
+                     {
+                       name: "important",
+                       hint: "Whether or not this message is important, " \
+                         "and should be delivered ahead of non-important " \
+                         "messages.",
+                       control_type: "checkbox",
+                       type: "boolean"
+                     },
+                     {
+                       name: "track_opens",
+                       hint: "Whether or not to turn on open tracking for " \
+                         "the message",
+                       control_type: "checkbox",
+                       type: "boolean"
+                     },
+                     {
+                       name: "track_clicks",
+                       hint: "Whether or not to turn on click tracking for " \
+                         "the message",
+                       control_type: "checkbox",
+                       type: "boolean"
+                     },
+                     {
+                       name: "send_at",
+                       hint: "When this message should be sent. If you " \
+                         "specify a time in the past, the message will be " \
+                         "sent immediately.",
+                       type: "timestamp"
+                     }
+                   ])
       }
     }
   },
 
   actions: {
     send_message: {
-      description: "Send <span class='provider'>message</span> using" \
-        " template in <span class='provider'>Mandrill</span>",
+      description: "Send <span class='provider'>message</span> using " \
+        "template in <span class='provider'>Mandrill</span>",
 
       config_fields: [
         {
