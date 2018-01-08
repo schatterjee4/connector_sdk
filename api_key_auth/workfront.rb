@@ -946,7 +946,8 @@
             control_type: :text,
             optional: false,
             toggle_hint: "Use custom value",
-            hint: "Provide the Object code"
+            hint: "Provide the object code or name e.g.  for Project enter"\
+            " <code>PROJ</code> or <code>project</code>"
           }
         },
         {
@@ -1019,7 +1020,8 @@
             control_type: :text,
             optional: false,
             toggle_hint: "Use custom value",
-            hint: "Provide the Object code"
+            hint: "Provide the object code or name e.g.  for Project enter"\
+            " <code>PROJ</code> or <code>project</code>"
           }
         },
         {
