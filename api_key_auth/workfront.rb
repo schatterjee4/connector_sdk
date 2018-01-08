@@ -450,6 +450,7 @@
         properties =  object_definitions["project"]
         properties << object_definitions["custom_object"] unless
          object_definitions["custom_object"].blank?
+        properties
       end,
       sample_output: lambda do |connection|
         get("https://#{connection['subdomain']}.workfront.com/attask/api/" \
@@ -635,6 +636,7 @@
         properties =  object_definitions["program"]
         properties << object_definitions["custom_object"] unless
          object_definitions["custom_object"].blank?
+        properties
       end,
       sample_output: lambda do |connection|
         get("/attask/api/#{connection['version']}/program/search?" \
@@ -673,6 +675,7 @@
         properties =  object_definitions["issue"]
         properties << object_definitions["custom_object"] unless
          object_definitions["custom_object"].blank?
+        properties
       end,
       sample_output: lambda do |connection, _object_definitions|
         get("/attask/api/#{connection['version']}/optask/search?" \
@@ -739,6 +742,66 @@
 
       sample_output: lambda do |connection|
         get("/attask/api/#{connection['version']}/optask/search?" \
+          "fields=*&$$LIMIT=1").dig("data", 0) || {}
+      end
+    },
+    get_object_details_by_id: {
+      description: "Get <span class='provider'>Object</span> in
+       <span class='provider'>details in Workfront</span>",
+      subtitle: "Get Object details in Workfront",
+      help: "Get Workfront object details by ID.",
+      config_fields: [
+        {
+          name: "objCode", control_type: :select,
+          pick_list: :objects, label: "Object",
+          optional: false,
+          hint: "Select Object",
+          toggle_hint: "Select from list",
+          toggle_field: {
+            name: "objCode",
+            label: "Object Code",
+            type: :string,
+            control_type: :text,
+            optional: false,
+            toggle_hint: "Use custom value",
+            hint: "Provide the object code or name e.g.  for Project enter"\
+            " <code>PROJ</code> or <code>project</code>"
+          }
+        },
+        {
+          name: "custom_fields",
+          control_type: "text-area",
+          change_on_blur: true,
+          sticky: true,
+          hint: "Custom fields involved in this action. one per line." \
+           " fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
+        }
+      ],
+
+      input_fields: lambda do
+        [
+          {
+            name: "ID", type: :string, optional: false, label: "Object ID",
+            hint: "Get Object details with object ID"
+          }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        get("/attask/api/#{connection['version']}/#{input['objCode']}/" \
+        + input["ID"] + "?fields=*&fields=parameterValues")["data"]
+      end,
+
+      output_fields: lambda do |object_definitions|
+        properties =  object_definitions["object_output"]
+        properties << object_definitions["custom_object"] unless
+         object_definitions["custom_object"].blank?
+        properties
+      end,
+
+      sample_output: lambda do |connection, input|
+        get("/attask/api/#{connection['version']}/#{input['objCode']}/search?" \
           "fields=*&$$LIMIT=1").dig("data", 0) || {}
       end
     },
