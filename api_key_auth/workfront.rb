@@ -204,7 +204,94 @@
     },
     issue: {
       fields: lambda do |connection, config|
-        get("/attask/api/#{connection['version']}/prgm/metadata")["data"]["fields"].
+        get("/attask/api/#{connection['version']}/optask/metadata")["data"]["fields"].
+        map do |key, value|
+          case value["fieldType"]
+          when "string"
+            if value["enumType"].blank?
+              { name: key, label: "#{value['label']}".labelize }
+            else
+              string_list = value["possibleValues"].map do |item|
+                [item["label"], item["value"]]
+              end
+              { name: key, label: "#{value['label']}".labelize, control_type: :select,
+                pick_list: string_list,
+                toggle_hint: "Select from list",
+                toggle_field: {
+                  name: key,
+                  label: "#{value['label']}".labelize,
+                  type: :string,
+                  control_type: "text",
+                  optional: false,
+                  toggle_hint: "Use custom value" } }
+            end
+          when "double"
+            { name: key, label: "#{value['label']}".labelize,
+                type: :ineger, control_type: :number }
+          when "date"
+            { name: key, type: :date,  label: "#{value['label']}".labelize,
+                control_type: :date_time }
+          when "boolean"
+            { name: key, label: "#{value['label']}".labelize, type: :boolean,
+                control_type: :checkbox,
+                toggle_hint: "Select from list",
+                toggle_field: {
+                  name: key,
+                  label: "#{value['label']}".labelize,
+                  type: :string,
+                  control_type: "text",
+                  optional: false,
+                  toggle_hint: "Use custom value" } }
+          when "string[]"
+            if value["enumType"].blank?
+              { name: key, label: "#{value['label']}".labelize }
+            else
+              select_list = value["possibleValues"].map do |item|
+                [item["label"], item["value"]]
+              end
+              { name: key, label: "#{value['label']}".labelize, control_type: :select,
+                pick_list: select_list,
+                toggle_hint: "Select from list",
+                toggle_field: {
+                  name: key,
+                  label: "#{value['label']}".labelize,
+                  type: :string,
+                  control_type: "text",
+                  optional: false,
+                  toggle_hint: "Use custom value" } }
+            end
+          when "dateTime"
+            { name: key, type: :date_time, label: "#{value['label']}".labelize }
+          when "int"
+            if value["enumType"].blank?
+              { name: key, label: "#{value['label']}".labelize, type: :integer,
+                control_type: :number }
+            else
+              int_list = value["possibleValues"].map do |item|
+                [item["label"], item["value"]]
+              end
+              { name: key, label: "#{value['label']}".labelize, control_type: :select,
+                pick_list: int_list,
+                toggle_hint: "Select from list",
+                toggle_field: {
+                  name: key,
+                  label: "#{value['label']}".labelize,
+                  type: :integer,
+                  control_type: "number",
+                  optional: false,
+                  toggle_hint: "Use custom value" } }
+            end
+          when "map"
+            { name: key, label: "#{value['label']}".labelize }
+          else
+            { name: key, label: "#{value['label']}".labelize }
+          end
+        end
+      end
+    },
+    object_output: {
+      fields: lambda do |connection, config|
+        get("/attask/api/#{connection['version']}/#{config['objCode']}/metadata")["data"]["fields"].
         map do |key, value|
           case value["fieldType"]
           when "string"
@@ -337,7 +424,7 @@
   actions: {
     get_project_details_by_id: {
       description: 'Get <span class="provider">project</span> details by ID 
-    in <span class="provider">Workfront</span>',
+      in <span class="provider">Workfront</span>',
       subtitle: "Get project details in Workfront",
       help: "Fetches the project details for the given Project ID",
       config_fields: [
@@ -597,11 +684,12 @@
        <span class='provider'>Workfront</span>",
       subtitle: "Create issue with details in Workfront",
       help: "Select the feilds which are part of Issue creation",
-       config_fields: [
+      config_fields: [
         {
           name: "custom_fields",
           control_type: "text-area",
           change_on_blur: true,
+          sticky: true,
           hint: "Custom fields involved in this action. one per line." \
            " fields with only colon and space are allowed." \
             " e.g. <code>DE:Project Manager</code>"
@@ -612,6 +700,7 @@
           { name: "projectID", label: "Project Name", control_type: :select,
             pick_list: "projects",
             sticky: true,
+            optional: false,
             toggle_hint: "Select from list",
             toggle_field: {
               name: "projectID",
@@ -619,13 +708,15 @@
               type: :string,
               control_type: "text",
               optional: false,
-              toggle_hint: "Use custom value" } }
+              toggle_hint: "Use custom value" } },
+          { name: "categoryID", label: "categoryID".labelize, sticky: true,
+            hint: "Category ID is required if Custom fields are used." }
         ].
           concat(object_definitions["issue"].
             ignored("ID", "lastUpdateDate",
                     "lastUpdatedByID", "entryDate",
-                    "enteredByID", "projectID").
-            required("projectID", "name")).
+                    "enteredByID", "projectID", "categoryID")).
+          required("projectID", "name").
           concat(object_definitions["custom_fields_input"])
       end,
 
@@ -693,6 +784,15 @@
           { name: "description" },
           { name: "lastUpdateDate", type: "date_time" }
         ]
+      end,
+      sample_output: lambda do
+        {
+          "ID": "58e7e2730050aa5fa78d2976b6d",
+          "name": "Test",
+          "objCode": "PROJ",
+          "description": "Updated by lorem ipsum",
+          "lastUpdateDate": "2017-04-21T21:27:38:155+0530"
+        }
       end
     }
   },
@@ -737,22 +837,20 @@
       end,
 
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= ((input["since"].presence || Time.now).
-          to_time.strftime("%Y-%m-%dT%H:%M:%S %z").to_time.
-          in_time_zone("US/Central"))
+        last_updated_time ||= (input["since"].presence || Time.now).to_time.
+          in_time_zone("US/Central").iso8601
         projects = get("/attask/api/#{connection['version']}/project/" \
           "search?fields=*&fields=parameterValues").
           params(portfolioID: input["port_id"],
                 portfolioID_Mod: "eq",
-                lastUpdateDate: last_updated_time.to_time.iso8601,
-                lastUpdateDate_Mod: "gt")["data"]
-        # Not sure about result order, to be on safer side, sorting explicitly
-        projects.sort_by { |obj| obj["lastUpdateDate"] } unless projects.blank?
-        last_modfied_time = projects.last["lastUpdateDate"] unless
+                lastUpdateDate: last_updated_time,
+                lastUpdateDate_Mod: "gt",
+                lastUpdateDate_Sort: "asc")["data"]
+        last_updated_time = projects.last["lastUpdateDate"] unless
          projects.blank?
         {
           events: projects,
-          next_poll: last_modfied_time,
+          next_poll: last_updated_time,
           can_poll_more: !projects.blank?
         }
       end,
@@ -797,20 +895,18 @@
         ]
       end,
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= ((input["since"].presence || Time.now).
-          to_time.strftime("%Y-%m-%dT%H:%M:%S %z").to_time.
-          in_time_zone("US/Central"))
+        last_updated_time ||= (input["since"].presence || Time.now).to_time.
+          in_time_zone("US/Central").iso8601
         issues = get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&fields=parameterValues").
-          params(lastUpdateDate: last_updated_time.to_time.iso8601,
-                lastUpdateDate_Mod: "gt")["data"]
-        # Not sure about result order, to be on safer side, sorting explicitly
-        issues.sort_by { |obj| obj["lastUpdateDate"] } unless issues.blank?
-        last_modfied_time = issues.last["lastUpdateDate"] unless
+          params(lastUpdateDate: last_updated_time,
+                lastUpdateDate_Mod: "gt",
+                lastUpdateDate_Sort: "asc")["data"]
+        last_updated_time = issues.last["lastUpdateDate"] unless
          issues.blank?
         {
           events: issues,
-          next_poll: last_modfied_time,
+          next_poll: last_updated_time,
           can_poll_more: !issues.blank?
         }
       end,
@@ -830,6 +926,79 @@
         get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&$$LIMIT=1").dig("data", 0) || {}
       end
+    },
+    new_updated_object: {
+      description: "New or updated <span class='provider'>Object</span> in
+       <span class='provider'>Workfront</span>",
+      subtitle: "New or updated Object in Workfront",
+      help: "Trigger polling time interval is based on user subscription.",
+      config_fields: [
+        {
+          name: "objCode", control_type: :select,
+          pick_list: :objects, label: "Object",
+          optional: false,
+          hint: "Select Object",
+          toggle_hint: "Select from list",
+          toggle_field: {
+            name: "objCode",
+            label: "Object Code",
+            type: :string,
+            control_type: :text,
+            optional: false,
+            toggle_hint: "Use custom value",
+            hint: "Provide the Object code"
+          }
+        },
+        {
+          name: "custom_fields",
+          control_type: "text-area",
+          change_on_blur: true,
+          sticky: true,
+          hint: "Custom fields involved in this action. one per line." \
+           " fields with only colon and space are allowed." \
+            " e.g. <code>DE:Project Manager</code>"
+        }
+      ],
+      input_fields: lambda do
+        [
+          name: "since", type: :date_time, sticky: true,
+          label: "From", hint: "Fetch objects from specified Date"
+        ]
+      end,
+
+      poll: lambda do |connection, input, last_updated_time|
+        last_updated_time ||= (input["since"].presence || Time.now).to_time.
+          in_time_zone("US/Central").iso8601
+        objects = get("/attask/api/#{connection['version']}/" \
+          "#{input['objCode']}/search?fields=*&fields=parameterValues").
+          params(lastUpdateDate: last_updated_time,
+                lastUpdateDate_Mod: "gt",
+                lastUpdateDate_Sort: "asc")["data"]
+        last_updated_time = objects.last["lastUpdateDate"] unless
+         objects.blank?
+         {
+          events: objects,
+          next_poll: last_updated_time,
+          can_poll_more: !objects.blank?
+          }
+      end,
+
+      dedup: lambda do |object|
+        object["ID"] + "@" + object["lastUpdateDate"]
+      end,
+
+      output_fields: lambda do |object_definitions|
+        properties =  object_definitions["object_output"]
+        properties << object_definitions["custom_object"] unless
+         object_definitions["custom_object"].blank?
+        properties
+      end,
+
+      sample_output: lambda do |connection, input|
+        get("/attask/api/#{connection['version']}/#{input['objCode']}/search?" \
+          "fields=*&$$LIMIT=1").dig("data", 0) || {}
+      end
+
     }
   },
   pick_lists: {
@@ -845,5 +1014,12 @@
       get("/attask/api/#{connection['version']}/project/search?" \
         "fields=name,ID&$$LIMIT=500")["data"].pluck("name", "ID")
     end,
+    objects: lambda do |connection|
+      objects = get("/attask/api/#{connection['version']}/metadata").
+      dig("data", "objects").
+      map do |_, val|
+          [val["name"], val["objCode"]]
+        end
+    end
   }
 }
