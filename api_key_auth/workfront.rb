@@ -1043,10 +1043,10 @@
 
       poll: lambda do |connection, input, last_updated_time|
         last_updated_time ||= (input["since"].presence || Time.now).to_time.
-          in_time_zone("US/Central").iso8601
+                               in_time_zone("US/Central").iso8601
         objects = get("/attask/api/#{connection['version']}/" \
           "#{input['objCode']}/search?fields=*&fields=parameterValues").
-          params(lastUpdateDate: last_updated_time,
+        params(lastUpdateDate: last_updated_time,
                 lastUpdateDate_Mod: "gt",
                 lastUpdateDate_Sort: "asc")["data"]
         last_updated_time = objects.last["lastUpdateDate"] unless
@@ -1091,8 +1091,7 @@
     end,
     objects: lambda do |connection|
       objects = get("/attask/api/#{connection['version']}/metadata").
-      dig("data", "objects").
-      map do |_, val|
+        dig("data", "objects").map do |_, val|
           [val["name"], val["objCode"]]
         end
     end
