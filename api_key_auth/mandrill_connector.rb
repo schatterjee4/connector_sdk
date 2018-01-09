@@ -141,13 +141,13 @@
                                       { name: key, content: val }
                                     end
         input["message"]["to"] = (input["message"]["to"] || "").
-                                  split("\n").
-                                  map { |to| { email: to.strip } }
+                                 split("\n").
+                                 map { |to| { email: to.strip } }
         if input["send_at"].present?
           input["send_at"] = input["send_at"].
                              to_time.
                              utc.
-                             strftime('%Y-%m-%d %H:%M:%S.%6N')
+                             strftime("%Y-%m-%d %H:%M:%S.%6N")
         end
 
         post("/api/1.0/messages/send-template.json", input).dig(0) || {}
