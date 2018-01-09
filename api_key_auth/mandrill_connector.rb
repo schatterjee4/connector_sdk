@@ -63,40 +63,47 @@
           }]
         end.concat([
                      {
-                       name: "from_email",
-                       hint: "The sender email address",
-                       optional: false
-                     },
-                     {
-                       name: "from_name",
-                       hint: "The sender name"
-                     },
-                     {
-                       name: "to",
-                       hint: "List of email recipients, one per line.",
-                       optional: false
-                     },
-                     {
-                       name: "important",
-                       hint: "Whether or not this message is important, " \
-                         "and should be delivered ahead of non-important " \
-                         "messages.",
-                       control_type: "checkbox",
-                       type: "boolean"
-                     },
-                     {
-                       name: "track_opens",
-                       hint: "Whether or not to turn on open tracking for " \
-                         "the message",
-                       control_type: "checkbox",
-                       type: "boolean"
-                     },
-                     {
-                       name: "track_clicks",
-                       hint: "Whether or not to turn on click tracking for " \
-                         "the message",
-                       control_type: "checkbox",
-                       type: "boolean"
+                       name: "message",
+                       optional: false,
+                       type: "object",
+                       properties: [
+                         {
+                           name: "from_email",
+                           hint: "The sender email address",
+                           optional: false
+                         },
+                         {
+                           name: "from_name",
+                           hint: "The sender name"
+                         },
+                         {
+                           name: "to",
+                           hint: "List of email recipients, one per line.",
+                           optional: false
+                         },
+                         {
+                           name: "important",
+                           hint: "Whether or not this message is important, " \
+                             "and should be delivered ahead of non-important " \
+                             "messages.",
+                           control_type: "checkbox",
+                           type: "boolean"
+                         },
+                         {
+                           name: "track_opens",
+                           hint: "Whether or not to turn on open tracking " \
+                             "for the message",
+                           control_type: "checkbox",
+                           type: "boolean"
+                         },
+                         {
+                           name: "track_clicks",
+                           hint: "Whether or not to turn on click tracking " \
+                             "for the message",
+                           control_type: "checkbox",
+                           type: "boolean"
+                         }
+                       ]
                      },
                      {
                        name: "send_at",
@@ -129,14 +136,10 @@
       },
 
       execute: lambda { |_connection, input|
-        message = {
-          from_email: input["from_email"],
-          from_name: input["from_name"],
-          to: input["to"].split("\n").map { |to| { email: to.strip } },
-          important: input["important"],
-          track_opens: input["track_opens"],
-          track_clicks: input["track_clicks"]
-        }
+        message = input["message"]
+        message["to"] = (message.dig("to") || "").
+                        split("\n").
+                        map { |to| { email: to.strip } }
 
         post("/api/1.0/messages/send-template.json").
           payload(template_name: input["template"],
