@@ -13,6 +13,11 @@
       {
         name: "client_id",
         optional: false
+      },
+      {
+        name: "siterelativeurl", label: "Site relative URL",
+        hint: "site relative url copy url between <code>`*.sharepoint.com/`</code>"\
+        " and <code>`/_api`</code> from the sharepoint Rest API url"
       }
     ],
 
@@ -43,21 +48,26 @@
 
       credentials: lambda do |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
-      end,
-      base_uri: lambda do |connection|
-        "https://#{connection['subdomain']}.sharepoint.com/_api"
       end
-    }
+    },
+    base_uri: lambda do |connection|
+      if connection["siterelativeurl"].blank?
+        "https://#{connection['subdomain']}.sharepoint.com"
+      else
+        "https://#{connection['subdomain']}.sharepoint.com/" +
+        connection["siterelativeurl"]
+      end
+    end
   },
 
   test: lambda do |connection|
-    get("https://#{connection['subdomain']}.sharepoint.com/_api/web/title")
+    get("/_api/web/title")
   end,
 
   object_definitions: {
     list_create: {
       fields: lambda do |connection, config|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,EntityPropertyName,Hidden,Required,
           ReadOnlyField,Title,TypeAsString,
@@ -135,7 +145,7 @@
 
     list_output: {
       fields: lambda do |connection, config|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,Title,TypeAsString,
             EntityPropertyName,IsDependentLookup")["value"].
@@ -202,7 +212,7 @@
     },
     list_item: {
       fields: lambda do |connection, config|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,EntityPropertyName,Hidden,Required,
           ReadOnlyField,Title,TypeAsString,
@@ -399,6 +409,12 @@
     }
   },
 
+  methods: {
+  	digest: lambda do |variable|
+  		post("/_api/contextinfo")&.[]("FormDigestValue")
+  	end
+  },
+  
   actions: {
     add_row_in_sharepoint_list: {
       description: "Add <span class='provider'>row</span> in " \
@@ -420,7 +436,7 @@
 
       execute: lambda do |connection, input|
         list_id = input.delete("list_id")
-        post("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        post("/_api/web/" \
              "lists(guid%27#{list_id}%27)/items", input)
       end,
 
@@ -433,7 +449,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
       end
@@ -461,14 +477,11 @@
       end,
 
       execute: lambda do |connection, input|
-        file_name = { "file_name" => input["file_name"] }.encode_www_form.
-          gsub(/file_name\=/, "")
-        form_digest = post("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/contextinfo")&.[]("FormDigestValue")
-        post("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        post("/_api/web/" \
           "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
-          "AttachmentFiles/add(FileName='#{file_name}')", input).
-        headers("X-RequestDigest": "#{form_digest}").
+          "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
+            	to_param  + "')", input).
+        headers("X-RequestDigest": call("digest",{})).
         request_body(input["content"])
       end,
 
@@ -490,11 +503,10 @@
       end,
 
       sample_output: lambda do |connection, input|
-        file_name = { "file_name" => input["file_name"] }.encode_www_form.
-          gsub(/file_name\=/, "")
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
             "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
-            "AttachmentFiles('#{file_name}')") || {}
+            "AttachmentFiles('" + input["file_name"].gsub(/\s/, "%20").
+            	to_param + "')") || {}
       end
     },
 
@@ -519,12 +531,10 @@
       end,
 
       execute: lambda do |connection, input|
-        file_name = { "file_name" => input["file_name"] }.encode_www_form.
-          gsub(/file_name\=/, "")
         {
-          "content": get("https://#{connection['subdomain']}.sharepoint.com/" \
-            "_api/web/lists(guid%27#{input['list_id']}%27)/" \
-            "items(#{input['item_id']})/AttachmentFiles('#{file_name}')/$value").
+          "content": get("/_api/web/lists(guid%27#{input['list_id']}%27)/" \
+            "items(#{input['item_id']})/AttachmentFiles('" +
+             input["file_name"].gsub(/\s/, "%20").to_param + "')/$value").
           response_format_raw
         }
       end,
@@ -563,13 +573,11 @@
       end,
 
       execute: lambda do |connection, input|
-        form_digest = post("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/contextinfo")&.[]("FormDigestValue")
-        document = post("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        document = post("/_api/web/" \
           "GetFolderByServerRelativeUrl('" + input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "')/Files/Add(url='" +
           input["file_name"].gsub(/\s/, "%20").to_param + "',overwrite=true)").
-        headers("X-RequestDigest": "#{form_digest}".split(",").first,
+        headers("X-RequestDigest": call("digest",{}),
                 "Content-Type": "application/json;odata=verbose").
         request_body(input["content"])
       end,
@@ -605,13 +613,11 @@
       end,
 
       execute: lambda do |connection, input|
-        form_digest = post("https://#{connection['subdomain']}.sharepoint.com/" \
-                           "_api/contextinfo")&.[]("FormDigestValue")
-        document = post("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/web/GetFileByServerRelativeUrl('" + input['serverRelativeUrl'].
+        document = post("/_api/web/GetFileByServerRelativeUrl('" +
+        	input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "/" + input["file_name"].
           gsub(/\s/, "%20").to_param + "')/$value").
-        headers("X-RequestDigest": "#{form_digest}".split(",").first,
+        headers("X-RequestDigest": call("digest",{}),
                 "X-HTTP-Method": "PUT",
                 "Content-Type": "application/json;odata=verbose").
         request_body(input["content"])
@@ -656,8 +662,7 @@
       end,
 
       execute: lambda do |connection, input|
-        document = get("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/web/GetFolderByServerRelativeUrl('" +
+        document = get("/_api/web/GetFolderByServerRelativeUrl('" +
           input['serverRelativeUrl'].gsub(/\s/, "%20") +
           "')/Files('"+ input['file_name'].gsub(/\s/, "%20").to_param +
           "')/ListItemAllFields").
@@ -697,11 +702,8 @@
       end,
 
       execute: lambda do |connection, input|
-        file_name = { "file_name" => input["file_name"] }.encode_www_form.
-          gsub(/file_name\=/, "")
         {
-          "content": get("https://#{connection['subdomain']}.sharepoint.com/" \
-            "_api/web/GetFolderByServerRelativeUrl('" +
+          "content": get("/_api/web/GetFolderByServerRelativeUrl('" +
             input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
             "Files('" + input['file_name'].gsub(/\s/, "%20").to_param +
             "')/$value").response_format_raw
@@ -750,13 +752,10 @@
       end,
 
       execute: lambda do |connection, input|
-        form_digest = post("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/contextinfo")&.[]("FormDigestValue")
-        document = post("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/web/lists/GetByTitle('" + input.delete('list_name').
+        document = post("/_api/web/lists/GetByTitle('" + input.delete('list_name').
           gsub(/\s/, "%20") + "')/" + "items(" +
           input.delete("item_id") + ")" ).
-        headers("X-RequestDigest": "#{form_digest}".split(",").first,
+        headers("X-RequestDigest": call("digest",{}),
                 "X-HTTP-Method": "MERGE",
                 "IF-MATCH": "*",
                 "Accept": "application/json;odata=verbose",
@@ -807,14 +806,12 @@
         if link.present?
           items = get(link)
         else
-          items = get("https://#{connection['subdomain']}.sharepoint.com/" \
-          "_api/web/lists(guid%27#{input['list_id']}%27)/items").
-          params("$filter": "Created ge datetime" \
-                            "%27#{input['since'].to_time.utc.iso8601}%27",
-                  "$orderby": "Created asc",
-                  "$top": "100",
-                  "$expand": "AttachmentFiles")
-        end
+          items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
+            params("$filter": "Created ge datetime%27#{input['since'].to_time.utc.iso8601}%27",
+                   "$orderby": "Created asc",
+                   "$top": "100",
+                   "$expand": "AttachmentFiles")
+            end
         {
           events: items["value"],
           next_poll: items["@odata.nextLink"],
@@ -842,23 +839,23 @@
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-                ] },
+              ] },
               { name: "ServerRelativePath", label: "Server relative path",
                 type: :object,
                 properties: [
                   {
                     name: "DecodedUrl", label: "Decoded url"
                   }
-                ] },
+              ] },
               { name: "ServerRelativeUrl", label: "Server relative url" }
-              ] }
-          ].concat(object_definitions["list_output"])
+          ] }
+        ].concat(object_definitions["list_output"])
       end,
 
       sample_output: lambda do |connection, input|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
         "lists(guid%27#{input['list_id']}%27)/items").
-        params("$top": 1)["value"]&.first || {}
+          params("$top": 1)["value"]&.first || {}
       end
     },
 
@@ -882,18 +879,18 @@
         if link.present?
           item = get(link)
         else
-          item = get("https://#{connection['subdomain']}.sharepoint.com/" \
-            "_api/web/RecycleBin").
-          params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
-                            "and (DeletedDate ge " \
-                            "datetime'#{input['since'].to_time.utc.iso8601}'))",
-                  "$orderby": "DeletedDate asc",
-                  "$top": 100)
+          item = get("/_api/web/RecycleBin").
+            params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
+                   "and (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
+                   "$orderby": "DeletedDate asc",
+                   "$top": 100)
+        	next_link = item["@odata.nextLink"]
         end
+
         {
           events: item["value"],
-          next_poll: item["@odata.nextLink"],
-          can_poll_more: item["@odata.nextLink"].present?
+          next_poll: next_link,
+          can_poll_more: next_link.present?
         }
       end,
 
@@ -925,8 +922,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
-        "RecycleBin").
+        get("/_api/web/RecycleBin").
           params("$filter": "DirName eq 'Lists/#{input['list_name']}'",
                  "$top": 1)["value"]&.first || {}
       end
@@ -935,46 +931,45 @@
 
   pick_lists: {
     list: lambda do |connection|
-      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists").
+      get("/_api/web/lists").
         params("$select": "Title,Id,BaseType")["value"].
-        select { |f| f["BaseType"] == 0 }.map do |i|
-          [i["Title"], i["Id"]]
-        end
+      select { |f| f["BaseType"] == 0 }.map do |i|
+        [i["Title"], i["Id"]]
+      end
     end,
 
     name_list: lambda do |connection|
-      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/lists").
+      get("/_api/web/lists").
         params("$select": "Title,BaseType")["value"].
-        select { |f| f["BaseType"] == 0 }.map do |i|
-          [i["Title"], i["Title"]]
-        end
+      select { |f| f["BaseType"] == 0 }.map do |i|
+        [i["Title"], i["Title"]]
+      end
     end,
 
     folders_list: lambda do |connection|
-      get("https://#{connection['subdomain']}.sharepoint.com/_api/web/Folders").
-        params("$select": "Id,ServerRelativeUrl,Name")["value"].
-        map do |field|
-          [field["Name"], field["ServerRelativeUrl"]]
-        end
+      get("/_api/web/Folders").
+      params("$select": "Id,ServerRelativeUrl,Name")["value"].map do |field|
+        [field["Name"], field["ServerRelativeUrl"]]
+      end
     end,
 
     folders: lambda do |connection, **args|
       if parentId = args&.[](:__parent_id).presence
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
+        get("/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-            params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-            map do |field|
-              [field["Name"].labelize, field["ServerRelativeUrl"].
-                gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-            end
+        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+        map do |field|
+          [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
+        end
       else
-        get("https://#{connection['subdomain']}.sharepoint.com/_api/web/" \
-          "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
-            params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-            map do |field|
-              [field["Name"].labelize, field["ServerRelativeUrl"].
-                gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-            end
+        get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+         # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+        map do |field|
+          [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
+        end
       end
     end
   }
