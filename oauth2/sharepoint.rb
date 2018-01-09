@@ -886,7 +886,7 @@
                    "and (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
                    "$orderby": "DeletedDate asc",
                    "$top": 100)
-        	next_link = item["@odata.nextLink"]
+          next_link = item["@odata.nextLink"]
         end
 
         {
@@ -935,17 +935,19 @@
     list: lambda do
       get("/_api/web/lists").
         params("$select": "Title,Id,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Id"]]
-      end
+      select { |f| f["BaseType"] == 0 }.
+        map do |i|
+          [i["Title"], i["Id"]]
+        end
     end,
 
     name_list: lambda do
       get("/_api/web/lists").
         params("$select": "Title,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.map do |i|
-        [i["Title"], i["Title"]]
-      end
+      select { |f| f["BaseType"] == 0 }.
+        map do |i|
+          [i["Title"], i["Title"]]
+        end
     end,
 
     folders_list: lambda do
@@ -959,19 +961,19 @@
       if parentId = args&.[](:__parent_id).presence
         get("/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-	        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-		        map do |field|
-		          [field["Name"].labelize, field["ServerRelativeUrl"].
-		            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-		        end
+        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+	        map do |field|
+	          [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+	        end
       else
-      	# "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+      # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
         get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
         	"Folders").
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
 	        map do |field|
 	          [field["Name"].labelize, field["ServerRelativeUrl"].
-	            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
 	        end
       end
     end
