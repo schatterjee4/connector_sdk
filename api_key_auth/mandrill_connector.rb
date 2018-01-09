@@ -41,7 +41,7 @@
                                []
                              else
                                post("/api/1.0/templates/info.json").
-                                 payload(name: config_fields["template"]).
+                                 payload(name: config_fields["template_name"]).
                                  dig("code").
                                  scan(/mc:edit=\"([^\"]*)\"/).
                                  map do |var|
@@ -124,7 +124,7 @@
 
       config_fields: [
         {
-          name: "template",
+          name: "template_name",
           control_type: "select",
           pick_list: "templates",
           optional: false
@@ -136,22 +136,21 @@
       },
 
       execute: lambda { |_connection, input|
-        message = input["message"]
-        message["to"] = (message.dig("to") || "").
-                        split("\n").
-                        map { |to| { email: to.strip } }
+        input["template_content"] = (input["template_content"] || []).
+                                    map do |key, val|
+                                      { name: key, content: val }
+                                    end
+        input["message"]["to"] = (input["message"]["to"] || "").
+                                  split("\n").
+                                  map { |to| { email: to.strip } }
+        if input["send_at"].present?
+          input["send_at"] = input["send_at"].
+                             to_time.
+                             utc.
+                             strftime('%Y-%m-%d %H:%M:%S.%6N')
+        end
 
-        post("/api/1.0/messages/send-template.json").
-          payload(template_name: input["template"],
-                  template_content: (input["template_content"] || []).
-                    map { |key, val| { name: key, content: val } },
-                  message: message,
-                  send_at: if input["send_at"].present?
-                             input["send_at"].
-                               to_time.
-                               utc.
-                               strftime("%Y-%m-%d %H:%M:%S.%6N")
-                           end).dig(0) || {}
+        post("/api/1.0/messages/send-template.json", input).dig(0) || {}
       },
 
       output_fields: lambda { |_object_definitions|
