@@ -807,7 +807,9 @@
           items = get(link)
         else
           items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
-            params("$filter": "Created ge datetime%27#{input['since'].to_time.utc.iso8601}%27",
+            params("$filter": "Created ge " \
+            									"datetime" \
+            									"%27#{input['since'].to_time.utc.iso8601}%27",
                    "$orderby": "Created asc",
                    "$top": "100",
                    "$expand": "AttachmentFiles")
@@ -852,7 +854,7 @@
         ].concat(object_definitions["list_output"])
       end,
 
-      sample_output: lambda do |connection, input|
+      sample_output: lambda do |_connection, input|
         get("/_api/web/" \
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
@@ -921,7 +923,7 @@
         ]
       end,
 
-      sample_output: lambda do |connection, input|
+      sample_output: lambda do |_connection, input|
         get("/_api/web/RecycleBin").
           params("$filter": "DirName eq 'Lists/#{input['list_name']}'",
                  "$top": 1)["value"]&.first || {}
@@ -930,7 +932,7 @@
   },
 
   pick_lists: {
-    list: lambda do |connection|
+    list: lambda do
       get("/_api/web/lists").
         params("$select": "Title,Id,BaseType")["value"].
       select { |f| f["BaseType"] == 0 }.map do |i|
@@ -938,7 +940,7 @@
       end
     end,
 
-    name_list: lambda do |connection|
+    name_list: lambda do
       get("/_api/web/lists").
         params("$select": "Title,BaseType")["value"].
       select { |f| f["BaseType"] == 0 }.map do |i|
@@ -946,30 +948,31 @@
       end
     end,
 
-    folders_list: lambda do |connection|
+    folders_list: lambda do
       get("/_api/web/Folders").
       params("$select": "Id,ServerRelativeUrl,Name")["value"].map do |field|
         [field["Name"], field["ServerRelativeUrl"]]
       end
     end,
 
-    folders: lambda do |connection, **args|
+    folders: lambda do |_connection, **args|
       if parentId = args&.[](:__parent_id).presence
         get("/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-        map do |field|
-          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
-        end
+	        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+		        map do |field|
+		          [field["Name"].labelize, field["ServerRelativeUrl"].
+		            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+		        end
       else
-        get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
-         # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+      	# "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+        get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
+        	"Folders").
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-        map do |field|
-          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/,"%20"), field["ServerRelativeUrl"], true]
-        end
+	        map do |field|
+	          [field["Name"].labelize, field["ServerRelativeUrl"].
+	            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+	        end
       end
     end
   }
