@@ -883,7 +883,8 @@
         else
           item = get("/_api/web/RecycleBin").
             params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
-                   "and (DeletedDate ge datetime'#{input['since'].to_time.utc.iso8601}'))",
+                   "and (DeletedDate ge " \
+                   "datetime'#{input['since'].to_time.utc.iso8601}'))",
                    "$orderby": "DeletedDate asc",
                    "$top": 100)
           next_link = item["@odata.nextLink"]
@@ -962,19 +963,19 @@
         get("/_api/web/" \
           "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-	        map do |field|
-	          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-	        end
+        map do |field|
+          [field["Name"].labelize, field["ServerRelativeUrl"].
+          gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+        end
       else
       # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
         get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
         	"Folders").
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-	        map do |field|
-	          [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-	        end
+        map do |field|
+          [field["Name"].labelize, field["ServerRelativeUrl"].
+          gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+        end
       end
     end
   }
