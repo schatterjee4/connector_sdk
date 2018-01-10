@@ -808,12 +808,12 @@
         else
           items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
-                            "datetime" \
-                            "%27#{input['since'].to_time.utc.iso8601}%27",
-                   "$orderby": "Created asc",
-                   "$top": "100",
-                   "$expand": "AttachmentFiles")
-            end
+                    "datetime" \
+                    "%27#{input['since'].to_time.utc.iso8601}%27",
+                    "$orderby": "Created asc",
+                    "$top": "100",
+                    "$expand": "AttachmentFiles")
+        end
         {
           events: items["value"],
           next_poll: items["@odata.nextLink"],
@@ -965,7 +965,7 @@
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
         map do |field|
           [field["Name"].labelize, field["ServerRelativeUrl"].
-          gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
         end
       else
         # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
@@ -974,7 +974,7 @@
           params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
           map do |field|
             [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+              gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
           end
       end
     end
