@@ -480,9 +480,9 @@
         post("/_api/web/" \
           "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
           "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
-              to_param  + "')", input).
-        headers("X-RequestDigest": call("digest",{})).
-        request_body(input["content"])
+          to_param  + "')", input).
+          headers("X-RequestDigest": call("digest",{})).
+          request_body(input["content"])
       end,
 
       output_fields: lambda do
@@ -808,8 +808,8 @@
         else
           items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
-                              "datetime" \
-                              "%27#{input['since'].to_time.utc.iso8601}%27",
+                            "datetime" \
+                            "%27#{input['since'].to_time.utc.iso8601}%27",
                    "$orderby": "Created asc",
                    "$top": "100",
                    "$expand": "AttachmentFiles")
@@ -968,14 +968,14 @@
           gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
         end
       else
-      # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
+        # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
         get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
           "Folders").
-        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-        map do |field|
-          [field["Name"].labelize, field["ServerRelativeUrl"].
-          gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-        end
+          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+          map do |field|
+            [field["Name"].labelize, field["ServerRelativeUrl"].
+            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+          end
       end
     end
   }
