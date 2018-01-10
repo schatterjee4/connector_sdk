@@ -808,11 +808,11 @@
         else
           items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
-                    "datetime" \
-                    "%27#{input['since'].to_time.utc.iso8601}%27",
-                    "$orderby": "Created asc",
-                    "$top": "100",
-                    "$expand": "AttachmentFiles")
+                              "datetime" \
+                              "%27#{input['since'].to_time.utc.iso8601}%27",
+                  "$orderby": "Created asc",
+                  "$top": "100",
+                  "$expand": "AttachmentFiles")
         end
         {
           events: items["value"],
