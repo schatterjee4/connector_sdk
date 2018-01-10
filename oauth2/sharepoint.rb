@@ -410,9 +410,9 @@
   },
 
   methods: {
-  	digest: lambda do |variable|
-  		post("/_api/contextinfo")&.[]("FormDigestValue")
-  	end
+    digest: lambda do |variable|
+      post("/_api/contextinfo")&.[]("FormDigestValue")
+    end
   },
   
   actions: {
@@ -480,7 +480,7 @@
         post("/_api/web/" \
           "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
           "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
-            	to_param  + "')", input).
+              to_param  + "')", input).
         headers("X-RequestDigest": call("digest",{})).
         request_body(input["content"])
       end,
@@ -506,7 +506,7 @@
         get("/_api/web/" \
             "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
             "AttachmentFiles('" + input["file_name"].gsub(/\s/, "%20").
-            	to_param + "')") || {}
+              to_param + "')") || {}
       end
     },
 
@@ -614,7 +614,7 @@
 
       execute: lambda do |connection, input|
         document = post("/_api/web/GetFileByServerRelativeUrl('" +
-        	input['serverRelativeUrl'].
+          input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "/" + input["file_name"].
           gsub(/\s/, "%20").to_param + "')/$value").
         headers("X-RequestDigest": call("digest",{}),
@@ -808,8 +808,8 @@
         else
           items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
-            									"datetime" \
-            									"%27#{input['since'].to_time.utc.iso8601}%27",
+                              "datetime" \
+                              "%27#{input['since'].to_time.utc.iso8601}%27",
                    "$orderby": "Created asc",
                    "$top": "100",
                    "$expand": "AttachmentFiles")
@@ -970,7 +970,7 @@
       else
       # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
         get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
-        	"Folders").
+          "Folders").
         params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
         map do |field|
           [field["Name"].labelize, field["ServerRelativeUrl"].
