@@ -15,7 +15,7 @@
         optional: false
       },
       {
-        name: "siterelativeurl", label: "Site relative URL",
+        name: "siteurl", label: "Site relative URL",
         hint: "site relative url copy url between <code>`*.sharepoint.com/`</code>"\
         " and <code>`/_api`</code> from the sharepoint Rest API url"
       }
@@ -51,12 +51,7 @@
       end
     },
     base_uri: lambda do |connection|
-      if connection["siterelativeurl"].blank?
-        "https://#{connection['subdomain']}.sharepoint.com"
-      else
-        "https://#{connection['subdomain']}.sharepoint.com/" +
-        connection["siterelativeurl"]
-      end
+      "https://#{connection['subdomain']}.sharepoint.com"
     end
   },
 
@@ -410,8 +405,16 @@
   },
 
   methods: {
-    digest: lambda do |variable|
+    digest: lambda do |var|
       post("/_api/contextinfo")&.[]("FormDigestValue")
+    end,
+    
+    url: lambda do |input|
+      if input[:siteurl].blank?
+         "/_api/web/"
+        else
+         "/" + input[:siteurl] + "/_api/web/"
+        end
     end
   },
   
@@ -436,7 +439,7 @@
 
       execute: lambda do |connection, input|
         list_id = input.delete("list_id")
-        post("/_api/web/" \
+        post(call("url", {siteurl: connection["siteurl"]}) +
              "lists(guid%27#{list_id}%27)/items", input)
       end,
 
@@ -449,7 +452,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get("/_api/web/" \
+        get(call("url", {siteurl: connection["siteurl"]}) +
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
       end
@@ -477,8 +480,8 @@
       end,
 
       execute: lambda do |connection, input|
-        post("/_api/web/" \
-          "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
+        post(call("url", {siteurl: connection["siteurl"]}) +
+           "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
           "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
           to_param  + "')", input).
           headers("X-RequestDigest": call("digest",{})).
@@ -503,8 +506,8 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get("/_api/web/" \
-            "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
+        get(call("url", {siteurl: connection["siteurl"]}) +
+             "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
             "AttachmentFiles('" + input["file_name"].gsub(/\s/, "%20").
               to_param + "')") || {}
       end
@@ -532,7 +535,8 @@
 
       execute: lambda do |connection, input|
         {
-          "content": get("/_api/web/lists(guid%27#{input['list_id']}%27)/" \
+          "content": get(call("url", {siteurl: connection["siteurl"]}) +
+            "lists(guid%27#{input['list_id']}%27)/" \
             "items(#{input['item_id']})/AttachmentFiles('" +
              input["file_name"].gsub(/\s/, "%20").to_param + "')/$value").
           response_format_raw
@@ -573,7 +577,7 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post("/_api/web/" \
+        document = post(call("url", {siteurl: connection["siteurl"]}) +
           "GetFolderByServerRelativeUrl('" + input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "')/Files/Add(url='" +
           input["file_name"].gsub(/\s/, "%20").to_param + "',overwrite=true)").
@@ -613,7 +617,8 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post("/_api/web/GetFileByServerRelativeUrl('" +
+        document = post(call("url", {siteurl: connection["siteurl"]}) +
+          "GetFileByServerRelativeUrl('" +
           input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "/" + input["file_name"].
           gsub(/\s/, "%20").to_param + "')/$value").
@@ -662,7 +667,8 @@
       end,
 
       execute: lambda do |connection, input|
-        document = get("/_api/web/GetFolderByServerRelativeUrl('" +
+        document = get(call("url", {siteurl: connection["siteurl"]}) +
+          "GetFolderByServerRelativeUrl('" +
           input['serverRelativeUrl'].gsub(/\s/, "%20") +
           "')/Files('"+ input['file_name'].gsub(/\s/, "%20").to_param +
           "')/ListItemAllFields").
@@ -703,7 +709,8 @@
 
       execute: lambda do |connection, input|
         {
-          "content": get("/_api/web/GetFolderByServerRelativeUrl('" +
+          "content": get(call("url", {siteurl: connection["siteurl"]}) +
+            "GetFolderByServerRelativeUrl('" +
             input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
             "Files('" + input['file_name'].gsub(/\s/, "%20").to_param +
             "')/$value").response_format_raw
@@ -752,7 +759,8 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post("/_api/web/lists/GetByTitle('" + input.delete('list_name').
+        document = post(call("url", { siteurl: connection["siteurl"] }) +
+         "lists/GetByTitle('" + input.delete('list_name').
           gsub(/\s/, "%20") + "')/" + "items(" +
           input.delete("item_id") + ")" ).
         headers("X-RequestDigest": call("digest",{}),
@@ -806,7 +814,8 @@
         if link.present?
           items = get(link)
         else
-          items = get("/_api/web/lists(guid%27#{input['list_id']}%27)/items").
+          items = get(call("url", {siteurl: connection["siteurl"]}) +
+            "lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
                               "datetime" \
                               "%27#{input['since'].to_time.utc.iso8601}%27",
@@ -854,8 +863,8 @@
         ].concat(object_definitions["list_output"])
       end,
 
-      sample_output: lambda do |_connection, input|
-        get("/_api/web/" \
+      sample_output: lambda do |connection, input|
+        get(call("url", {siteurl: connection["siteurl"]}) +
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
       end
@@ -881,7 +890,8 @@
         if link.present?
           item = get(link)
         else
-          item = get("/_api/web/RecycleBin").
+          item = get(call("url", {siteurl: connection["siteurl"]}) +
+            "RecycleBin").
             params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
                    "and (DeletedDate ge " \
                    "datetime'#{input['since'].to_time.utc.iso8601}'))",
@@ -924,8 +934,9 @@
         ]
       end,
 
-      sample_output: lambda do |_connection, input|
-        get("/_api/web/RecycleBin").
+      sample_output: lambda do |connection, input|
+        get(call("url", {siteurl: connection["siteurl"]}) +
+          "RecycleBin").
           params("$filter": "DirName eq 'Lists/#{input['list_name']}'",
                  "$top": 1)["value"]&.first || {}
       end
