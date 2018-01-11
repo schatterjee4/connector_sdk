@@ -439,7 +439,7 @@
 
       execute: lambda do |connection, input|
         list_id = input.delete("list_id")
-        post(call("url", {siteurl: connection["siteurl"]}) +
+        post(call("url", { siteurl: connection["siteurl"] }) +
              "lists(guid%27#{list_id}%27)/items", input)
       end,
 
@@ -452,7 +452,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get(call("url", {siteurl: connection["siteurl"]}) +
+        get(call("url", { siteurl: connection["siteurl"] }) +
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
       end
@@ -480,7 +480,7 @@
       end,
 
       execute: lambda do |connection, input|
-        post(call("url", {siteurl: connection["siteurl"]}) +
+        post(call("url", { siteurl: connection["siteurl"] }) +
            "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
           "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
           to_param  + "')", input).
@@ -506,7 +506,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get(call("url", {siteurl: connection["siteurl"]}) +
+        get(call("url", { siteurl: connection["siteurl"] }) +
              "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
             "AttachmentFiles('" + input["file_name"].gsub(/\s/, "%20").
               to_param + "')") || {}
@@ -535,7 +535,7 @@
 
       execute: lambda do |connection, input|
         {
-          "content": get(call("url", {siteurl: connection["siteurl"]}) +
+          "content": get(call("url", { siteurl: connection["siteurl"] }) +
             "lists(guid%27#{input['list_id']}%27)/" \
             "items(#{input['item_id']})/AttachmentFiles('" +
              input["file_name"].gsub(/\s/, "%20").to_param + "')/$value").
@@ -577,7 +577,7 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post(call("url", {siteurl: connection["siteurl"]}) +
+        document = post(call("url", { siteurl: connection["siteurl"] }) +
           "GetFolderByServerRelativeUrl('" + input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "')/Files/Add(url='" +
           input["file_name"].gsub(/\s/, "%20").to_param + "',overwrite=true)").
@@ -617,7 +617,7 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post(call("url", {siteurl: connection["siteurl"]}) +
+        document = post(call("url", { siteurl: connection["siteurl"] }) +
           "GetFileByServerRelativeUrl('" +
           input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "/" + input["file_name"].
@@ -667,7 +667,7 @@
       end,
 
       execute: lambda do |connection, input|
-        document = get(call("url", {siteurl: connection["siteurl"]}) +
+        document = get(call("url", { siteurl: connection["siteurl"] }) +
           "GetFolderByServerRelativeUrl('" +
           input['serverRelativeUrl'].gsub(/\s/, "%20") +
           "')/Files('"+ input['file_name'].gsub(/\s/, "%20").to_param +
@@ -709,7 +709,7 @@
 
       execute: lambda do |connection, input|
         {
-          "content": get(call("url", {siteurl: connection["siteurl"]}) +
+          "content": get(call("url", { siteurl: connection["siteurl"] }) +
             "GetFolderByServerRelativeUrl('" +
             input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
             "Files('" + input['file_name'].gsub(/\s/, "%20").to_param +
@@ -814,7 +814,7 @@
         if link.present?
           items = get(link)
         else
-          items = get(call("url", {siteurl: connection["siteurl"]}) +
+          items = get(call("url", { siteurl: connection["siteurl"] }) +
             "lists(guid%27#{input['list_id']}%27)/items").
             params("$filter": "Created ge " \
                               "datetime" \
@@ -864,7 +864,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get(call("url", {siteurl: connection["siteurl"]}) +
+        get(call("url", { siteurl: connection["siteurl"] }) +
         "lists(guid%27#{input['list_id']}%27)/items").
           params("$top": 1)["value"]&.first || {}
       end
@@ -890,7 +890,7 @@
         if link.present?
           item = get(link)
         else
-          item = get(call("url", {siteurl: connection["siteurl"]}) +
+          item = get(call("url", { siteurl: connection["siteurl"] }) +
             "RecycleBin").
             params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
                    "and (DeletedDate ge " \
@@ -935,7 +935,7 @@
       end,
 
       sample_output: lambda do |connection, input|
-        get(call("url", {siteurl: connection["siteurl"]}) +
+        get(call("url", { siteurl: connection["siteurl"] }) +
           "RecycleBin").
           params("$filter": "DirName eq 'Lists/#{input['list_name']}'",
                  "$top": 1)["value"]&.first || {}
