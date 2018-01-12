@@ -35,8 +35,8 @@
           { name: "completed_at", type: "timestamp" },
           { name: "last_activity_at", type: "timestamp" },
           { name: "expires_on", type: "timestamp" },
-          { name: "is_trashed" },
-          { name: "size" },
+          { name: "is_trashed", control_type: "checkbox", type: "boolean" },
+          { name: "size", type: "integer" },
           { name: "content_type" },
           { name: "original_filename" },
           { name: "signed_pdf_checksum" },
@@ -53,14 +53,14 @@
             of: "object",
             properties: [
               { name: "name" },
-              { name: "email" },
-              { name: "must_sign" },
+              { name: "email", control_type: "email" },
+              { name: "must_sign", control_type: "checkbox", type: "boolean" },
               { name: "document_role_id" },
               { name: "role_id" },
               { name: "state" },
-              { name: "is_sender" },
-              { name: "viewed_at" },
-              { name: "completed_at" }
+              { name: "is_sender", control_type: "checkbox", type: "boolean" },
+              { name: "viewed_at", type: "timestamp" },
+              { name: "completed_at", type: "timestamp" }
             ]
           },
           {
@@ -68,7 +68,7 @@
             type: "array",
             of: "object",
             properties: [
-              { name: "timestamp" },
+              { name: "timestamp", type: "timestamp" },
               { name: "keyword" },
               { name: "message" }
             ]
@@ -93,35 +93,26 @@
     }
   },
 
-  test: lambda { |_connection|
-    get("/api/documents.json")
-  },
+  test: ->(_connection) { get("/api/documents.json") },
 
   actions: {
     get_document_details: {
-      description: "Get <span class='provider'>document details</span>" \
-        " by ID in <span class='provider'>RightSignature</span>",
       subtitle: "Get document details by ID",
+      description: "Get <span class='provider'>document details</span> " \
+        "by ID in <span class='provider'>RightSignature</span>",
 
       input_fields: lambda { |object_definitions|
-        object_definitions["document"].
-          only("guid").
-          required("guid")
+        object_definitions["document"].only("guid").required("guid")
       },
 
       execute: lambda { |_connection, input|
-        get("/api/documents/#{input['guid']}.json").
-          dig("document") || {}
+        get("/api/documents/#{input['guid']}.json")["document"] || {}
       },
 
-      output_fields: lambda { |object_definitions|
-        object_definitions["document"]
-      },
+      output_fields: ->(object_definitions) { object_definitions['document'] },
 
       sample_output: lambda { |_connection|
-        get("/api/documents.json").
-          payload(per_page: 1).
-          dig("page", "documents", 0) || {}
+        get("/api/documents.json").dig("page", "documents", 0) || {}
       }
     }
   },
@@ -134,54 +125,45 @@
       type: "paging_desc",
 
       input_fields: lambda {
-        [
-          {
-            name: "since",
-            label: "From",
-            type: "timestamp",
-            optional: true,
-            sticky: true,
-            hint: "Get documents signed since given date/time. " \
-              "Leave empty to get the documents signed one hour ago"
-          }
-        ]
+        [{
+          name: "since",
+          label: "From",
+          type: "timestamp",
+          sticky: true,
+          hint: "Get documents signed since given date/time. " \
+            "Leave empty to get the documents signed one hour ago"
+        }]
       },
 
-      poll: lambda { |_connection, input, page|
-        page ||= 1
-        page_size = 50
+      poll: lambda { |_connection, input, closure|
+        page ||= closure.present? ? closure.first : 1
+        updated_since = ((closure.present? ? closure[1] : false) ||
+         input['since'] || 1.hour.ago).to_time
         documents = (get("/api/documents.json").
-                       payload(page: page,
-                               per_page: page_size,
-                               state: "signed").
+                       params(page: page).
                        dig("page", "documents") || []).
                     select do |document|
-                      document["completed_at"].to_time >=
-                        (input["since"].presence || 1.hour.ago).to_time
+                      document["completed_at"].to_time >= updated_since
                     end
+        # default page_size=10; no option to change
+        last_page = documents.size < 10
+        closure = (last_page ? [1, now] : [page + 1, updated_since])
 
         {
           events: documents,
-          next_page: (documents.size >= page_size ? page + 1 : nil)
+          next_page: closure,
+          can_poll_more: !last_page
         }
       },
 
-      document_id: lambda { |document|
-        document["guid"]
-      },
+      document_id: ->(document) { document["guid"] },
 
-      sort_by: lambda { |document|
-        document["completed_at"]
-      },
+      sort_by: ->(document) { document["completed_at"] },
 
-      output_fields: lambda { |object_definitions|
-        object_definitions["document"]
-      },
+      output_fields: ->(object_definitions) { object_definitions['document'] },
 
       sample_output: lambda { |_connection|
-        get("/api/documents.json").
-          payload(per_page: 1).
-          dig("page", "documents", 0) || {}
+        get("/api/documents.json").dig("page", "documents", 0) || {}
       }
     }
   }
