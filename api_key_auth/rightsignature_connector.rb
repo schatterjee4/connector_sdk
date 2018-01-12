@@ -109,7 +109,7 @@
         get("/api/documents/#{input['guid']}.json")["document"] || {}
       },
 
-      output_fields: ->(object_definitions) { object_definitions['document'] },
+      output_fields: ->(object_definitions) { object_definitions["document"] },
 
       sample_output: lambda { |_connection|
         get("/api/documents.json").dig("page", "documents", 0) || {}
@@ -138,7 +138,7 @@
       poll: lambda { |_connection, input, closure|
         page ||= closure.present? ? closure.first : 1
         updated_since = ((closure.present? ? closure[1] : false) ||
-         input['since'] || 1.hour.ago).to_time
+         input["since"] || 1.hour.ago).to_time
         documents = (get("/api/documents.json").
                        params(page: page).
                        dig("page", "documents") || []).
@@ -160,7 +160,7 @@
 
       sort_by: ->(document) { document["completed_at"] },
 
-      output_fields: ->(object_definitions) { object_definitions['document'] },
+      output_fields: ->(object_definitions) { object_definitions["document"] },
 
       sample_output: lambda { |_connection|
         get("/api/documents.json").dig("page", "documents", 0) || {}
