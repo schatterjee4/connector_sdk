@@ -608,6 +608,26 @@
     }
   },
 
+  methods: {
+    get_object_fields: lambda do |input|
+      get("/v1/describe/" + input[:object]).
+          response_format_xml.
+          dig("object", 0, "fields", 0, "field").map do |o|
+          o.dig("name", 0, "content!") unless o.dig("selectable", 0,
+            "content!") == "false"
+      end
+    end,
+
+    object_sample_output: lambda do |input|
+      post("/v1/action/query").
+          headers("x-zuora-wsdl-version": 88.0).
+          payload(queryString: "Select " + call("get_object_fields",
+           { object: input[:object] }).smart_join(", ") +
+            " from " + input[:object] + " ").
+          dig("records").first || {}
+    end
+  },
+
   actions: {
     get_customer_account_by_id: {
       subtitle: "Get customer account by ID",
@@ -767,7 +787,7 @@
       output_fields: lambda do |object_definitions|
         [
           { name: "response", type: "object", properties: [
-              { name: "Success", type: "boolean",
+              { name: "success", type: "boolean",
                 control_type: "checkbox" },
               { name: "Id" },
               { name: "Errors", type: "array",
@@ -778,6 +798,9 @@
             ] },
           
         ]
+      end,
+      sample_output: lambda do |_connection, input|
+        { response: { success: "true", Id: "107bb8280175668b1f47e51710214497" }}
       end
     },
      create_objects: {
@@ -819,9 +842,12 @@
               { name: "Code" },
               { name: "Message"}
             ] },
-            { name: "Success", type: "boolean", control_type: "checkbox" },
+            { name: "success", type: "boolean", control_type: "checkbox" },
             { name: "Id" }] }
         ]
+      end,
+      sample_output: lambda do |_connection, input|
+        { results: [{ success: "true", Id: "107bb8280175668b1f47e51710214497" }]}
       end
     },
     update_object: {
@@ -850,7 +876,7 @@
       output_fields: lambda do
         [
           { name: "response", type: "object", properties: [
-              { name: "Success", type: "boolean",
+              { name: "success", type: "boolean",
                 control_type: "checkbox" },
               { name: "Id" },
               { name: "Errors", type: "array", of: "object",
@@ -860,6 +886,10 @@
                 ]}
             ] },
         ]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        { response: { success: "true", Id: "107bb8280175668b1f47e51710214497" } }
       end
     },
     update_objects: {
@@ -902,9 +932,13 @@
                 { name: "Code" },
                 { name: "Message"}
               ] },
-            { name: "Success", type: "boolean", control_type: "checkbox" },
+            { name: "success", type: "boolean", control_type: "checkbox" },
             { name: "Id" } ] }
         ]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        { results: [{ success: "true", Id: "107bb8280175668b1f47e51710214497" }]}
       end
     },
     
@@ -925,12 +959,7 @@
 
       execute: lambda do |connection, input|
         object = input.delete("object_name")
-        fields = get("/v1/describe/#{object}").
-          response_format_xml.
-          dig("object", 0, "fields", 0, "field").map do |o|
-          o.dig("name", 0, "content!") unless o.dig("selectable", 0,
-            "content!") == "false"
-        end
+        fields = call("get_object_fields", { object: object })
         query_params = (input || []).map do |k,v| 
           if ["Name"].include?(k)
             " #{k} = '%#{v}%'" 
@@ -938,6 +967,7 @@
             " #{k} = '#{v}'" 
           end
         end.join(" or ")
+        
         queryString = "Select " + fields.smart_join(", ") + " from #{object} " +
         ( query_params.blank? ? "" :  "where " + query_params )
         response = post("/v1/action/query").
@@ -954,6 +984,10 @@
           { name: "objects", type: "array", of: "object",
             properties: object_definitions["object_output"] }
         ]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        { objects: [call("object_sample_output", { object: input["object_name"] })] }
       end
     }
   },
@@ -1026,6 +1060,10 @@
 
       output_fields: lambda do | object_definitions|
         object_definitions["object_output"]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        call("object_sample_output", { object: input["object_name"] })
       end
     },
 
@@ -1096,6 +1134,10 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["object_output"]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        call("object_sample_output", { object: input["object_name"] })
       end
     }
   },
