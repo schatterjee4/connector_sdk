@@ -582,6 +582,7 @@
           gsub(/\s/, "%20") + "')/Files/Add(url='" +
           input["file_name"].gsub(/\s/, "%20").to_param + "',overwrite=true)").
         headers("X-RequestDigest": call("digest",{}),
+                "Accept": "application/json;odata=verbose",
                 "Content-Type": "application/json;odata=verbose").
         request_body(input["content"])
       end,
@@ -624,6 +625,7 @@
           gsub(/\s/, "%20").to_param + "')/$value").
         headers("X-RequestDigest": call("digest",{}),
                 "X-HTTP-Method": "PUT",
+                "Accept": "application/json;odata=verbose",
                 "Content-Type": "application/json;odata=verbose").
         request_body(input["content"])
       end,
@@ -672,7 +674,8 @@
           input['serverRelativeUrl'].gsub(/\s/, "%20") +
           "')/Files('"+ input['file_name'].gsub(/\s/, "%20").to_param +
           "')/ListItemAllFields").
-        headers("Content-Type": "application/json;odata=verbose").
+        headers("Accept": "application/json;odata=verbose",
+                "Content-Type": "application/json;odata=verbose").
         map do |key, value|
           { "#{key}".gsub(".", "_") => "#{value}" }
         end.inject(:merge)
@@ -722,6 +725,10 @@
         [
           { name: "content" }
         ]
+      end,
+      
+      sample_output: lambda do
+        { "content": "test" }
       end
     },
 
