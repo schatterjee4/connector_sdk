@@ -67,19 +67,26 @@
       fields: lambda do
         [
           { name: "number", label: "Invoice number" },
-          { name: "merchant_info", type: :object, label: "Merchant information",
+          { name: "merchant_info", type: :object,
+            label: "Merchant information",
             properties: [
               { name: "first_name", type: :string },
               { name: "last_name", type: :string },
-              { name: "business_name", type: :string, label: "Business name" },
-              { name: "email", type: :string, control_type: :text, label: "Email" },
+              { name: "business_name", type: :string,
+                label: "Business name" },
+              { name: "email", type: :string,
+                control_type: :text, label: "Email" },
               { name: "phone", type: :object, properties: [
-                { name: "country_code", type: :string, label: "Country code" },
-                { name: "national_number", label: "Phone number", control_type: :phone }
+                { name: "country_code", type: :string,
+                  label: "Country code" },
+                { name: "national_number", 
+                  label: "Phone number", control_type: :phone }
                 ]},
               { name: "fax", type: :object, properties: [
-              { name: "country_code", type: :string, label: "Country code" },
-              { name: "national_number", label: "Phone number", control_type: :phone }
+              { name: "country_code", type: :string,
+                label: "Country code" },
+              { name: "national_number", label: "Phone number",
+                control_type: :phone }
               ]},
               { name: "address", type: :object, properties: [
                 { name: "line1", label: "Street" },
@@ -123,9 +130,10 @@
             { name: "unit_price", type: :object, properties: [
               { name: "currency" },
               { name: "value", type: :string,
-                control_type: :currency }
+                control_type: :number }
             ]},
-            { name: "tax", type: :object, control_type: :text, properties: [
+            { name: "tax", type: :object, control_type: :text,
+              properties: [
               { name: "name" },
               { name: "percent", type: :integer, control_type: :number,
                 hint: "The tax rate. Value is from 0 to 100. Supports up to "\
@@ -134,7 +142,7 @@
                 hint: "The calculated tax amount. (Read Only)",
                 properties: [
                   { name: "currency" },
-                  { name: "value", type: :string, control_type: :currency }
+                  { name: "value", type: :string, control_type: :number }
               ]}
             ]},
             { name: "date", hint: "The date when the item or service was "\
@@ -148,7 +156,7 @@
                 " two decimal places.",
                 properties: [
                   { name: "currency" },
-                  { name: "value", type: :string, control_type: :currency }
+                  { name: "value", type: :string, control_type: :number }
               ]}
             ]},
             { name: "unit_of_measure", type: "select",
@@ -182,7 +190,7 @@
                  properties: [
                   { name: "currency" },
                   { name: "value", type: :string,
-                    control_type: :currency }
+                    control_type: :number }
               ]}
           ]},
           { name: "shipping_cost", type: :object,
@@ -193,7 +201,7 @@
                 properties: [
                   { name: "currency" },
                   { name: "value", type: :string,
-                    control_type: :currency }
+                    control_type: :number }
                 ]},
               { name: "tax", type: :object, properties: [
                 { name: "name" },
@@ -205,7 +213,7 @@
                   properties: [
                     { name: "currency" },
                     { name: "value", type: :string,
-                      control_type: :currency }
+                      control_type: :number }
                 ]}
               ]}
           ]},
@@ -216,7 +224,7 @@
                 hint: "The calculated tax amount. (Read Only)",
                 properties: [
                   { name: "currency", type: :string },
-                  { name: "value", type: :string, control_type: :currency }
+                  { name: "value", type: :string, control_type: :number }
               ]}
           ]},
           { name: "allow_partial_payment", type: :boolean },
@@ -226,7 +234,7 @@
              properties: [
               { name: "currency" },
               { name: "value", type: :string,
-                control_type: :currency }
+                control_type: :number }
           ]},
           { name: "tax_calculated_after_discount",
             type: :boolean,
@@ -279,28 +287,31 @@
               toggle_hint: "Use custom value",
               hint: "For possible values, Refer https://"\
               "developer.paypal.com/docs/api/invoicing/#"\
-              "invoices_search for status column " }
-          },
+              "invoices_search for status column " } },
           { name: "lower_total_amount",
             hint: "The lower limit of the total amount." },
-          { name: "upper_total_amount", hint: "The upper limit of total amount." },
+          { name: "upper_total_amount", 
+            hint: "The upper limit of total amount." },
           { name: "start_invoice_date",
             type: :date,
-            hint: "The start date for the invoice ex: yyyy-MM-dd z." },
+            hint: "The start date for the invoice e.g. yyyy-MM-dd z." },
           { name: "start_due_date", type: :date,
-            hint: "The start due date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start due date for the invoice, e.g. yyyy-MM-dd z." },
           { name: "end_due_date", type: :date,
-            hint: "The end due date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end due date for the invoice, e.g. yyyy-MM-dd z." },
           { name: "start_payment_date", type: :date,
-            hint: "The start payment date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start payment date for the invoice," \
+            " e.g. yyyy-MM-dd z." },
           { name: "end_payment_date", type: :date,
-            hint: "The end payment date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end payment date for the invoice, e.g. yyyy-MM-dd z." },
           { name: "start_creation_date", type: :date,
-            hint: "The start creation date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start creation date for the invoice," \
+            " e.g. yyyy-MM-dd z." },
           { name: "end_creation_date", type: :date,
-            hint: "The end creation date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end creation date for the invoice," \
+            " e.g. yyyy-MM-dd z." },
           { name: "total_count_required", type: :boolean,
-            hint: "Indicates whether the response shows the total count."},
+            hint: "Indicates whether the response shows the total count." },
           { name: "archived", type: :boolean,
             label: "Archived?",
             hint: "<code>true</code> - only archieved, <code>false</code> "\
@@ -325,7 +336,7 @@
       sample_output: lambda do
         [
           post("/v1/invoicing/search").
-            payload(page: 0, page_size: 1).dig(0, "invoices")
+            payload(page: 0, page_size: 1).dig(0, "invoices") || {}
         ]
       end
     },
@@ -342,7 +353,7 @@
         ]
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         get("/v1/invoicing/invoices/#{input['invoice_id']}")
       end,
 
@@ -353,7 +364,7 @@
       sample_output: lambda do
         [
           post("/v1/invoicing/search").
-            payload(page: 0, page_size: 1).dig("invoices", 0)
+            payload(page: 0, page_size: 1).dig("invoices", 0) || {}
         ]
       end
     }
@@ -370,10 +381,10 @@
         []
       end,
 
-      webhook_subscribe: lambda do |webhook_url, connection, input, recipe_id|
+      webhook_subscribe: lambda do |webhook_url, _connection, input, recipe_id|
         post("/v1/notifications/webhooks").
-          payload(url: webhook_url,
-                  event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
+        payload(url: webhook_url,
+                event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
 
       webhook_notification: lambda do |input, payload|
@@ -394,7 +405,7 @@
 
       sample_output: lambda do
         post("/v1/invoicing/search").
-          payload(page: 0, page_size: 1).dig(0, "invoices")
+          payload(page: 0, page_size: 1).dig(0, "invoices") || {}
       end
     }
   },
