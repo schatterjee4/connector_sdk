@@ -281,8 +281,10 @@
           { name: "status", control_type: "select",
             pick_list: "status_list", label: "Invoice status",
             toggle_hint: "Select from list",
-            toggle_field: { name: "status",
-              type: :string, control_type: "text", 
+            toggle_field:
+            { name: "status",
+              type: :string,
+              control_type: "text", 
               label: "Invoice Status",
               toggle_hint: "Use custom value",
               hint: "For possible values, Refer https://"\
@@ -290,7 +292,7 @@
               "invoices_search for status column " } },
           { name: "lower_total_amount",
             hint: "The lower limit of the total amount." },
-          { name: "upper_total_amount", 
+          { name: "upper_total_amount",
             hint: "The upper limit of total amount." },
           { name: "start_invoice_date",
             type: :date,
@@ -383,8 +385,8 @@
 
       webhook_subscribe: lambda do |webhook_url, _connection, input, recipe_id|
         post("/v1/notifications/webhooks").
-        payload(url: webhook_url,
-                event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
+          payload(url: webhook_url,
+                  event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
 
       webhook_notification: lambda do |input, payload|
