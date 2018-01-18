@@ -44,18 +44,22 @@
         {
           access_token: (post("https://api.#{connection['environment']}/"\
           "v1/oauth2/token").
-          	headers(Accept: "application/json",
-          					"Accept-Language": "en_US",
-          					Authorization: "Basic #{hash}").
-          	payload(grant_type: "client_credentials").
-          	request_format_www_form_urlencoded)["access_token"]
+            headers(Accept: "application/json",
+                    "Accept-Language": "en_US",
+                    Authorization: "Basic #{hash}").
+            payload(grant_type: "client_credentials").
+            request_format_www_form_urlencoded)["access_token"]
         }
       end,
       refresh_on: 401,
       apply: lambda do |connection|
         headers(Authorization: "Bearer #{connection['access_token']}")
       end
-    }
+    },
+
+    base_uri: lambda do |connection|
+        "https://api.#{connection['environment']}"
+    end
   },
 
   object_definitions: {
@@ -134,14 +138,14 @@
               ]}
             ]},
             { name: "date", hint: "The date when the item or service was "\
-            	"provided in yyyy-MM-dd z." },
+              "provided in yyyy-MM-dd z." },
             { name: "discount", type: :object, properties: [
               { name: "percent", type: :integer,
                 control_type: :number,
                 hint: "The discount as a percentage value." },
               { name: "amount", type: :object, hint: "The invoice level "\
-              	"discount amount. Value is from 0 to 1000000. Supports up to"\
-              	" two decimal places.",
+                "discount amount. Value is from 0 to 1000000. Supports up to"\
+                " two decimal places.",
                 properties: [
                   { name: "currency" },
                   { name: "value", type: :string, control_type: :currency }
@@ -247,9 +251,8 @@
     }
   },
 
-  test: lambda do |connection|
-    get("https://api.#{connection['environment']}/v1/oauth2/token/userinfo").
-    	params(schema: "openid")
+  test: lambda do |_connection|
+    get("/v1/oauth2/token/userinfo").params(schema: "openid")
   end,
 
   actions: {
@@ -266,11 +269,11 @@
           { name:  "recipient_last_name" },
           { name: "recipient_business_name" },
           { name: "number", label: "Invoice number",
-          	hint: "Any part of the invoice number." },
+            hint: "Any part of the invoice number." },
           { name: "status", control_type: "select",
-          	pick_list: "status_list", label: "Invoice status",
-          	toggle_hint: "Select from list",
-          	toggle_field: { name: "status",
+            pick_list: "status_list", label: "Invoice status",
+            toggle_hint: "Select from list",
+            toggle_field: { name: "status",
               type: :string, control_type: "text", 
               label: "Invoice Status",
               toggle_hint: "Use custom value",
@@ -279,35 +282,34 @@
               "invoices_search for status column " }
           },
           { name: "lower_total_amount",
-          	hint: "The lower limit of the total amount." },
+            hint: "The lower limit of the total amount." },
           { name: "upper_total_amount", hint: "The upper limit of total amount." },
           { name: "start_invoice_date",
-          	type: :date,
-          	hint: "The start date for the invoice ex: yyyy-MM-dd z." },
+            type: :date,
+            hint: "The start date for the invoice ex: yyyy-MM-dd z." },
           { name: "start_due_date", type: :date,
-          	hint: "The start due date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start due date for the invoice, ex: yyyy-MM-dd z." },
           { name: "end_due_date", type: :date,
-          	hint: "The end due date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end due date for the invoice, ex: yyyy-MM-dd z." },
           { name: "start_payment_date", type: :date,
-          	hint: "The start payment date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start payment date for the invoice, ex: yyyy-MM-dd z." },
           { name: "end_payment_date", type: :date,
-          	hint: "The end payment date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end payment date for the invoice, ex: yyyy-MM-dd z." },
           { name: "start_creation_date", type: :date,
-          	hint: "The start creation date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The start creation date for the invoice, ex: yyyy-MM-dd z." },
           { name: "end_creation_date", type: :date,
-          	hint: "The end creation date for the invoice, ex: yyyy-MM-dd z." },
+            hint: "The end creation date for the invoice, ex: yyyy-MM-dd z." },
           { name: "total_count_required", type: :boolean,
-          	hint: "Indicates whether the response shows the total count."},
+            hint: "Indicates whether the response shows the total count."},
           { name: "archived", type: :boolean,
-          	label: "Archived?",
-          	hint: "<code>true</code> - only archieved, <code>false</code> "\
-          	"- unarchived only, <code>null</code> - lists all invoices." }
+            label: "Archived?",
+            hint: "<code>true</code> - only archieved, <code>false</code> "\
+            "- unarchived only, <code>null</code> - lists all invoices." }
         ]
       end,
 
-      execute: lambda do |connection, input|
-        invoices = post("https://api.#{connection['environment']}/v1/"\
-        "invoicing/search", input)["invoices"]
+      execute: lambda do |_connection, input|
+        invoices = post("/v1/invoicing/search", input)["invoices"]
         {
           invoices: invoices
         }
@@ -316,14 +318,14 @@
       output_fields: lambda do |object_definitions|
         [
           { name: "invoices", type: :array, of: :object,
-          	properties: object_definitions["invoice"] }
+            properties: object_definitions["invoice"] }
         ]
       end,
 
-      sample_output: lambda do |connection|
+      sample_output: lambda do
         [
-        	post("https://api.#{connection['environment']}/v1/invoicing/search").
-        		payload(page: 0, page_size: 1).dig(0, "invoices")
+          post("/v1/invoicing/search").
+            payload(page: 0, page_size: 1).dig(0, "invoices")
         ]
       end
     },
@@ -334,29 +336,25 @@
       title_hint: "Get invoice in PayPal",
       hint: "Fetch the invoice details for the given Invoice ID",
 
-      input_fields: lambda do |_connection|
+      input_fields: lambda do
         [
           { name: "invoice_id", label: "Invoice ID", optional: false }
         ]
       end,
 
       execute: lambda do |connection, input|
-        {
-          invoice: get("https://api.#{connection['environment']}/v1/"\
-          "invoicing/invoices/#{input['invoice_id']}")
-        }
+        get("/v1/invoicing/invoices/#{input['invoice_id']}")
       end,
 
       output_fields: lambda do |object_definitions|
-        [
-        { name: "invoice", type: :object, label: "Invoice",
-        	properties: object_definitions["invoice"] }
-        ]
+        object_definitions["invoice"]
       end,
 
-      sample_output: lambda do |connection|
-      	[post("https://api.#{connection['environment']}/v1/invoicing/search").
-      		 payload(page: 0, page_size: 1).dig("invoices", 0)]
+      sample_output: lambda do
+        [
+          post("/v1/invoicing/search").
+            payload(page: 0, page_size: 1).dig("invoices", 0)
+        ]
       end
     }
   },
@@ -372,19 +370,18 @@
         []
       end,
 
-      webhook_subscribe: lambda do |webhook_url, connection, _input, _recipe_id|
-        post("https://api.#{connection['environment']}/v1/notifications/webhooks").
-        	payload(url: webhook_url,
-        					event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
+      webhook_subscribe: lambda do |webhook_url, connection, input, recipe_id|
+        post("/v1/notifications/webhooks").
+          payload(url: webhook_url,
+                  event_types: [{ name: "INVOICING.INVOICE.CREATED" }])
       end,
 
-      webhook_notification: lambda do |_input, payload|
+      webhook_notification: lambda do |input, payload|
         payload["resource"]
       end,
 
       webhook_unsubscribe: lambda do |webhook, connection|
-        delete("https://api.#{connection['environment']}/v1/notifications/webhooks/"\
-        	"#{webhook['id']}")
+        delete("/v1/notifications/webhooks/#{webhook['id']}")
       end,
 
       dedup: lambda do |invoice|
@@ -395,9 +392,9 @@
         object_definitions["invoice"]
       end,
 
-      sample_output: lambda do |connection|
-        post("https://api.#{connection['environment']}/v1/invoicing/search").
-        	payload(page: 0, page_size: 1).dig(0, "invoices")
+      sample_output: lambda do
+        post("/v1/invoicing/search").
+          payload(page: 0, page_size: 1).dig(0, "invoices")
       end
     }
   },
