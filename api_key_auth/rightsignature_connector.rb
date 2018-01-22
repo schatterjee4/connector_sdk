@@ -136,7 +136,7 @@
       },
 
       poll: lambda { |_connection, input, closure|
-        page = closure.present? ? closure.first : 1
+        page ||= closure.present? ? closure.first : 1
         updated_since = ((closure.present? ? closure[1] : false) ||
          input["since"] || 1.hour.ago).to_time
         documents = (get("/api/documents.json").
