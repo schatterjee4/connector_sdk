@@ -117,7 +117,7 @@
             { name: "uri", label: "Spotify URI" },
             { name: "external_urls" },
             { name: "href", type: "string", control_type: "url" }
-            ] },
+          ] },
           { name: "uri", label: "Spotify URI" },
           { name: "external_urls" },
           { name: "href", type: "string", control_type: "url" },
@@ -126,7 +126,7 @@
           { name: "tracks", type: "object", properties: [
             { name: "href", type: "string", control_type: "url" },
             { name: "total", type: "integer" }
-            ] }
+          ] }
         ]
       end
     },
