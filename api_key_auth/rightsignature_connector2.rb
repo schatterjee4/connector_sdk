@@ -98,8 +98,8 @@
   actions: {
     get_document_details: {
       subtitle: "Get document details by ID",
-      description: "Get <span class='provider'>document details</span> " \
-        "by ID in <span class='provider'>RightSignature</span>",
+      description: "Get <span class='provider'>document details</span>" \
+        " by ID in <span class='provider'>RightSignature</span>",
 
       input_fields: lambda { |object_definitions|
         object_definitions["document"].only("guid").required("guid")
@@ -109,10 +109,12 @@
         get("/api/documents/#{input['guid']}.json")["document"] || {}
       },
 
-      output_fields: ->(object_definitions) { object_definitions["document"] },
+      output_fields: ->(object_definitions) { object_definitions['document'] },
 
       sample_output: lambda { |_connection|
-        get("/api/documents.json").dig("page", "documents", 0) || {}
+        get("/api/documents.json").
+          payload(per_page: 1).
+          dig("page", "documents", 0) || {}
       }
     }
   },
@@ -136,17 +138,16 @@
       },
 
       poll: lambda { |_connection, input, closure|
-        page = closure.present? ? closure.first : 1
+        page ||= closure.present? ? closure.first : 1
         updated_since = ((closure.present? ? closure[1] : false) ||
-         input["since"] || 1.hour.ago).to_time
+         input['since'] || 1.hour.ago).to_time
         documents = (get("/api/documents.json").
                        params(page: page).
                        dig("page", "documents") || []).
                     select do |document|
                       document["completed_at"].to_time >= updated_since
                     end
-        # default page_size=10; no option to change
-        last_page = documents.size < 10
+        last_page = documents.size < page_size
         closure = (last_page ? [1, now] : [page + 1, updated_since])
 
         {
@@ -160,10 +161,12 @@
 
       sort_by: ->(document) { document["completed_at"] },
 
-      output_fields: ->(object_definitions) { object_definitions["document"] },
+      output_fields: ->(object_definitions) { object_definitions['document'] },
 
       sample_output: lambda { |_connection|
-        get("/api/documents.json").dig("page", "documents", 0) || {}
+        get("/api/documents.json").
+          payload(per_page: 1).
+          dig("page", "documents", 0) || {}
       }
     }
   }
