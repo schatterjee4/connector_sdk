@@ -570,7 +570,7 @@
               type: "string", control_type: "text",
               label: "Server relative URL", toggle_hint: "Use folder realtive Path",
               hint: "Relative URL of the folder to upload file in" },
-            toggle_hint: "Select folder"},
+            toggle_hint: "Select folder" },
           { name: "file_name", label: "File name", optional: false },
           { name: "content", optional: false }
         ]
@@ -611,7 +611,7 @@
               label: "Server relative URL",
               toggle_hint: "Use folder realtive Path",
               hint: "Relative URL of the folder to upload file in" },
-            toggle_hint: "Select folder"},
+            toggle_hint: "Select folder" },
           { name: "file_name", label: "File name", optional: false },
           { name: "content", optional: false }
         ]
@@ -738,18 +738,27 @@
       title_hint: "Update List item metadata in Microsoft Sharepoint library",
       help: "Update List item metadata in Microsoft Sharepoint library",
 
+      config_fields: [
+        {
+            name: "list_id",
+            control_type: :select,
+            pick_list: :list,
+            label: "List",
+            optional: false,
+            toggle_field: { name: "list_id",
+              type: "string", control_type: "text",
+              label: "List",
+              toggle_hint: "Use the list id",
+              hint: "List id of the file located" },
+            toggle_hint: "Select list" }
+          },
+          {
+            name: "item_id"
+          }
+      ],
+
       input_fields: lambda do |object_defintions|
         [
-          {
-            name: "list_name",
-            control_type: :select,
-            pick_list: :name_list,
-            label: "List",
-            optional: false
-          },
-          {
-            name: "item_id", optional: false
-          },
           {
             name: "__metadata",
             label: "Item Type",
@@ -767,8 +776,8 @@
 
       execute: lambda do |connection, input|
         document = post(call("url", { siteurl: connection["siteurl"] }) +
-         "lists/GetByTitle('" + input.delete('list_name').
-          gsub(/\s/, "%20") + "')/" + "items(" +
+          "lists(guid%27" + input.delete('list_id').
+          gsub(/\s/, "%20") + "%27)/" + "items(" +
           input.delete("item_id") + ")" ).
         headers("X-RequestDigest": call("digest",{}),
                 "X-HTTP-Method": "MERGE",
