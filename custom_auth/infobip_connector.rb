@@ -14,10 +14,13 @@
               headers(:Authorization => "App #{connection['api_key']}",
                       :'User-Agent' => 'Workato')
             }
+        },
+        base_uri: lambda { |connection|
+          'https://api.infobip.com/sms/1'
         }
     },
     test: ->(connection) {
-      get('https://api.infobip.com/sms/1/logs').params(limit: 1)
+      get('/logs').params(limit: 1)
     },
     object_definitions: {
         send_sms_request: {
@@ -66,7 +69,7 @@
               object_definitions['send_sms_request']
             },
             execute: ->(connection, input) {
-              post('https://api.infobip.com/sms/1/text/single', input)['send_sms_request']
+              post('/text/single', input)['send_sms_request']
             },
             output_fields: ->(object_definitions) {[
                 { name: 'messages', type: :array, of: :object, properties: object_definitions['sent_sms_info'] }
@@ -80,7 +83,7 @@
               received_since = last_received_at || (Time.now - 5 * 60).utc.strftime(date_time_format)
               query_param = received_since.gsub(':', '%3A').gsub('+', '%2B')
 
-              received_messages = get("https://api.infobip.com/sms/1/inbox/logs?receivedSince=#{query_param}")
+              received_messages = get("/inbox/logs?receivedSince=#{query_param}")
 
               received_sms_info = received_messages['results']
               last_received_at = received_sms_info.length == 0 ? received_since : received_sms_info[0]['receivedAt']
