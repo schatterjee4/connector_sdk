@@ -52,8 +52,7 @@
 
       acquire: lambda { |connection|
         {
-          session_id: post("https://#{connection['environment']}.bill.com" \
-            "/api/v2/Login.json").
+          session_id: post("/api/v2/Login.json").
             payload(userName: connection["user_name"],
                     password: connection["password"],
                     orgId: connection["org_id"],
