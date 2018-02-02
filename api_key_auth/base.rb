@@ -128,8 +128,8 @@
           ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
       end,
 
-      execute: lambda do |connection, input|
-        post("https://api.getbase.com/v2/leads").
+      execute: lambda do |_connection, input|
+        lead = post("https://api.getbase.com/v2/leads").
           payload(data: input)["data"]
       end,
 
@@ -139,7 +139,7 @@
 
       sample_output: lambda do
         get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
-            dig(0, "data") || {}
+          dig(0, "data") || {}
       end
     }
   }
