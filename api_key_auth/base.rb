@@ -129,7 +129,7 @@
       end,
 
       execute: lambda do |_connection, input|
-        lead = post("https://api.getbase.com/v2/leads").
+        post("https://api.getbase.com/v2/leads").
           payload(data: input)["data"]
       end,
 
