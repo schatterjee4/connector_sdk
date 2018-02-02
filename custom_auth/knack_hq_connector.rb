@@ -14,17 +14,20 @@
         headers('X-Knack-Application-Id': connection['app_id'],
                 'X-Knack-REST-API-Key': connection['api_key'])
       }
+    },
+    base_uri: lambda { |connection|
+      'https://api.knackhq.com/v1'
     }
   },
   
   test: ->(connection) {
-    get("https://api.knackhq.com/v1/objects")
+    get('/objects')
   },
 
   object_definitions: {
     object_1: {
       fields: ->(connection) {
-        get("https://api.knackhq.com/v1/objects/object_1/fields")['fields'].
+        get('/objects/object_1/fields')['fields'].
           map { |f| { name: f['key'], label: f['label'] } }
       }
     }
@@ -40,7 +43,7 @@
       },
       
       execute: ->(connection,input) {
-        get("https://api.knackhq.com/v1/objects/object_1/records/#{input['id']}")
+        get("/objects/object_1/records/#{input['id']}")
       },
       
       output_fields: -> (object_definitions) {
@@ -58,7 +61,7 @@
       poll: ->(connection,input,page) {
         page ||= 1
         
-        response = get("https://api.knackhq.com/v1/objects/object_1/records").
+        response = get('/objects/object_1/records').
                      params(sort_field: 'id',
                             sort_order: 'desc',
                             page: page)
