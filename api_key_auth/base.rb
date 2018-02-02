@@ -129,28 +129,17 @@
       end,
 
       execute: lambda do |connection, input|
-        lead = post("https://api.getbase.com/v2/leads").
+        post("https://api.getbase.com/v2/leads").
           payload(data: input)["data"]
-        {
-          lead: lead
-        }
       end,
 
       output_fields: lambda do |object_definitions|
-        [
-          {
-            name: "lead", type: :object, label: "Lead",
-            properties: object_definitions["lead"]
-          }
-        ]
+        object_definitions["lead"]
       end,
 
       sample_output: lambda do
-        {
-          lead:
-          get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
+        get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
             dig(0, "data") || {}
-        }
       end
     }
   }
