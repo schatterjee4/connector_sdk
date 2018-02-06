@@ -2,28 +2,22 @@
   title: "RightSignature",
 
   connection: {
-    fields: [
-      {
-        name: "api_key",
-        label: "Secure token",
-        hint: "You may find the secure token <a href=" \
-          "'https://rightsignature.com/oauth_clients' target='_blank'>here</a>",
-        control_type: "password",
-        optional: false
-      }
-    ],
+    fields: [{
+      name: "api_key",
+      label: "Secure token",
+      hint: "You may find the secure token <a href=" \
+        "'https://rightsignature.com/oauth_clients' target='_blank'>here</a>",
+      control_type: "password",
+      optional: false
+    }],
 
     authorization: {
       type: "api_key",
 
-      apply: lambda { |connection|
-        headers(api_token: connection["api_key"])
-      }
+      apply: ->(connection) { headers(api_token: connection["api_key"]) }
     },
 
-    base_uri: lambda { |_connection|
-      "https://rightsignature.com"
-    }
+    base_uri: ->(_connection) { "https://rightsignature.com" }
   },
 
   object_definitions: {
@@ -108,57 +102,6 @@
       execute: lambda { |_connection, input|
         get("/api/documents/#{input['guid']}.json")["document"] || {}
       },
-
-      output_fields: ->(object_definitions) { object_definitions["document"] },
-
-      sample_output: lambda { |_connection|
-        get("/api/documents.json").dig("page", "documents", 0) || {}
-      }
-    }
-  },
-
-  triggers: {
-    new_signed_document: {
-      subtitle: "New signed document",
-      description: "New <span class='provider'>signed document</span> " \
-        "in <span class='provider'>RightSignature</span>",
-      type: "paging_desc",
-
-      input_fields: lambda {
-        [{
-          name: "since",
-          label: "From",
-          type: "timestamp",
-          sticky: true,
-          hint: "Get documents signed since given date/time. " \
-            "Leave empty to get the documents signed one hour ago"
-        }]
-      },
-
-      poll: lambda { |_connection, input, closure|
-        page = closure.present? ? closure.first : 1
-        updated_since = ((closure.present? ? closure[1] : false) ||
-         input["since"] || 1.hour.ago).to_time
-        documents = (get("/api/documents.json").
-                       params(page: page).
-                       dig("page", "documents") || []).
-                    select do |document|
-                      document["completed_at"].to_time >= updated_since
-                    end
-        # default page_size=10; no option to change
-        last_page = documents.size < 10
-        closure = (last_page ? [1, now] : [page + 1, updated_since])
-
-        {
-          events: documents,
-          next_page: closure,
-          can_poll_more: !last_page
-        }
-      },
-
-      document_id: ->(document) { document["guid"] },
-
-      sort_by: ->(document) { document["completed_at"] },
 
       output_fields: ->(object_definitions) { object_definitions["document"] },
 
