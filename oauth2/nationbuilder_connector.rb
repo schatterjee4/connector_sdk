@@ -35,34 +35,15 @@
       authorization_url: lambda { |connection|
         "https://#{connection['subdomain']}.nationbuilder.com/" \
           "oauth/authorize?response_type=code&client_id=" \
-          "#{connection['client_id']}&redirect_uri=" \
-          "https://www.workato.com/oauth/callback"
+          "#{connection['client_id']}"
       },
 
-      acquire: lambda { |connection, auth_code, redirect_uri|
-        response = post("https://#{connection['subdomain']}" \
-                  ".nationbuilder.com/oauth/token").
-                   payload(client_id: connection["client_id"],
-                           redirect_uri: redirect_uri,
-                           grant_type: "authorization_code",
-                           client_secret: connection["client_secret"],
-                           code: auth_code).
-                   request_format_www_form_urlencoded
-
-        [response, nil, nil]
+      token_url: lambda { |connection|
+        "https://#{connection['subdomain']}" \
+          ".nationbuilder.com/oauth/token?client_id=" \
+          "#{connection['client_id']}&client_secret=" \
+          "#{connection['client_secret']}"
       },
-
-      refresh: lambda { |connection, refresh_token|
-        post("https://#{connection['subdomain']}.nationbuilder.com" \
-          "/oauth/token").
-          payload(client_id: connection["client_id"],
-                  client_secret: connection["client_secret"],
-                  grant_type: "refresh_token",
-                  refresh_token: refresh_token).
-          request_format_www_form_urlencoded
-      },
-
-      refresh_on: [401],
 
       apply: lambda { |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
@@ -84,25 +65,29 @@
           { name: "county_district" },
           { name: "county_file_id" },
           { name: "created_at", type: "date_time" },
-          { name: "do_not_call", type: "boolean" },
-          { name: "do_not_contact", type: "boolean" },
+          { name: "do_not_call", control_type: "checkbox", type: "boolean" },
+          { name: "do_not_contact", control_type: "checkbox", type: "boolean" },
           { name: "dw_id" },
-          { name: "email_opt_in", type: "boolean" },
+          { name: "email_opt_in", control_type: "checkbox", type: "boolean" },
           { name: "email", control_type: "email" },
           { name: "employer" },
           { name: "external_id" },
           { name: "federal_district" },
           { name: "fire_district" },
           { name: "first_name" },
-          { name: "has_facebook", type: "boolean" },
+          { name: "has_facebook", control_type: "checkbox", type: "boolean" },
           { name: "id" },
-          { name: "is_twitter_follower", type: "boolean" },
-          { name: "is_volunteer", type: "boolean" },
+          {
+            name: "is_twitter_follower",
+            control_type: "checkbox",
+            type: "boolean"
+          },
+          { name: "is_volunteer", control_type: "checkbox", type: "boolean" },
           { name: "judicial_district" },
           { name: "labour_region" },
           { name: "last_name" },
           { name: "linkedin_id" },
-          { name: "mobile_opt_in", type: "boolean" },
+          { name: "mobile_opt_in", control_type: "checkbox", type: "boolean" },
           { name: "mobile", control_type: "phone" },
           { name: "nbec_guid" },
           { name: "ngp_id" },
@@ -171,15 +156,13 @@
     }
   },
 
-  test: lambda { |_connection|
-    get("/api/v1/people/count")
-  },
+  test: ->(_connection) { get("/api/v1/people/count") },
 
   actions: {
     search_people: {
       subtitle: "Search people",
       description: "Search <span class='provider'>people</span> in " \
-      "<span class='provider'>NationBuilder</span>",
+        "<span class='provider'>NationBuilder</span>",
       help: "Returns a list of people based on search criteria. " \
         "Find more information <a " \
         "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
@@ -194,27 +177,23 @@
       execute: lambda { |_connection, input|
         {
           people: get("/api/v1/people/search", input).
-            params(per_page: 100).
-            dig("results") || []
+            params(per_page: 100)["results"] || []
         }
       },
 
       output_fields: lambda { |object_definitions|
-        [
-          {
-            name: "people",
-            type: "array",
-            of: "object",
-            properties: object_definitions["person"]
-          }
-        ]
+        [{
+          name: "people",
+          type: "array",
+          of: "object",
+          properties: object_definitions["person"]
+        }]
       },
 
       sample_output: lambda { |_connection|
         {
           people: get("/api/v1/people/search").
-            params(per_page: 1).
-            dig("results") || []
+            params(per_page: 1)["results"] || []
         }
       }
     },
@@ -236,13 +215,10 @@
               "/api/v1/people/#{input['external_id']}?id_type=external"
             else
               "/api/v1/people/#{input['id']}"
-            end).
-          dig("person") || {}
+            end)["person"] || {}
       },
 
-      output_fields: lambda { |object_definitions|
-        object_definitions["person"]
-      },
+      output_fields: ->(object_definitions) { object_definitions['person'] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -263,12 +239,10 @@
       },
 
       execute: lambda { |_connection, input|
-        get("/api/v1/people/match").params(input).dig("person") || {}
+        get("/api/v1/people/match").params(input)["person"] || {}
       },
 
-      output_fields: lambda { |object_definitions|
-        object_definitions["person"]
-      },
+      output_fields: ->(object_definitions) { object_definitions['person'] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -283,44 +257,40 @@
         "<span class='provider'>NationBuilder</span>",
 
       input_fields: lambda { |_connection|
-        [
-          {
-            name: "since",
-            label: "From",
-            type: "timestamp",
-            optional: true,
-            sticky: true,
-            hint: "Fetch trigger events from specified time. " \
-              "Leave empty to get person created or updated one hour ago"
-          }
-        ]
+        [{
+          name: "since",
+          label: "From",
+          type: "timestamp",
+          sticky: true,
+          hint: "Fetch trigger events from specified time. " \
+            "Leave empty to get person created or updated one hour ago"
+        }]
       },
 
-      poll: lambda { |_connection, input, next_page|
-        response = get(if next_page.present?
-                         next_page
-                       else
-                         "/api/v1/people/search"
-                       end).
-                   params(per_page: 100,
-                          updated_since: (input["since"].presence ||
-                            1.hour.ago).to_time.utc.iso8601)
+      poll: lambda { |_connection, input, closure|
+        closure ||= [nil, nil]
+        uri = closure[0]
+        updated_since = (closure[1] || input["since"] ||
+          1.hour.ago).to_time.utc.iso8601
+        response = if uri.present?
+                     get(uri)
+                   else
+                     get("/api/v1/people/search").
+                       params(per_page: 100, updated_since: updated_since)
+                   end
+        next_uri = response["next"]
+        closure = (next_uri ? [next_uri, updated_since] : [nil, now])
 
         {
-          events: (response.dig("results") || []).
-            sort_by { |person| person["updated_at"] },
-          next_poll: response.dig("next").presence,
-          can_poll_more: response.dig("next").present?
+          events: response["results"] || [],
+          next_poll: closure,
+          can_poll_more: next_uri.present?
         }
       },
 
-      dedup: lambda { |person|
-        person["id"].to_s + "@" + person["updated_at"]
-      },
+      dedup: ->(person) { person["id"].to_s + "@" + person["updated_at"] },
 
-      output_fields: lambda { |object_definitions|
-        object_definitions["person"]
-      },
+      output_fields: ->(object_definitions) { object_definitions['person'] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -334,42 +304,40 @@
       type: "paging_desc",
 
       input_fields: lambda { |_connection|
-        [
-          {
-            name: "since",
-            label: "From",
-            type: "timestamp",
-            optional: true,
-            sticky: true,
-            hint: "Fetch trigger events from specified time. Leave empty " \
-              "to get survey response created one hour ago"
-          }
-        ]
+        [{
+          name: "since",
+          label: "From",
+          type: "timestamp",
+          sticky: true,
+          hint: "Fetch trigger events from specified time. Leave empty " \
+            "to get survey response created one hour ago"
+        }]
       },
 
-      poll: lambda { |_connection, input, next_page|
-        response = get(if next_page.present?
-                         next_page
-                       else
-                         "/api/v1/survey_responses"
-                       end).
-                   params(per_page: 100,
-                          start_time: (input["since"].presence || 1.hour.ago).
-                            to_time.to_i)
+      poll: lambda { |_connection, input, closure|
+        closure ||= [nil, nil]
+        uri = closure[0]
+        updated_since = (closure[1] || input["since"] ||
+          1.hour.ago).to_time.to_i
+        response = if uri.present?
+                     get(uri)
+                   else
+                     get("/api/v1/survey_responses").
+                       params(per_page: 100, start_time: updated_since)
+                   end
+        survey_responses = response["results"] || []
+        if !uri.present?
+          updated_since = survey_responses.first["created_at"].to_time.to_i
+        end
+        next_uri = response["next"]
+        closure = (next_uri ? [next_uri, updated_since] : [nil, updated_since])
 
-        {
-          events: response.dig("results") || [],
-          next_page: response.dig("next").presence
-        }
+        { events: survey_responses, next_page: closure }
       },
 
-      document_id: lambda { |survey_response|
-        survey_response["id"]
-      },
+      document_id: ->(survey_response) { survey_response["id"] },
 
-      sort_by: lambda { |survey_response|
-        survey_response["created_at"]
-      },
+      sort_by: ->(survey_response) { survey_response["created_at"] },
 
       output_fields: lambda { |object_definitions|
         object_definitions["survey_response"]
@@ -384,12 +352,6 @@
   },
 
   pick_lists: {
-    genders: lambda { |_connection|
-      [
-        %w[Male M],
-        %w[Female F],
-        %w[Other O]
-      ]
-    }
+    genders: ->(_connection) { [%w[Male M], %w[Female F], %w[Other O]] }
   }
 }
