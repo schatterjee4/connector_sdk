@@ -218,7 +218,7 @@
             end)["person"] || {}
       },
 
-      output_fields: ->(object_definitions) { object_definitions['person'] },
+      output_fields: ->(object_definitions) { object_definitions["person"] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -242,7 +242,7 @@
         get("/api/v1/people/match").params(input)["person"] || {}
       },
 
-      output_fields: ->(object_definitions) { object_definitions['person'] },
+      output_fields: ->(object_definitions) { object_definitions["person"] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -290,7 +290,7 @@
 
       dedup: ->(person) { person["id"].to_s + "@" + person["updated_at"] },
 
-      output_fields: ->(object_definitions) { object_definitions['person'] },
+      output_fields: ->(object_definitions) { object_definitions["person"] },
 
       sample_output: lambda { |_connection|
         get("/api/v1/people/search").params(per_page: 1).dig("results", 0) || {}
@@ -326,7 +326,7 @@
                        params(per_page: 100, start_time: updated_since)
                    end
         survey_responses = response["results"] || []
-        if !uri.present?
+        unless uri.present?
           updated_since = survey_responses.first["created_at"].to_time.to_i
         end
         next_uri = response["next"]
