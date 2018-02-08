@@ -53,7 +53,7 @@
             end
           when "double"
             { name: key, label: "#{value['label']}".labelize,
-                type: :ineger, control_type: :number }
+                type: :number, control_type: :number }
           when "date"
             { name: key, type: :date,  label: "#{value['label']}".labelize,
                 control_type: :date_time }
@@ -140,7 +140,7 @@
             end
           when "double"
             { name: key, label: "#{value['label']}".labelize,
-                type: :ineger, control_type: :number }
+                type: :number, control_type: :number }
           when "date"
             { name: key, type: :date,  label: "#{value['label']}".labelize,
                 control_type: :date_time }
@@ -227,7 +227,7 @@
             end
           when "double"
             { name: key, label: "#{value['label']}".labelize,
-                type: :ineger, control_type: :number }
+                type: :number, control_type: :number }
           when "date"
             { name: key, type: :date,  label: "#{value['label']}".labelize,
                 control_type: :date_time }
@@ -314,7 +314,7 @@
             end
           when "double"
             { name: key, label: "#{value['label']}".labelize,
-                type: :ineger, control_type: :number }
+                type: :number, control_type: :number }
           when "date"
             { name: key, type: :date,  label: "#{value['label']}".labelize,
                 control_type: :date_time }
@@ -900,7 +900,7 @@
       end,
 
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= (input["since"].presence || Time.now).to_time.
+        last_updated_time ||= (input["since"].presence || 1.hour.ago).to_time.
           in_time_zone("US/Central").iso8601
         projects = get("/attask/api/#{connection['version']}/project/" \
           "search?fields=*&fields=parameterValues").
@@ -914,7 +914,7 @@
         {
           events: projects,
           next_poll: last_updated_time,
-          can_poll_more: !projects.blank?
+          can_poll_more: projects.present?
         }
       end,
 
@@ -958,7 +958,7 @@
         ]
       end,
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= (input["since"].presence || Time.now).to_time.
+        last_updated_time ||= (input["since"].presence || 1.hour.ago).to_time.
           in_time_zone("US/Central").iso8601
         issues = get("/attask/api/#{connection['version']}/optask/search?" \
           "fields=*&fields=parameterValues").
@@ -970,7 +970,7 @@
         {
           events: issues,
           next_poll: last_updated_time,
-          can_poll_more: !issues.blank?
+          can_poll_more: issues.present?
         }
       end,
 
@@ -1031,19 +1031,19 @@
       end,
 
       poll: lambda do |connection, input, last_entered_time|
-        last_entered_time ||= (input["since"].presence || Time.now).to_time.
+        last_entered_time ||= (input["since"].presence || 1.hour.ago).to_time.
           in_time_zone("US/Central").iso8601
         objects = get("/attask/api/#{connection['version']}/" \
           "#{input['objCode']}/search?fields=*&fields=parameterValues").
           params(entryDate: last_entered_time,
-                entryDate_Mod: "gt",
-                lastUpdateDate_Sort: "asc")["data"]
+                 entryDate_Mod: "gt",
+                 lastUpdateDate_Sort: "asc")["data"]
         last_entered_time = objects.last["entryDate"] unless
-         objects.blank?
+        objects.blank?
          {
-          events: objects,
-          next_poll: last_entered_time,
-          can_poll_more: !objects.blank?
+            events: objects,
+            next_poll: last_entered_time,
+            can_poll_more: objects.present?
           }
       end,
 
@@ -1105,19 +1105,19 @@
       end,
 
       poll: lambda do |connection, input, last_updated_time|
-        last_updated_time ||= (input["since"].presence || Time.now).to_time.
-                               in_time_zone("US/Central").iso8601
+        last_updated_time ||= (input["since"].presence || 1.hour.ago).to_time.
+                              in_time_zone("US/Central").iso8601
         objects = get("/attask/api/#{connection['version']}/" \
           "#{input['objCode']}/search?fields=*&fields=parameterValues").
         params(lastUpdateDate: last_updated_time,
-                lastUpdateDate_Mod: "gt",
-                lastUpdateDate_Sort: "asc")["data"]
+               lastUpdateDate_Mod: "gt",
+               lastUpdateDate_Sort: "asc")["data"]
         last_updated_time = objects.last["lastUpdateDate"] unless
-         objects.blank?
+        objects.blank?
          {
-          events: objects,
-          next_poll: last_updated_time,
-          can_poll_more: !objects.blank?
+            events: objects,
+            next_poll: last_updated_time,
+            can_poll_more: objects.present?
           }
       end,
 
@@ -1128,7 +1128,7 @@
       output_fields: lambda do |object_definitions|
         properties =  object_definitions["object_output"]
         properties << object_definitions["custom_object"] unless
-         object_definitions["custom_object"].blank?
+          object_definitions["custom_object"].blank?
         properties
       end,
 
