@@ -270,16 +270,16 @@
       poll: lambda { |_connection, input, closure|
         closure ||= [nil, nil]
         uri = closure[0]
-        updated_since = (closure[1] || input["since"] ||
-          1.hour.ago).to_time.utc.iso8601
         response = if uri.present?
                      get(uri)
                    else
                      get("/api/v1/people/search").
-                       params(per_page: 100, updated_since: updated_since)
+                       params(per_page: 100,
+                              updated_since: (closure[1] || input["since"] ||
+                                1.hour.ago).to_time.utc.iso8601)
                    end
         next_uri = response["next"]
-        closure = (next_uri ? [next_uri, updated_since] : [nil, now])
+        closure = (next_uri ? [next_uri, nil] : [nil, now])
 
         {
           events: response["results"] || [],
@@ -314,25 +314,17 @@
         }]
       },
 
-      poll: lambda { |_connection, input, closure|
-        closure ||= [nil, nil]
-        uri = closure[0]
-        updated_since = (closure[1] || input["since"] ||
-          1.hour.ago).to_time.to_i
-        response = if uri.present?
-                     get(uri)
+      poll: lambda { |_connection, input, next_uri|
+        response = if next_uri.present?
+                     get(next_uri)
                    else
                      get("/api/v1/survey_responses").
-                       params(per_page: 100, start_time: updated_since)
+                       params(per_page: 100,
+                              start_time: (input["since"] ||
+                                1.hour.ago).to_time.to_i)
                    end
-        survey_responses = response["results"] || []
-        unless uri.present?
-          updated_since = survey_responses.first["created_at"].to_time.to_i
-        end
-        next_uri = response["next"]
-        closure = (next_uri ? [next_uri, updated_since] : [nil, updated_since])
 
-        { events: survey_responses, next_page: closure }
+        { events: response["results"] || [], next_page: response["next"] }
       },
 
       document_id: ->(survey_response) { survey_response["id"] },
