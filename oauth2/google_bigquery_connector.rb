@@ -113,9 +113,11 @@
             optional: (field["mode"] != "REQUIRED"),
             control_type: control_type_map[field["type"]],
             type: field_type,
-            properties: (field["fields"].map do |inner_field|
-                          build_schema_field[inner_field]
-                        end if field_type == "object")
+            properties: if field_type == "object"
+                          field["fields"].map do |inner_field|
+                            build_schema_field[inner_field]
+                          end
+                        end
           }
         end
 
@@ -183,33 +185,33 @@
       end,
 
       execute: lambda do |_connection, input|
-        project_id = input["project"]
-        dataset_id = input["dataset"]
-        table_id = input["table"]
         rows = input["rows"]
-        table_schema = get("/bigquery/v2/projects/#{project_id}/datasets/"  \
-                        "#{dataset_id}/tables/#{table_id}").
-                        dig("schema", "fields")
+        table_schema = get("/bigquery/v2/projects/#{input['project']}"  \
+                         "/datasets/#{input['dataset']}"  \
+                         "/tables/#{input['table']}").
+                       dig('schema', 'fields')
 
-        build_processed_row = lambda do |row, table_schema|
-          table_schema.map do |table_field|
-            row[table_field["name"]] = case table_field["type"]
-                                       when "TIME"
-                                         row[table_field["name"]].
-                                       to_time.
-                                       strftime("%H:%M:%S.%6N")
-                                       when "DATETIME"
-                                         row[table_field["name"]].
-                                       to_time.
-                                       strftime("%Y-%m-%dT%H:%M:%S.%6N")
-                                       when "RECORD", "STRUCT"
-                                         build_processed_row[
-                                           row[table_field["name"]],
-                                           table_field["fields"]
-                                         ]
-                                       else
-                                         row[table_field["name"]]
-            end if row[table_field["name"]].present?
+        build_processed_row = lambda do |row, schema_info|
+          schema_info.map do |table_field|
+            if row[table_field["name"]].present?
+              row[table_field["name"]] = case table_field["type"]
+                                         when "TIME"
+                                           row[table_field["name"]].
+                                         to_time.
+                                         strftime("%H:%M:%S.%6N")
+                                         when "DATETIME"
+                                           row[table_field["name"]].
+                                         to_time.
+                                         strftime("%Y-%m-%dT%H:%M:%S.%6N")
+                                         when "RECORD", "STRUCT"
+                                           build_processed_row[
+                                             row[table_field["name"]],
+                                             table_field["fields"]
+                                           ]
+                                         else
+                                           row[table_field["name"]]
+                                         end
+            end
           end
 
           row
@@ -220,7 +222,6 @@
           params(fields: "kind,insertErrors").
           payload(rows: rows.map do |row|
                           row = build_processed_row[row, table_schema]
-
                           { insertId: row.delete("insertId") || "", json: row }
                         end)
       end,
@@ -240,8 +241,8 @@
       get("/bigquery/v2/projects/#{project_id}/datasets").
         dig("datasets").
         map do |dataset|
-          [ dataset["datasetReference"]["datasetId"],
-           dataset["datasetReference"]["datasetId"] ]
+          [dataset["datasetReference"]["datasetId"],
+           dataset["datasetReference"]["datasetId"]]
         end
     end,
 
