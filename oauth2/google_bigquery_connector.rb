@@ -189,7 +189,7 @@
         table_schema = get("/bigquery/v2/projects/#{input['project']}"  \
                          "/datasets/#{input['dataset']}"  \
                          "/tables/#{input['table']}").
-                       dig('schema', 'fields')
+                       dig("schema", "fields")
 
         build_processed_row = lambda do |row, schema_info|
           schema_info.map do |table_field|
