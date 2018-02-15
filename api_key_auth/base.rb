@@ -16,7 +16,10 @@
       credentials: lambda do |connection|
         headers("Authorization": "Bearer " + connection["api_key"])
       end
-    }
+    },
+    base_uri: lambda do
+      "https://api.getbase.com"
+    end
   },
 
   object_definitions: {
@@ -64,7 +67,7 @@
   },
 
   test: ->(connection) {
-    get("https://api.getbase.com/v2/users/self")
+    get("/v2/users/self")
   },
 
   actions: {
@@ -94,9 +97,9 @@
           only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         {
-          leads: get("https://api.getbase.com/v2/leads", input).dig("items")&.
+          leads: get("/v2/leads", input).dig("items")&.
             pluck("data") || []
         }
       end,
@@ -111,7 +114,7 @@
       sample_output: lambda do
         {
           leads:
-          [get("https://api.getbase.com/v2/leads").
+          [get("/v2/leads").
             params(per_page: 1)["items"].dig(0, "data") || {}]
         }
       end
@@ -129,7 +132,7 @@
       end,
 
       execute: lambda do |_connection, input|
-        post("https://api.getbase.com/v2/leads").
+        post("/v2/leads").
           payload(data: input)["data"]
       end,
 
@@ -138,7 +141,7 @@
       end,
 
       sample_output: lambda do
-        get("https://api.getbase.com/v2/leads", per_page: 1)["items"].
+        get("/v2/leads", per_page: 1)["items"].
           dig(0, "data") || {}
       end
     }
