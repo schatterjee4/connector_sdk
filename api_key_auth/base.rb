@@ -78,26 +78,26 @@
       input_fields: lambda do |object_definitions|
         [
           { name: "ids", label: "ID",
+            sticky: true,
             hint: "Comma-separated list of lead IDs." },
-          { name: "address_op_city_cl_", label: "City name" },
-          { name: "address_op_postal_code_cl_", label: "Zip/postal code" },
-          { name: "address_op_state_cl_", label: "State/region name" },
-          { name: "address_op_country_cl_", label: "Country name" }
+          { name: "address", type: :object, properties: [
+            { name: "city", sticky: true, 
+              label: "City name" },
+            { name: "postal_code", sticky: true, 
+              label: "Zip/postal code" },
+            { name: "state", sticky: true, 
+              label: "State/region name" },
+            { name: "country", sticky: true, 
+              label: "Country name" }
+          ] }
         ].concat(object_definitions["lead"].
           only("creator_id", "owner_id", "status", "email", "phone", "mobile"))
       end,
 
       execute: lambda do |connection, input|
-        params = input.map do |key, value|
-          if key.include?("_op_") && value.present?
-            key.gsub("_op_", "[").gsub("_cl_", "]") + "=" + value
-          else
-            key + "=" + value
-          end
-        end.join("&")
         {
-          leads: get("https://api.getbase.com/v2/leads?" + params).dig("items")&.
-            pluck("data")
+          leads: get("https://api.getbase.com/v2/leads", input).dig("items")&.
+            pluck("data") || []
         }
       end,
 
