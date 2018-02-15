@@ -84,13 +84,13 @@
             sticky: true,
             hint: "Comma-separated list of lead IDs." },
           { name: "address", type: :object, properties: [
-            { name: "city", sticky: true, 
+            { name: "city", sticky: true,
               label: "City name" },
-            { name: "postal_code", sticky: true, 
+            { name: "postal_code", sticky: true,
               label: "Zip/postal code" },
-            { name: "state", sticky: true, 
+            { name: "state", sticky: true,
               label: "State/region name" },
-            { name: "country", sticky: true, 
+            { name: "country", sticky: true,
               label: "Country name" }
           ] }
         ].concat(object_definitions["lead"].
