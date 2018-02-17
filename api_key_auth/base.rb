@@ -72,8 +72,8 @@
 
   actions: {
     search_leads: {
-      description: 'Search <span class="provider">Leads</span> in
-        <span class="provider">Base CRM</span>',
+      description: "Search <span class='provider'>Leads</span> in
+        <span class='provider'>Base CRM</span>",
       subtitle: "Search leads in Base CRM",
       help: "Search will only return leads matching all inputs." \
        " Returns all leads, if blank.",
@@ -113,19 +113,17 @@
 
       sample_output: lambda do
         {
-          leads:
-          [get("/v2/leads").
+          leads: [get("/v2/leads").
             params(per_page: 1)["items"].dig(0, "data") || {}]
         }
       end
     },
     create_lead: {
       description:
-      'Create <span>Lead</span> in <span class="provider">Base CRM</span>',
+      "Create <span>Lead</span> in <span class='provider'>Base CRM</span>",
       subtitle: "Create lead in Base CRM",
       help: "Either last name or organisation name is required " \
        "to create account for individuals/organisations respectively.",
-
       input_fields: lambda do |object_definitions|
         object_definitions["lead"].
           ignored("id", "creator_id", "created_at", "updated_at", "owner_id")
@@ -146,5 +144,4 @@
       end
     }
   }
-
 }
