@@ -65,7 +65,7 @@
       detect_on: [/"errors"\:\s*\[/],
 
       apply: lambda do |_connection, access_token|
-        headers(Authorization: "Bearer #{access_token}")
+        headers("Authorization" => "Bearer #{access_token}")
       end,
     },
 
@@ -74,75 +74,69 @@
 
   test: ->(_connection) { get("/bigquery/v2/projects").params(maxResults: 1) },
 
+  methods: {
+    schema_for_table: lambda do |input|
+      type_map = {
+        "STRING"    => "string", "BYTES"    => "string",
+        "INTEGER"   => "integer", "INT64"   => "integer",
+        "FLOAT"     => "number", "FLOAT64"  => "number",
+        "BOOLEAN"   => "boolean", "BOOL"    => "boolean",
+        "TIMESTAMP" => "timestamp",
+        "DATE"      => "date",
+        "TIME"      => "string", "DATETIME" => "string",
+        "RECORD"    => "object", "STRUCT"   => "object"
+      }
+      hint_map = {
+        "TIME"     => "Represents a time, independent of a specific date. " \
+          "Example: 11:16:00.000000",
+        "DATETIME" => "Represents a year, month, day, hour, minute, " \
+          "second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+      }
+
+      (input["fields"] || []).map do |field|
+        field_type = type_map[field["type"]]
+        {
+          name: field["name"],
+          label: field["name"],
+          hint: [field["description"], hint_map[field["type"]]].
+            compact.join("<br/>"),
+          optional: (field["mode"] != "REQUIRED"),
+          control_type: (field_type == "boolean" ? "checkbox" : nil),
+          type: field_type,
+          properties: if field_type == "object"
+                        call("schema_for_table", "fields" => field["fields"])
+                      end
+        }.compact
+      end
+    end
+  },
+
   object_definitions: {
-    table_schema: {
+    table: {
       fields: lambda do |_connection, config_fields|
-        project_id = config_fields["project"]
-        dataset_id = config_fields["dataset"]
-        table_id = config_fields["table"]
-        type_map = {
-          "BYTES" => "string",
-          "INTEGER" => "integer", "INT64" => "integer",
-          "FLOAT" => "number", "FLOAT64" => "number",
-          "BOOLEAN" => "boolean", "BOOL" => "boolean",
-          "TIMESTAMP" => "timestamp",
-          "DATE" => "date",
-          "TIME" => "date_time",
-          "DATETIME" => "date_time",
-          "RECORD" => "object", "STRUCT" => "object"
-        }
-        control_type_map = {
-          "BYTES" => "text-area",
-          "INTEGER" => "number", "INT64" => "number",
-          "FLOAT" => "number", "FLOAT64" => "number",
-          "BOOLEAN" => "checkbox", "BOOL" => "checkbox",
-          "TIMESTAMP" => "date_time",
-          "DATE" => "date",
-          "TIME" => "date_time",
-          "DATETIME" => "date_time",
-          "RECORD" => "", "STRUCT" => ""
-        }
+        table = config_fields["table"]
+        if table.present?
+          fields = get("/bigquery/v2/projects/#{config_fields['project']}" \
+                     "/datasets/#{config_fields['dataset']}/tables/#{table}").
+                   dig("schema", "fields")
 
-        build_schema_field = lambda do |field|
-          field_type = type_map[field["type"]]
-
-          {
-            name: field["name"],
-            label: field["name"],
-            hint: field["description"],
-            optional: (field["mode"] != "REQUIRED"),
-            control_type: control_type_map[field["type"]],
-            type: field_type,
-            properties: if field_type == "object"
-                          field["fields"].map do |inner_field|
-                            build_schema_field[inner_field]
-                          end
-                        end
-          }
+          [
+            name: "rows",
+            optional: false,
+            type: "array",
+            of: "object",
+            properties: [
+              {
+                name: "insertId",
+                hint: "A unique ID for each row. More details <a " \
+                 "href='https://cloud.google.com/bigquery/streaming-data-" \
+                 "into-bigquery#dataconsistency' target='_blank'>here</a>.",
+              }
+            ].concat(call("schema_for_table", "fields" => fields))
+          ]
+        else
+          []
         end
-
-        [
-          name: "rows",
-          optional: false,
-          type: "array",
-          of: "object",
-          properties: [
-            {
-              name: "insertId",
-              hint: "A unique ID for each row. Google BigQuery uses this " \
-               "property to detect duplicate insertion requests on a "     \
-               "best-effort basis. Find more information <a "              \
-               "href='https://cloud.google.com/bigquery/streaming-data-"   \
-               "into-bigquery#dataconsistency' target='_blank'>here</a>.",
-            }
-          ].concat((if project_id && dataset_id && table_id
-                      get("/bigquery/v2/projects/#{project_id}/datasets/"  \
-                        "#{dataset_id}/tables/#{table_id}").
-                        dig("schema", "fields")
-                    else
-                      []
-                    end).map { |table_field| build_schema_field[table_field] })
-        ]
       end
     }
   },
@@ -150,8 +144,8 @@
   actions: {
     add_rows: {
       subtitle: "Add data rows",
-      description: "Add <span class='provider'>rows</span> to dataset" \
-        " in <span class='provider'>Google BigQuery</span>",
+      description: "Add <span class='provider'>rows</span> to table " \
+        "in <span class='provider'>Google BigQuery</span>",
       help: "Streams data into a table of Google BigQuery.",
 
       config_fields: [
@@ -164,64 +158,29 @@
         },
         {
           name: "dataset",
+          hint: "Select a dataset to view list of tables",
+          optional: false,
           control_type: "select",
           pick_list: "datasets",
-          pick_list_params: { project_id: "project" },
-          optional: false,
-          hint: "Select a dataset to view list of tables"
+          pick_list_params: { project_id: "project" }
         },
         {
           name: "table",
+          hint: "Select a table to stream data",
+          optional: false,
           control_type: "select",
           pick_list: "tables",
-          pick_list_params: { project_id: "project", dataset_id: "dataset" },
-          optional: false,
-          hint: "Select a table to stream data"
+          pick_list_params: { project_id: "project", dataset_id: "dataset" }
         },
       ],
 
-      input_fields: lambda do |object_definitions|
-        object_definitions["table_schema"]
-      end,
+      input_fields: ->(object_definitions) { object_definitions["table"] },
 
       execute: lambda do |_connection, input|
-        rows = input["rows"]
-        table_schema = get("/bigquery/v2/projects/#{input['project']}"  \
-                         "/datasets/#{input['dataset']}"  \
-                         "/tables/#{input['table']}").
-                       dig("schema", "fields")
-
-        build_processed_row = lambda do |row, schema_info|
-          schema_info.map do |table_field|
-            if row[table_field["name"]].present?
-              row[table_field["name"]] = case table_field["type"]
-                                         when "TIME"
-                                           row[table_field["name"]].
-                                         to_time.
-                                         strftime("%H:%M:%S.%6N")
-                                         when "DATETIME"
-                                           row[table_field["name"]].
-                                         to_time.
-                                         strftime("%Y-%m-%dT%H:%M:%S.%6N")
-                                         when "RECORD", "STRUCT"
-                                           build_processed_row[
-                                             row[table_field["name"]],
-                                             table_field["fields"]
-                                           ]
-                                         else
-                                           row[table_field["name"]]
-                                         end
-            end
-          end
-
-          row
-        end
-
         post("/bigquery/v2/projects/#{input['project']}/datasets/" \
           "#{input['dataset']}/tables/#{input['table']}/insertAll").
           params(fields: "kind,insertErrors").
-          payload(rows: rows.map do |row|
-                          row = build_processed_row[row, table_schema]
+          payload(rows: input["rows"].map do |row|
                           { insertId: row.delete("insertId") || "", json: row }
                         end)
       end,
@@ -234,12 +193,11 @@
 
   pick_lists: {
     projects: lambda do |_connection|
-      get("/bigquery/v2/projects").dig("projects").pluck("friendlyName", "id")
+      get("/bigquery/v2/projects")["projects"].pluck("friendlyName", "id")
     end,
 
     datasets: lambda do |_connection, project_id:|
-      get("/bigquery/v2/projects/#{project_id}/datasets").
-        dig("datasets").
+      get("/bigquery/v2/projects/#{project_id}/datasets")["datasets"].
         map do |dataset|
           [dataset["datasetReference"]["datasetId"],
            dataset["datasetReference"]["datasetId"]]
@@ -247,8 +205,8 @@
     end,
 
     tables: lambda do |_connection, project_id:, dataset_id:|
-      get("/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}/tables").
-        dig("tables").
+      get("/bigquery/v2/projects/#{project_id}/datasets/#{dataset_id}" \
+        "/tables")["tables"].
         map do |table|
           [table["tableReference"]["tableId"],
            table["tableReference"]["tableId"]]
