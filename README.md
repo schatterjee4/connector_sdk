@@ -927,6 +927,8 @@ While the config_fields is empty, document objects will have no fields (empty ar
 ## Basic Authentication Samples
 - [Harvest app connector](https://github.com/workato/connector_sdk/blob/master/basic_auth/harvest_connector.rb)
 
+- [On-prem Security connector](https://github.com/workato/connector_sdk/blob/master/basic_auth/onprem_security.rb)
+
 - [Freshdesk connector](https://github.com/workato/connector_sdk/blob/master/basic_auth/freshdesk_connector.rb)
 
 - [Clearbit connector](https://github.com/workato/connector_sdk/blob/master/basic_auth/clearbit_connector.rb)
