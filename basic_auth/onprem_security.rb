@@ -1,6 +1,6 @@
 {
   # Works with the custom security extension profile for 
-  # Workato OPA: https://github.com/workato/opa-connectors/blob/master/src/main/java/com/mycompany/onprem/SecurityExtension.java
+  # Workato OPA: https://github.com/workato/opa-extensions/blob/master/src/main/java/com/mycompany/onprem/SecurityExtension.java
   title: 'On-prem security',
   secure_tunnel: true,
 
