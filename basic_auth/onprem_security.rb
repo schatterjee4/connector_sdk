@@ -5,16 +5,8 @@
   secure_tunnel: true,
 
   connection: {
-    fields: [
-      {
-        name: 'profile',
-        hint: 'On-prem security connection profile'
-      }
-    ],
-
-    authorization: {
-      type: 'none'
-    }
+    fields: [{ name: 'profile', hint: 'On-prem security connection profile' }],
+    authorization: { type: 'none'}
   },
 
   test: ->(connection) {
@@ -27,25 +19,11 @@
       title: 'Create SHA-256 digest',
       description: 'Create <span class="provider">SHA-256</span> digest',
 
-      input_fields: ->(_) {
-        [
-          {
-            name: 'payload'
-          }
-        ]
-      },
+      input_fields: ->(_) { [{ name: 'payload' }] },
+      output_fields: ->(_) { [{name: 'signature'}] },
 
       execute: ->(connection, input) {
         post("http://localhost/ext/#{connection['profile']}", input).headers('X-Workato-Connector': 'enforce')
-      },
-
-      # Output schema.  Same as input above.
-      output_fields: ->(_) {
-        [
-          {
-            name: 'signature'
-          }
-        ]
       }
     }
   }
