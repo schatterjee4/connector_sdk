@@ -716,19 +716,19 @@
                     type: "number"
                   },
                   {
-                     name: "locationid",
-                     label: "Location",
-                     sticky: true,
-                     control_type: "select",
-                     pick_list: "locations",
-                     toggle_hint: "Select from list",
-                     toggle_field: {
-                       name: "locationid",
-                       label: "Location ID",
-                       toggle_hint: "Use custom value",
-                       control_type: "text",
-                       type: "string"
-                     }
+                    name: "locationid",
+                    label: "Location",
+                    sticky: true,
+                    control_type: "select",
+                    pick_list: "locations",
+                    toggle_hint: "Select from list",
+                    toggle_field: {
+                      name: "locationid",
+                      label: "Location ID",
+                      toggle_hint: "Use custom value",
+                      control_type: "text",
+                      type: "string"
+                    }
                   },
                   {
                     name: "departmentid",
