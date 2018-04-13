@@ -947,7 +947,7 @@
                     ]
                   },
                   {
-                    name: 'projectid',
+                    name: "projectid",
                     label: "Project",
                     control_type: "select",
                     pick_list: "projects",
@@ -960,10 +960,10 @@
                       type: "string"
                     }
                   },
-                  { name: "customerid" , label: "Customer ID" },
+                  { name: "customerid", label: "Customer ID" },
                   { name: "vendorid", label: "Vendor ID" },
                   {
-                    name: 'employeeid',
+                    name: "employeeid",
                     label: "Employee",
                     control_type: "select",
                     pick_list: "employees",
@@ -977,7 +977,7 @@
                     }
                   },
                   {
-                    name: 'classid',
+                    name: "classid",
                     label: "Class",
                     control_type: "select",
                     pick_list: "classes",
@@ -1611,8 +1611,8 @@
         }
       }
       class_response = post("/ia/xml/xmlgw.phtml", payload).
-                         dig("response", 0, "operation", 0, "result", 0,
-                             "data", 0, "class") || []
+                            dig("response", 0, "operation", 0, "result", 0,
+                                "data", 0, "class") || []
 
       class_response.map do |value|
         class_var = call("parse_nested_elements", value)
@@ -1709,8 +1709,8 @@
         }
       }
       location_response = post("/ia/xml/xmlgw.phtml", payload).
-                         dig("response", 0, "operation", 0, "result", 0,
-                             "data", 0, "location") || []
+                          dig("response", 0, "operation", 0, "result", 0,
+                              "data", 0, "location") || []
 
       location_response.map do |value|
         location = call("parse_nested_elements", value)
@@ -1765,13 +1765,13 @@
         }
       }
       warehouse_response = post("/ia/xml/xmlgw.phtml", payload).
-                         dig("response", 0, "operation", 0, "result", 0,
-                             "data", 0, "warehouse") || []
+                           dig("response", 0, "operation", 0, "result", 0,
+                               "data", 0, "warehouse") || []
 
       warehouse_response.map do |value|
         warehouse = call("parse_nested_elements", value)
         [warehouse["NAME"], warehouse["WAREHOUSEID"]]
       end
-    },
+    }
   }
 }
