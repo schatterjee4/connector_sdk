@@ -83,9 +83,9 @@
             optional: false,
             type: "object",
             properties: [{
-              name: 'CONTACTNAME',
-              label: 'Contact name',
-              hit: 'Contact name of an existing contact',
+              name: "CONTACTNAME",
+              label: "Contact name",
+              hit: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -162,8 +162,8 @@
             }
           },
           {
-            name: 'DEPARTMENTID',
-            label: 'Department',
+            name: "DEPARTMENTID",
+            label: "Department",
             control_type: "select",
             pick_list: "departments",
             toggle_hint: "Select from list",
@@ -176,7 +176,7 @@
             }
           },
           {
-            name: 'LOCATIONID',
+            name: "LOCATIONID",
             label: "Location",
             hint: "Required only when an employee is created at the " \
               "top level in a multi-entity, multi-base-currency company.",
@@ -193,7 +193,7 @@
             }
           },
           {
-            name: 'CLASSID',
+            name: "CLASSID",
             label: "Class",
             control_type: "select",
             pick_list: "classes",
@@ -263,7 +263,7 @@
         [
           { name: "RECORDNO", label: "Record number", type: "integer" },
           {
-            name: 'EMPLOYEEID',
+            name: "EMPLOYEEID",
             label: "Employee",
             sticky: true,
             control_type: "select",
@@ -431,8 +431,8 @@
             }
           },
           {
-            name: 'DEPARTMENTID',
-            label: 'Department',
+            name: "DEPARTMENTID",
+            label: "Department",
             control_type: "select",
             pick_list: "departments",
             toggle_hint: "Select from list",
@@ -445,7 +445,7 @@
             }
           },
           {
-            name: 'LOCATIONID',
+            name: "LOCATIONID",
             label: "Location",
             hint: "Required only when an employee is created at the " \
               "top level in a multi-entity, multi-base-currency company.",
@@ -462,7 +462,7 @@
             }
           },
           {
-            name: 'CLASSID',
+            name: "CLASSID",
             label: "Class",
             control_type: "select",
             pick_list: "classes",
@@ -559,9 +559,9 @@
             label: "Return to contact",
             type: "object",
             properties: [{
-              name: 'contactname',
-              label: 'Contact name',
-              hit: 'Contact name of an existing contact',
+              name: "contactname",
+              label: "Contact name",
+              hit: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -580,9 +580,9 @@
             label: "Pay to contact",
             type: "object",
             properties: [{
-              name: 'contactname',
-              label: 'Contact name',
-              hit: 'Contact name of an existing contact',
+              name: "contactname",
+              label: "Contact name",
+              hit: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -680,8 +680,8 @@
                     type: "boolean"
                   },
                   {
-                    name: 'warehouseid',
-                    label: 'Warehouse',
+                    name: "warehouseid",
+                    label: "Warehouse",
                     control_type: "select",
                     pick_list: "warehouses",
                     toggle_hint: "Select from list",
@@ -716,7 +716,7 @@
                     type: "number"
                    },
                    {
-                     name: 'locationid',
+                     name: "locationid",
                      label: "Location",
                      sticky: true,
                      control_type: "select",
@@ -731,8 +731,8 @@
                      }
                    },
                   {
-                    name: 'departmentid',
-                    label: 'Department',
+                    name: "departmentid",
+                    label: "Department",
                     control_type: "select",
                     pick_list: "departments",
                     toggle_hint: "Select from list",
@@ -779,7 +779,7 @@
                     ]
                   },
                   {
-                    name: 'projectid',
+                    name: "projectid",
                     label: "Project",
                     control_type: "select",
                     pick_list: "projects",
@@ -795,7 +795,7 @@
                   { name: "customerid" , label: "Customer ID" },
                   { name: "vendorid", label: "Vendor ID" },
                   {
-                    name: 'employeeid',
+                    name: "employeeid",
                     label: "Employee",
                     control_type: "select",
                     pick_list: "employees",
@@ -809,7 +809,7 @@
                     }
                   },
                   {
-                    name: 'classid',
+                    name: "classid",
                     label: "Class",
                     control_type: "select",
                     pick_list: "classes",
@@ -873,8 +873,8 @@
                     type: "boolean"
                   },
                   {
-                    name: 'warehouseid',
-                    label: 'Warehouse',
+                    name: "warehouseid",
+                    label: "Warehouse",
                     control_type: "select",
                     pick_list: "warehouses",
                     toggle_hint: "Select from list",
@@ -890,7 +890,7 @@
                   { name: "unit", hint: "Unit of measure to base quantity" },
                   { name: "price", control_type: "currency", type: "number" },
                   {
-                    name: 'locationid',
+                    name: "locationid",
                     label: "Location",
                     sticky: true,
                     control_type: "select",
@@ -905,8 +905,8 @@
                     }
                   },
                   {
-                    name: 'departmentid',
-                    label: 'Department',
+                    name: "departmentid",
+                    label: "Department",
                     control_type: "select",
                     pick_list: "departments",
                     toggle_hint: "Select from list",
@@ -1196,7 +1196,7 @@
           "content" => {
             "function" => {
               "@controlid" => "testControlId",
-              "create_supdoc" => input['attachment']
+              "create_supdoc" => input["attachment"]
             }
           }
         }
