@@ -358,8 +358,8 @@
                 label: "Mailing information",
                 type: "object",
                 properties: [
-                  { name: "ADDRESS1", name: "Address line 1" },
-                  { name: "ADDRESS2", name: "Address line 2" },
+                  { name: "ADDRESS1", label: "Address line 1" },
+                  { name: "ADDRESS2", label: "Address line 2" },
                   { name: "CITY", label: "City" },
                   { name: "STATE", label: "State", hint: "State/province" },
                   { name: "ZIP", label: "Zip", hint: "Zip/postal code" },
@@ -714,8 +714,8 @@
                     hint: "Tax amount",
                     control_type: "currency",
                     type: "number"
-                   },
-                   {
+                  },
+                  {
                      name: "locationid",
                      label: "Location",
                      sticky: true,
@@ -729,7 +729,7 @@
                        control_type: "text",
                        type: "string"
                      }
-                   },
+                  },
                   {
                     name: "departmentid",
                     label: "Department",
