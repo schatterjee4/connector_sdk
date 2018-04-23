@@ -1,6 +1,8 @@
 {
   title: "Microsoft Sharepoint",
 
+  secure_tunnel: true,
+
   connection: {
     fields: [
       {
@@ -13,6 +15,11 @@
       {
         name: "client_id",
         optional: false
+      },
+      {
+        name: "client_secret",
+        optional: false,
+        control_type: "password"
       },
       {
         name: "siteurl", label: "Site relative URL",
@@ -32,6 +39,7 @@
       acquire: lambda do |connection, auth_code, redirect_url|
         post("https://login.windows.net/common/oauth2/token").
           payload(client_id: connection["client_id"],
+                  client_secret: connection['client_secret'],
                   grant_type: :authorization_code,
                   code: auth_code,
                   redirect_uri: redirect_url).
@@ -41,6 +49,7 @@
       refresh: lambda do |connection, refresh_token|
         post("https://login.windows.net/common/oauth2/token").
           payload(client_id: connection["client_id"],
+                  client_secret: connection['client_secret'],
                   grant_type: :refresh_token,
                   refresh_token: refresh_token).
           request_format_www_form_urlencoded
@@ -62,7 +71,7 @@
   object_definitions: {
     list_create: {
       fields: lambda do |connection, config|
-        get("/_api/web/" \
+        get(call("url", { siteurl: connection["siteurl"] }) +  \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,EntityPropertyName,Hidden,Required,
           ReadOnlyField,Title,TypeAsString,
@@ -140,7 +149,7 @@
 
     list_output: {
       fields: lambda do |connection, config|
-        get("/_api/web/" \
+        get(call("url", { siteurl: connection["siteurl"] }) + \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,Title,TypeAsString,
             EntityPropertyName,IsDependentLookup")["value"].
@@ -207,7 +216,7 @@
     },
     list_item: {
       fields: lambda do |connection, config|
-        get("/_api/web/" \
+        get(call("url", { siteurl: connection["siteurl"] }) + \
         "lists(guid%27#{config['list_id']}%27)/Fields").
           params("$select": "odata.type,EntityPropertyName,Hidden,Required,
           ReadOnlyField,Title,TypeAsString,
@@ -307,27 +316,20 @@
           { name: "ContentTag" },
           { name: "CustomizedPageStatus",
             type: "integer" },
-          { name: "ListId" },
           { name: "ETag" },
           { name: "Exists",
-            type: "boolean" },
-          { name: "IrmEnabled",
             type: "boolean" },
           { name: "Length" },
           { name: "Level",
             type: "integer" },
-          { name: "LinkingUri" },
-          { name: "LinkingUrl" },
           { name: "MajorVersion",
             type: "integer" },
           { name: "MinorVersion",
             type: "integer" },
           { name: "Name" },
-          { name: "PageRenderType",
-            type: "integer" },
-          { name: "ServerRelativePath" },
+          { name: "LinkingUri" },
+          { name: "LinkingUrl" },
           { name: "ServerRelativeUrl" },
-          { name: "SiteId" },
           { name: "TimeCreated",
             type: "date_time",
             control_type: "date_time" },
@@ -337,68 +339,58 @@
           { name: "Title" },
           { name: "UIVersion",
             type: "integer" },
-          { name: "UIVersionLabel",
-            type: "integer" },
-          { name: "UniqueId" },
-          { name: "WebId" },
-          { name: "ActivityCapabilities",
-            type: "object",
-            properties: [
-              { name: "enabled", type: "boolean" },
-              { name: "revisionSetEnabled", type: "boolean" }
-          ] },
-          { name: "Author", type: "object", properties: [
-              { name: "__deferred", type: "object",
-                properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "CheckedOutByUser", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "EffectiveInformationRightsManagementSettings", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "InformationRightsManagementSettings", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "ListItemAllFields", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "LockedByUser", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "ModifiedBy", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "Properties", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "VersionEvents", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] },
-          { name: "Versions", type: "object", properties: [
-              { name: "__deferred", type: "object", properties: [
-                  {  name: "uri" }
-              ] }
-          ] }
+          { name: "UIVersionLabel" },
+          { name: "UniqueId" }
+        ]
+      end
+    },
+    file_item_fields: {
+      fields: lambda do
+        [
+          { name: "__metadata", type: "object", properties: [
+              { name: "id" },
+              { name: "uri" },
+              { name: "etag" },
+              { name: "type" }
+            ]},
+          { name: "FileSystemObjectType" },
+          { name: "ID", type: "integer" },
+          { name: "ContentTypeId" },
+          { name: "Created", type: "date_time", control_type: "date_time" },
+          { name: "AuthorId", type: "integer" },
+          { name: "Modified", type: "date_time", control_type: "date_time" },
+          { name: "EditorId", type: "integer" },
+          { name: "OData__CopySource" },
+          { name: "CheckoutUserId" },
+          { name: "OData__UIVersionString" },
+          { name: "GUID" },
+          { name: "ComplianceAssetId" },
+          { name: "Title" },
 
+        ]
+      end
+    },
+    file: {
+      fields: lambda do
+        [
+          { name: "CheckInComment" },
+          { name: "CheckOutType", type: "integer", control_type: "number" },
+          { name: "ContentTag" },
+          { name: "CustomizedPageStatus", type: "integer", control_type: "number" },
+          { name: "ETag" },
+          { name: "Exists", type: "boolean", control_type: "checkbox" },
+          { name: "Length", type: "integer", control_type: "number" },
+          { name: "Level", type: "integer", control_type: "integer" },
+          { name: "MajorVersion", type: "integer", control_type: "integer" },
+          { name: "MinorVersion", type: "integer", control_type: "integer" },
+          { name: "Name" },
+          { name: "ServerRelativeUrl" },
+          { name: "TimeCreated", type: "date_time", control_type: "date_time" },
+          { name: "TimeLastModified", type: "date_time", control_type: "date_time" },
+          { name: "Title" },
+          { name: "UiVersion" },
+          { name: "UiVersionLabel" },
+          { name: "UniqueId" }
         ]
       end
     }
@@ -408,13 +400,13 @@
     digest: lambda do |var|
       post("/_api/contextinfo")&.[]("FormDigestValue")
     end,
-    
+
     url: lambda do |input|
       if input[:siteurl].blank?
-         "/_api/web/"
-        else
-         "/" + input[:siteurl] + "/_api/web/"
-        end
+        "/_api/web/"
+      else
+        "/" + input[:siteurl] + "/_api/web/"
+      end
     end
   },
   
@@ -439,8 +431,8 @@
 
       execute: lambda do |connection, input|
         list_id = input.delete("list_id")
-        post(call("url", { siteurl: connection["siteurl"] }) +
-             "lists(guid%27#{list_id}%27)/items", input)
+        post( call("url", { siteurl: connection["siteurl"] }) +
+          "lists(guid%27#{list_id}%27)/items", input)
       end,
 
       output_fields: lambda do |object_definitions|
@@ -480,12 +472,13 @@
       end,
 
       execute: lambda do |connection, input|
-        post(call("url", { siteurl: connection["siteurl"] }) +
-           "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" \
-          "AttachmentFiles/add(FileName='" + input["file_name"].gsub(/\s/, "%20").
-          to_param  + "')", input).
-          headers("X-RequestDigest": call("digest",{})).
-          request_body(input["content"])
+        file_name = input["file_name"].gsub(/\s/, "%20").to_param
+        form_digest = post("https://#{connection['subdomain']}.sharepoint.com/" \
+          "_api/contextinfo")&.[]('FormDigestValue')
+        post( call("url", { siteurl: connection["siteurl"] }) + 
+          "lists(guid%27#{input['list_id']}%27)/items(#{input['item_id']})/" +
+              "AttachmentFiles/add(FileName='" + file_name + "')", input).
+        headers("X-RequestDigest": form_digest).request_body(input["content"])
       end,
 
       output_fields: lambda do
@@ -538,7 +531,7 @@
           "content": get(call("url", { siteurl: connection["siteurl"] }) +
             "lists(guid%27#{input['list_id']}%27)/" \
             "items(#{input['item_id']})/AttachmentFiles('" +
-             input["file_name"].gsub(/\s/, "%20").to_param + "')/$value").
+            input["file_name"].gsub(/\s/, "%20").to_param + "')/$value").
           response_format_raw
         }
       end,
@@ -577,14 +570,14 @@
       end,
 
       execute: lambda do |connection, input|
-        document = post(call("url", { siteurl: connection["siteurl"] }) +
+        post(call("url", { siteurl: connection["siteurl"] }) +
           "GetFolderByServerRelativeUrl('" + input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "')/Files/Add(url='" +
           input["file_name"].gsub(/\s/, "%20").to_param + "',overwrite=true)").
-        headers("X-RequestDigest": call("digest",{}),
-                "Accept": "application/json;odata=verbose",
-                "Content-Type": "application/json;odata=verbose").
-        request_body(input["content"])
+          headers("X-RequestDigest": call("digest",{}),
+                  "Accept": "application/json;odata=verbose",
+                  "Content-Type": "application/json;odata=verbose").
+          request_body(input["content"])["d"]
       end,
 
       output_fields: lambda do |object_definitions|
@@ -600,33 +593,34 @@
 
       input_fields: lambda do
         [
-          { name: "serverRelativeUrl", label: "Parent folder",
-            control_type: 'tree',
+          { name: "serverRelativeUrl",
+            label: "Parent folder",
+            control_type: "tree",
             hint: "Select parent folder to create new file in",
             tree_options: { selectable_folder: true },
             pick_list: :folders,
             optional: false,
-            toggle_field: { name: "serverRelativeUrl",
+            toggle_field: { 
+              name: "serverRelativeUrl",
               type: "string", control_type: "text",
               label: "Server relative URL",
               toggle_hint: "Use folder realtive Path",
               hint: "Relative URL of the folder to upload file in" },
-            toggle_hint: "Select folder" },
+            toggle_hint: "Select folder"},
           { name: "file_name", label: "File name", optional: false },
           { name: "content", optional: false }
         ]
       end,
 
       execute: lambda do |connection, input|
-        document = post(call("url", { siteurl: connection["siteurl"] }) +
-          "GetFileByServerRelativeUrl('" +
-          input['serverRelativeUrl'].
+        post(call("url", { siteurl: connection["siteurl"] }) +
+          "GetFileByServerRelativeUrl('" + input['serverRelativeUrl'].
           gsub(/\s/, "%20") + "/" + input["file_name"].
           gsub(/\s/, "%20").to_param + "')/$value").
         headers("X-RequestDigest": call("digest",{}),
-                "X-HTTP-Method": "PUT",
-                "Accept": "application/json;odata=verbose",
-                "Content-Type": "application/json;odata=verbose").
+          "X-HTTP-Method": "PUT",
+          "Accept": "application/json;odata=verbose",
+          "Content-Type": "application/json;odata=verbose").
         request_body(input["content"])
       end,
 
@@ -653,7 +647,7 @@
         [
           { name: "serverRelativeUrl",
             label: "Parent folder",
-            control_type: 'tree',
+            control_type: "tree",
             hint: "Select parent folder to create new file in",
             tree_options: { selectable_folder: true },
             pick_list: :folders,
@@ -674,8 +668,7 @@
           input['serverRelativeUrl'].gsub(/\s/, "%20") +
           "')/Files('"+ input['file_name'].gsub(/\s/, "%20").to_param +
           "')/ListItemAllFields").
-        headers("Accept": "application/json;odata=verbose",
-                "Content-Type": "application/json;odata=verbose").
+        headers("Content-Type": "application/json;odata=verbose").
         map do |key, value|
           { "#{key}".gsub(".", "_") => "#{value}" }
         end.inject(:merge)
@@ -687,15 +680,15 @@
     },
 
     download_file_from_library: {
-      description: "Get <span class='provider'>file</span> in " \
+      description: "Download <span class='provider'>file</span> from " \
       "<span class='provider'>Microsoft Sharepoint</span> library",
-      title_hint: "Get file in Microsoft Sharepoint library",
-      help: "Get file in Microsoft Sharepoint library",
+      title_hint: "Download file from Microsoft Sharepoint library",
+      help: "Download file from Microsoft Sharepoint library",
 
       input_fields: lambda do
         [
           { name: "serverRelativeUrl", label: "Parent folder",
-            control_type: 'tree',
+            control_type: "tree",
             hint: "Select parent folder to create new file in",
             tree_options: { selectable_folder: true },
             pick_list: :folders,
@@ -712,7 +705,7 @@
 
       execute: lambda do |connection, input|
         {
-          "content": get(call("url", { siteurl: connection["siteurl"] }) +
+          "content":get(call("url", { siteurl: connection["siteurl"] }) +
             "GetFolderByServerRelativeUrl('" +
             input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
             "Files('" + input['file_name'].gsub(/\s/, "%20").to_param +
@@ -733,8 +726,8 @@
     },
 
     update_list_item_metadata: {
-      description: "Update List <span class='provider'>item</span> in " \
-      "<span class='provider'> metadata in Microsoft Sharepoint</span> library",
+      description: "Update List <span class='provider'>item metadata</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span> library",
       title_hint: "Update List item metadata in Microsoft Sharepoint library",
       help: "Update List item metadata in Microsoft Sharepoint library",
 
@@ -750,7 +743,7 @@
               label: "List",
               toggle_hint: "Use the list id",
               hint: "List id of the file located" },
-            toggle_hint: "Select list" }
+            toggle_hint: "Select list"
           },
           {
             name: "item_id"
@@ -776,15 +769,14 @@
 
       execute: lambda do |connection, input|
         document = post(call("url", { siteurl: connection["siteurl"] }) +
-          "lists(guid%27" + input.delete('list_id').
-          gsub(/\s/, "%20") + "%27)/" + "items(" +
-          input.delete("item_id") + ")" ).
-        headers("X-RequestDigest": call("digest",{}),
-                "X-HTTP-Method": "MERGE",
-                "IF-MATCH": "*",
-                "Accept": "application/json;odata=verbose",
-                "Content-Type": "application/json;odata=verbose").
-        payload(input)
+          "lists(guid%27" + input.delete('list_id').gsub(/\s/, "%20") +
+          "%27)/items(" + input.delete("item_id") + ")" ).
+          headers("X-RequestDigest": call("digest",{}),
+            "X-HTTP-Method": "MERGE",
+            "IF-MATCH": "*",
+            "Accept": "application/json;odata=verbose",
+            "Content-Type": "application/json;odata=verbose").
+          payload(input)
       end,
 
       output_fields: lambda do |object_definitions|
@@ -798,7 +790,370 @@
           ]}
         ]
       end
+    },
+    search_users: {
+      description: "Search <span class='provider'>Users</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span>",
+      title_hint: "Search users in Microsoft Sharepoint",
+      help: "Search users in Microsoft Sharepoint",
+
+      input_fields: lambda do
+        [
+          {  name: "usermail",
+             label: "User email's",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Enter user email's separated with comma" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = ""
+        emails = input["usermail"].split(",")
+        filter_mails = []
+        emails.map do |email|
+          filter_mails << (filter_string + "Email eq '" +
+           email + "'") unless email.blank?
+        end
+        filter_string = filter_mails.smart_join(" or ")
+        {
+          users: get(call("url", { siteurl: connection["siteurl"] }) +
+           "/siteusers?$filter=" +
+            filter_string ).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        }
+      end,
+
+      output_fields: lambda do
+        [
+          {
+            name: "users", type: "array", of: "object",
+              properties: [
+               { name: "Id" },
+               { name: "Title" },
+               { name: "Email" },
+               { name: "UserId", type: "object", properties: [
+                   { name: "NameId" },
+                   {  name: "NameIdIssuer" }
+                   ]}
+              ]
+          }
+        ]
+      end
+    },
+
+    search_products: {
+      description: "Search <span class='provider'>Products</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span>",
+      title_hint: "Search products in Microsoft Sharepoint",
+      help: "Search products in Microsoft Sharepoint",
+
+      input_fields: lambda do
+        [
+          {  name: "product_name",
+             label: "Product Name's",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Enter product names with comma separated values " \
+             "e.g. `Product_1,Product2`" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = ""
+        products = input["product_name"].split(",")
+        filter_products = []
+        products.map do |product|
+          filter_products << (filter_string + "Product eq '" +
+           product + "'") unless product.blank?
+        end
+        filter_string = filter_products.smart_join(" or ")
+        {
+          products: get(call("url", { siteurl: connection["siteurl"] }) +
+            "/lists/getbytitle('Products')/items?$filter=" + filter_string).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        }
+      end,
+
+      output_fields: lambda do
+        [ { name: "products", type: "array", of: "object",
+            properties: [
+              { name: "Id", type: "integer" },
+              { name: "Title" },
+              { name: "Product" },
+              { name: "ContentTypeId" },
+              { name: "GUID" },
+              { name: "Created", type: "date_time"},
+          { name: "Modified", type: "date_time"} ] }
+          ]
+      end
+    },
+
+    search_countries: {
+      description: "Search <span class='provider'>Countries</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span>",
+      title_hint: "Search countries in Microsoft Sharepoint",
+      help: "Search countries in Microsoft Sharepoint",
+
+      input_fields: lambda do
+        [
+          {  name: "country_name",
+             label: "Country Name's",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Enter Country names with comma separated values"\
+             " e.g. `Vietnam,Japan`" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = ""
+        countries = input["country_name"].split(",")
+        filter_countries = []
+        countries.map do |country|
+          filter_countries << (filter_string + "Country eq '" +
+           country + "'") unless country.blank?
+        end
+        filter_string = filter_countries.smart_join(" or ")
+        {
+          countries: get(call("url", { siteurl: connection["siteurl"] }) + 
+            "/lists/getbytitle('Countries')/items?$filter=" + filter_string ).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        }
+      end,
+
+      output_fields: lambda do
+        [ { name: "countries", type: "array", of: "object",
+            properties: [
+              { name: "Id", type: "integer" },
+              { name: "Title" },
+              { name: "Region" },
+              { name: "Subregion" },
+              { name: "Country" },
+              { name: "Created", type: "date_time"},
+          { name: "Modified", type: "date_time"} ] }
+          ]
+      end
+    },
+
+    search_subregions: {
+      description: "Search <span class='provider'>SubRegion's</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span>",
+      title_hint: "Search subregion's in Microsoft Sharepoint",
+      help: "Search subregion's in Microsoft Sharepoint",
+
+      input_fields: lambda do
+        [
+          {  name: "subregion_name",
+             label: "Subregion name's",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Enter Subregion names with comma separated values" \
+             " e.g. `ASUG,ASAP`" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = ""
+        subregions = input["subregion_name"].split(",")
+        filter_subregions = []
+        subregions.map do |subr|
+          filter_subregions << (filter_string + "Subregion eq '" +
+           subr + "'") unless subr.blank?
+        end
+        filter_string = filter_subregions.smart_join(" or ")
+        {
+          subregions: get(call("url", { siteurl: connection["siteurl"] }) +
+           "/lists/getbytitle('Subregions')/items?$filter=" + filter_string ).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        }
+      end,
+
+      output_fields: lambda do
+        [ { name: "subregions", type: "array", of: "object",
+            properties: [
+              { name: "Id", type: "integer" },
+              { name: "Title" },
+              { name: "Region" },
+              { name: "Subregion" },
+              { name: "Created", type: "date_time"},
+          { name: "Modified", type: "date_time"} ] }
+          ]
+      end
+    },
+
+    search_regions: {
+      description: "Search <span class='provider'>Region's</span> in " \
+      "<span class='provider'> in Microsoft Sharepoint</span>",
+      title_hint: "Search region's in Microsoft Sharepoint",
+      help: "Search region's in Microsoft Sharepoint",
+
+      input_fields: lambda do
+        [
+          {  name: "region_name",
+             label: "Region name's",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Enter Region names with comma separated values" \
+             " e.g. `AP,SMEA`" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = ""
+        regions = input["region_name"].split(",")
+        filter_regions = []
+        regions.map do |reg|
+          filter_regions << (filter_string + "Region eq '" +
+           reg + "'") unless reg.blank?
+        end
+        filter_string = filter_regions.smart_join(" or ")
+        {
+          regions: get(call("url", { siteurl: connection["siteurl"] }) + 
+            "/lists/getbytitle('Regions')/items?$filter=" + filter_string ).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        }
+      end,
+
+      output_fields: lambda do
+        [ { name: "regions", type: "array", of: "object",
+            properties: [
+              { name: "Id", type: "integer" },
+              { name: "Title" },
+              { name: "Region" },
+              { name: "Created", type: "date_time"},
+          { name: "Modified", type: "date_time"}] }
+
+          ]
+      end
+    },
+
+    search_folder_by_name: {
+      description: "Search <span class='provider'>Folder</span> " \
+      "<span class='provider'> by name in Microsoft Sharepoint</span> library",
+      title_hint: "Searches folder by name in Selected folder.",
+      help: "Search folder by name selected folder in " \
+      "Microsoft Sharepoint library",
+
+      input_fields: lambda do
+        [
+          { name: "serverRelativeUrl", label: "Parent folder",
+            control_type: "tree",
+            hint: "Select parent folder to create new file in",
+            tree_options: { selectable_folder: true },
+            pick_list: :folders,
+            optional: false,
+            toggle_field: { name: "serverRelativeUrl",
+              type: "string",
+              control_type: "text",
+              label: "Server relative URL",
+              toggle_hint: "Use folder realtive Path",
+              hint: "Relative URL of the folder to upload file in" },
+            toggle_hint: "Select folder" },
+          {  name: "folder_name",
+             label: "Folder name",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Searches for folder with eaxact match" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = "Name eq '" + input["folder_name"].
+          gsub(/\s/, "%20") + "'"
+        folders = get(call("url", { siteurl: connection["siteurl"] }) +
+          "GetFolderByServerRelativeUrl('" +
+          input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
+          "Folders?$expand=Folders,Folders/Folders&$filter=" + filter_string).
+          headers("Content-Type": "application/json;odata=verbose")["value"]
+        {
+          folders: folders
+        }
+      end,
+
+      output_fields: lambda do
+        [ { name: "folders", type: "array", of: "object",
+            properties: [
+              { name: "ItemCount", type: "integer" },
+              { name: "Name" },
+              { name: "Title" },
+              { name: "ServerRelativeUrl" },
+              { name: "TimeCreated", type: "date_time"},
+              { name: "TimeLastModified", type: "date_time"},
+              { name: "UniqueId" },
+              { name: "ProgID" },
+              { name: "Exists", type: "boolean" },
+              { name: "ETag" }
+            ]}
+          ]
+      end
+    },
+
+    create_folder: {
+      description: "Create <span class='provider'>Folder</span> " \
+      "<span class='provider'> by name in Microsoft Sharepoint</span> library",
+      title_hint: "Create Folder in Microsoft Sharepoint library",
+      help: "Create Folder in Microsoft Sharepoint library",
+
+      input_fields: lambda do
+        [
+          { name: "serverRelativeUrl", label: "Parent folder",
+            control_type: "tree",
+            hint: "Select parent folder to create folder",
+            tree_options: { selectable_folder: true },
+            pick_list: :folders,
+            optional: false,
+            toggle_field: { name: "serverRelativeUrl",
+              type: "string",
+              control_type: "text",
+              label: "Server relative URL",
+              toggle_hint: "Use folder realtive Path",
+              hint: "Relative URL of the folder to create folder" },
+            toggle_hint: "Select folder" },
+          {  name: "folder_name",
+             label: "Folder name",
+             type: :text,
+             control_type: :text,
+             optional: false,
+             hint: "Name of folder" }
+        ]
+      end,
+
+      execute: lambda do |connection, input|
+        filter_string = "Name eq '" + input["folder_name"].
+          gsub(/\s/, "%20") + "'"
+        folders = post(call("url", { siteurl: connection["siteurl"] }) +
+          "GetFolderByServerRelativeUrl('" +
+          input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/" +
+          "Folders").
+          payload("__metadata": { "type": "SP.Folder" },
+            ServerRelativeUrl: input["folder_name"].gsub(/\s/, "%20")).
+            headers("Accept": "application/json;odata=verbose",
+              "Content-Type": "application/json;odata=verbose")["d"]
+      end,
+
+      output_fields: lambda do
+        [
+          { name: "ItemCount", type: "integer" },
+          { name: "Name" },
+          { name: "Title" },
+          { name: "ServerRelativeUrl" },
+          { name: "TimeCreated", type: "date_time"},
+          { name: "TimeLastModified", type: "date_time"},
+          { name: "UniqueId" },
+          { name: "ProgID" },
+          { name: "Exists", type: "boolean" },
+          { name: "ETag" }
+        ]
+      end
     }
+
   },
 
   triggers: {
@@ -827,22 +1182,19 @@
       end,
 
       poll: lambda do |connection, input, link|
-        if link.present?
-          items = get(link)
+        response = if link.present?
+          get(link)
         else
-          items = get(call("url", { siteurl: connection["siteurl"] }) +
-            "lists(guid%27#{input['list_id']}%27)/items").
-            params("$filter": "Created ge " \
-                              "datetime" \
-                              "%27#{input['since'].to_time.utc.iso8601}%27",
-                  "$orderby": "Created asc",
-                  "$top": "100",
-                  "$expand": "AttachmentFiles")
+          get( call("url", { siteurl: connection["siteurl"] }) +
+            "lists(guid%27#{input['list_id']}%27)/items?" +
+            "$filter=Created ge datetime%27" \
+            "#{input['since'].to_time.utc.iso8601}%27" \
+            "&$orderby=Created asc&$top=100&$expand=AttachmentFiles")
         end
         {
-          events: items["value"],
-          next_poll: items["@odata.nextLink"],
-          can_poll_more: items["@odata.nextLink"].present?
+          events: response["value"],
+          next_poll: response["@odata.nextLink"],
+          can_poll_more: response["@odata.nextLink"].present?
         }
       end,
 
@@ -886,123 +1238,110 @@
       end
     },
 
-    deleted_row_in_sharepoint_list: {
-      description: "Deleted <span class='provider'>row</span> in " \
-      "<span class='provider'>Microsoft Sharepoint</span> list",
-      title_hint: "Triggers when a row is deleted in Sharepoint list",
-      help: "Each row deleted will be processed as a single trigger event.",
+    new_updated_file_in_sharepoint_library: {
+      description: "New or Updated <span class='provider'>file</span> in " \
+      "<span class='provider'>Microsoft Sharepoint</span> folder",
+      title_hint: "Triggers when a file created or updated in" \
+      " Sharepoint Folder",
+      help: "Each file created or updated processed as a single event.",
 
       input_fields: lambda do
         [
-          { name: "list_name", control_type: :select,
-            pick_list: :name_list, label: "List", optional: false },
+          { name: "serverRelativeUrl",
+            label: "Folder",
+            control_type: "tree",
+            hint: "Select folder to process files",
+            pick_list: :folders,
+            optional: false,
+            tree_options: { selectable_folder: true },
+            toggle_field: { name: "serverRelativeUrl",
+              type: "string",
+              control_type: "text",
+              label: "Server relative URL",
+              toggle_hint: "Use folder realtive Path",
+              hint: "Relative URL of the folder" },
+            toggle_hint: "Select folder" },
           { name: "since", type: :date_time,
             label: "From", optional: false,
-            hint: "Fetch deleted row from specified time" }
+            hint: "Fetch files from specified time" }
         ]
       end,
 
-      poll: lambda do |connection, input, link|
-        if link.present?
-          item = get(link)
-        else
-          item = get(call("url", { siteurl: connection["siteurl"] }) +
-            "RecycleBin").
-            params("$filter": "((DirName eq 'Lists/#{input['list_name']}') " \
-                   "and (DeletedDate ge " \
-                   "datetime'#{input['since'].to_time.utc.iso8601}'))",
-                   "$orderby": "DeletedDate asc",
-                   "$top": 100)
-          next_link = item["@odata.nextLink"]
-        end
-
+      poll: lambda do |connection, input, last_updated_since|
+        last_updated_since ||= (input["since"].presence || 1.hour.ago).
+          to_time.utc.iso8601
+        files = get(call("url", { siteurl: connection["siteurl"] }) +
+          "GetFolderByServerRelativeUrl('" +
+          input['serverRelativeUrl'].gsub(/\s/, "%20") + "')/Files").
+          params("$filter": "TimeLastModified gt " + "datetime'" +
+            last_updated_since + "'",
+            "$orderby": "TimeLastModified ").
+          headers("Accept": "application/json;odata=verbose")["d"]["results"]
+        #need to fix continuous poll
+        next_updated_since = files.blank? ? now.to_time.utc.
+          iso8601 : files.last['TimeLastModified']
         {
-          events: item["value"],
-          next_poll: next_link,
-          can_poll_more: next_link.present?
+          events: files,
+          next_poll: next_updated_since,
+          can_poll_more: files.blank?
         }
       end,
-
-      dedup: lambda do |item|
-        item["Id"]
+      dedup: lambda do |file|
+        file["UniqueId"]
       end,
 
-      output_fields: lambda do
-        [
-          { name: "AuthorEmail", label: "Author email" },
-          { name: "AuthorName", label: "Author name" },
-          { name: "DeletedByEmail", label: "Deleted by email" },
-          { name: "DeletedByName", label: "Deleted by name" },
-          { name: "DeletedDate", label: "Deleted date", type: :date_time },
-          { name: "DirName", label: "Directory name" },
-          { name: "DirNamePath", label: "Directory name path",
-            type: :object, properties: [{ name: "DecodedUrl",
-                                          label: "Decoded url" }] },
-          { name: "Id" },
-          { name: "ItemState", type: :integer, label: "Item state" },
-          { name: "ItemType", type: :integer, label: "Item type" },
-          { name: "LeafName", label: "Leaf name" },
-          { name: "LeafNamePath", label: "Leaf name path",
-            type: :object, properties: [{ name: "DecodedUrl",
-                                          label: "Decoded url" }] },
-          { name: "Size" },
-          { name: "Title" },
-        ]
-      end,
-
-      sample_output: lambda do |connection, input|
-        get(call("url", { siteurl: connection["siteurl"] }) +
-          "RecycleBin").
-          params("$filter": "DirName eq 'Lists/#{input['list_name']}'",
-                 "$top": 1)["value"]&.first || {}
+      output_fields: lambda do |object_defintions|
+        object_defintions["file"]
       end
     }
+
   },
 
   pick_lists: {
-    list: lambda do
-      get("/_api/web/lists").
+    list: lambda do |connection|
+      get(call("url", { siteurl: connection["siteurl"] }) + "lists").
         params("$select": "Title,Id,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.
+        select { |f| f["BaseType"] == 0 }.
         map do |i|
           [i["Title"], i["Id"]]
         end
     end,
 
-    name_list: lambda do
-      get("/_api/web/lists").
+    name_list: lambda do |connection|
+      get(call("url", { siteurl: connection["siteurl"] }) + "lists").
         params("$select": "Title,BaseType")["value"].
-      select { |f| f["BaseType"] == 0 }.
-        map do |i|
-          [i["Title"], i["Title"]]
-        end
-    end,
-
-    folders_list: lambda do
-      get("/_api/web/Folders").
-      params("$select": "Id,ServerRelativeUrl,Name")["value"].map do |field|
-        [field["Name"], field["ServerRelativeUrl"]]
+        select { |f| f["BaseType"] == 0 }.
+      map do |i|
+        [i["Title"], i["Title"]]
       end
     end,
 
-    folders: lambda do |_connection, **args|
+    folders_list: lambda do |connection|
+      get(call("url", { siteurl: connection["siteurl"] }) + "Folders").
+        params("$select": "Id,ServerRelativeUrl,Name")["value"].map do |field|
+          [field["Name"], field["ServerRelativeUrl"]]
+        end
+    end,
+
+    folders: lambda do |connection, **args|
       if parentId = args&.[](:__parent_id).presence
-        get("/_api/web/" \
-          "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
-        params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
+        get(call("url", { siteurl: connection["siteurl"] }) +  \
+        "GetFolderByServerRelativePath(decodedurl='#{parentId}')/Folders").
+          params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
         map do |field|
           [field["Name"].labelize, field["ServerRelativeUrl"].
-            gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+           gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
         end
       else
-        # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders").
-        get("/_api/web/GetFolderByServerRelativeUrl('/Shared%20Documents')/" \
-          "Folders").
+      # "GetFolderByServerRelativeUrl('/Shared%20Documents')/Folders") - change if necessary
+       site_url = connection["siteurl"].blank? ? "" : "/" + connection["siteurl"]
+        get(call("url", { siteurl: connection["siteurl"] }) +
+        "GetFolderByServerRelativeUrl('" + site_url + "/Shared%20Documents')/Folders").
           params("$select": "Id,ServerRelativeUrl,Name,Title")["value"].
-          map do |field|
-            [field["Name"].labelize, field["ServerRelativeUrl"].
-              gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
-          end
+        map do |field|
+          [field["Name"].labelize, field["ServerRelativeUrl"].
+           gsub(/\s/, "%20"), field["ServerRelativeUrl"], true]
+        end
       end
     end
   }
