@@ -163,9 +163,7 @@
       subtitle: "Search people",
       description: "Search <span class='provider'>people</span> in " \
         "<span class='provider'>NationBuilder</span>",
-      help: "Returns a list of people based on search criteria. " \
-        "Find more information <a " \
-        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
+      help: "Returns a list of people that matches the search criteria. ",
 
       input_fields: lambda { |object_definitions|
         object_definitions["person"].
@@ -202,9 +200,7 @@
       subtitle: "Get person by ID",
       description: "Get <span class='provider'>person</span> by ID in " \
         "<span class='provider'>NationBuilder</span>",
-      help: "Retrieve the data of a person by ID or external ID. " \
-        "Find more information <a " \
-        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
+      help: "Retrieve the data of a person by ID or external ID. ",
 
       input_fields: lambda { |object_definitions|
         object_definitions["person"].only("id", "external_id")
@@ -229,9 +225,8 @@
       subtitle: "Match person",
       description: "Match <span class='provider'>person</span> in " \
         "<span class='provider'>NationBuilder</span>",
-      help: "Use this match to find person that have certain attributes. " \
-        "Find more information <a " \
-        "href='http://nationbuilder.com/people_api' target='_blank'>here</a>",
+      help: "Use this match to find a person that have certain attributes. " \
+        "A single person must match the given criteria for a successful job. ",
 
       input_fields: lambda { |object_definitions|
         object_definitions["person"].
