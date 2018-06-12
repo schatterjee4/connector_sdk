@@ -103,7 +103,7 @@
           { name: "TITLE", label: "Title" },
           {
             name: "SSN",
-            label: "Social Security Number" ,
+            label: "Social Security Number",
             hint: "Do not include dashes."
           },
           { name: "EMPLOYEETYPE", label: "Employee type" },
