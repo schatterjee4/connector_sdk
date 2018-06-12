@@ -85,7 +85,7 @@
             properties: [{
               name: "CONTACTNAME",
               label: "Contact name",
-              hit: "Contact name of an existing contact",
+              hint: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -101,11 +101,16 @@
           },
           { name: "STARTDATE", label: "Start date", type: "date" },
           { name: "TITLE", label: "Title" },
-          { name: "SSN", label: "Social security number" },
+          {
+            name: "SSN",
+            label: "Social Security Number" ,
+            hint: "Do not include dashes."
+          },
           { name: "EMPLOYEETYPE", label: "Employee type" },
           {
             name: "STATUS",
             label: "Status",
+            hint: "Default: active",
             control_type: "select",
             pick_list: "statuses",
             toggle_hint: "Select from list",
@@ -215,6 +220,7 @@
           {
             name: "POSTACTUALCOST",
             label: "Post actual cost",
+            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -223,26 +229,28 @@
           { name: "FORM1099BOX", label: "Form 1099 box" },
           {
             name: "SUPDOCFOLDERNAME",
-            label: "SUP doc folder name",
+            label: "Supporting doc folder name",
             hint: "Attachment folder name"
           },
           { name: "PAYMETHODKEY", label: "Preferred payment method" },
           {
             name: "PAYMENTNOTIFY",
             label: "Payment notify",
-            hint: "Send automatic payment notification",
+            hint: "Send automatic payment notification. Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
           {
             name: "MERGEPAYMENTREQ",
             label: "Merge payment requests",
+            hint: "Default: true",
             control_type: "checkbox",
             type: "boolean"
           },
           {
             name: "ACHENABLED",
             label: "ACH enabled",
+            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -370,7 +378,11 @@
           },
           { name: "STARTDATE", label: "Start date", type: "date" },
           { name: "TITLE", label: "Title" },
-          { name: "SSN", label: "Social security number" },
+          {
+            name: "SSN",
+            label: "Social Security Number",
+            hint: "Do not include dashes"
+          },
           { name: "EMPLOYEETYPE", label: "Employee type" },
           {
             name: "STATUS",
@@ -484,6 +496,7 @@
           {
             name: "POSTACTUALCOST",
             label: "Post actual cost",
+            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -492,14 +505,14 @@
           { name: "FORM1099BOX", label: "Form 1099 box" },
           {
             name: "SUPDOCFOLDERNAME",
-            label: "SUP doc folder name",
+            label: "Supporting doc folder name",
             hint: "Attachment folder name"
           },
           { name: "PAYMETHODKEY", label: "Preferred payment method" },
           {
             name: "PAYMENTNOTIFY",
             label: "Payment notify",
-            hint: "Send automatic payment notification",
+            hint: "Send automatic payment notification. Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -512,6 +525,7 @@
           {
             name: "ACHENABLED",
             label: "ACH enabled",
+            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -557,11 +571,12 @@
           {
             name: "returnto",
             label: "Return to contact",
+            optional: false,
             type: "object",
             properties: [{
               name: "contactname",
               label: "Contact name",
-              hit: "Contact name of an existing contact",
+              hint: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -578,11 +593,12 @@
           {
             name: "payto",
             label: "Pay to contact",
+            optional: false,
             type: "object",
             properties: [{
               name: "contactname",
               label: "Contact name",
-              hit: "Contact name of an existing contact",
+              hint: "Contact name of an existing contact",
               optional: false,
               control_type: "select",
               pick_list: "contact_names",
@@ -608,13 +624,13 @@
           {
             name: "exchratetype",
             label: "Exchange rate type",
-            hint: "Do not use if exchrate is set. " \
+            hint: "Do not use if exchange rate is set. " \
               "(Leave blank to use Intacct Daily Rate)"
           },
           {
             name: "exchrate",
             label: "Exchange rate",
-            hint: "Do not use if exchangeratetype is set."
+            hint: "Do not use if exchange rate type is set."
           },
           {
             name: "customfields",
@@ -699,7 +715,7 @@
                   {
                     name: "sourcelinekey",
                     label: "Source line key",
-                    hint: "Source line to convert this line from. Use the" \
+                    hint: "Source line to convert this line from. Use the " \
                       "RECORDNO of the line from the created from " \
                       "transaction document."
                   },
@@ -1028,7 +1044,7 @@
             {
               name: "supdocfoldername",
               label: "Folder name",
-              hint: "Attachments folder name",
+              hint: "Folder to create attachment in",
               optional: false
             },
             { name: "supdocdescription", label: "Attachment description" },
@@ -1058,7 +1074,7 @@
                   {
                     name: "attachmentdata",
                     label: "Attachment data",
-                    hint: "Base64 encode the file’s binary data",
+                    hint: "Base64-encoded file binary data",
                     sticky: true
                   }
                 ]
@@ -1093,7 +1109,7 @@
           {
             name: "supdocfoldername",
             label: "Folder name",
-            hint: "Attachments folder name"
+            hint: "Folder to store attachment in"
           },
           { name: "supdocdescription", label: "Attachment description" },
           {
@@ -1121,7 +1137,7 @@
                   {
                     name: "attachmentdata",
                     label: "Attachment data",
-                    hint: "Base64 encode the file’s binary data",
+                    hint: "Base64-encoded file binary data",
                     sticky: true
                   }
                 ]
@@ -1190,6 +1206,9 @@
       subtitle: "Create attachments",
       description: "Create <span class='provider'>attachments</span> in " \
         "<span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1249,7 +1268,10 @@
     update_attachment: {
       subtitle: "Update attachment",
       description: "Update <span class='provider'>attachment</span> in " \
-        "<span class='>Intacct</span>",
+        "<span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the value for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1281,6 +1303,9 @@
       subtitle: "Create attachment folder",
       description: "Create <span class='provider'>attachment folder</span> " \
          "in <span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1308,7 +1333,7 @@
 
     get_attachment_folder: {
       subtitle: "Get attachment folder",
-      description: "Get <span class='provider'>attachment_folder</span> in " \
+      description: "Get <span class='provider'>attachment folder</span> in " \
         "<span class='provider'>Intacct</span>",
 
       execute: lambda { |_connection, input|
@@ -1345,6 +1370,9 @@
       subtitle: "Update attachment folder",
       description: "Update <span class='provider'>attachment folder</span> " \
         "in <span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1375,6 +1403,8 @@
       subtitle: "Get API session",
       description: "Get <span class='provider'>API session</span> in " \
         "<span class='provider'>Intacct</span>",
+      help: "Action returns a unique identifier for an API session " \
+        "and its endpoint.",
 
       execute: lambda { |_connection, _input|
         payload = {
@@ -1400,6 +1430,9 @@
       subtitle: "Create employee",
       description: "Create <span class='provider'>employee</span> in " \
         "<span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1466,6 +1499,9 @@
       subtitle: "Update employee",
       description: "Update <span class='provider'>employee</span> in " \
         "<span class='provider'>Intacct</span>",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1498,8 +1534,9 @@
       subtitle: "Update purchase transaction header",
       description: "Update <span class='provider'>purchase transaction " \
         "header</span> in <span class='provider'>Intacct</span>",
-      help: "Pay special attention to map the data pills in the same order " \
-        "as you see in the input list, for the action to be successful!",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         build_date_object = lambda { |raw_date|
@@ -1542,8 +1579,9 @@
       subtitle: "Add purchase transaction items",
       description: "Add <span class='provider'>purchase transaction " \
         "items</span> in <span class='provider'>Intacct</span>",
-      help: "Pay special attention to map the data pills in the same order " \
-        "as you see in the input list, to run the action successfully!",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1570,8 +1608,9 @@
       subtitle: "Update purchase transaction items",
       description: "Update <span class='provider'>purchase transaction " \
         "items</span> in <span class='provider'>Intacct</span>",
-      help: "Pay special attention to map the data pills in the same order " \
-        "as you see in the input list, for the action to be successful!",
+      help: "Pay special attention to enter the values for the " \
+        "fields in the same order as listed below, " \
+        "for the action to be successful!",
 
       execute: lambda { |_connection, input|
         payload = {
@@ -1611,8 +1650,8 @@
         }
       }
       class_response = post("/ia/xml/xmlgw.phtml", payload).
-                            dig("response", 0, "operation", 0, "result", 0,
-                                "data", 0, "class") || []
+                       dig("response", 0, "operation", 0, "result", 0,
+                           "data", 0, "class") || []
 
       class_response.map do |value|
         class_var = call("parse_nested_elements", value)
