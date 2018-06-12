@@ -110,7 +110,7 @@
           {
             name: "STATUS",
             label: "Status",
-            hint: "Default: active",
+            hint: "Default: Active",
             control_type: "select",
             pick_list: "statuses",
             toggle_hint: "Select from list",
@@ -220,7 +220,7 @@
           {
             name: "POSTACTUALCOST",
             label: "Post actual cost",
-            hint: "Default: false",
+            hint: "Default: No",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -236,21 +236,21 @@
           {
             name: "PAYMENTNOTIFY",
             label: "Payment notify",
-            hint: "Send automatic payment notification. Default: false",
+            hint: "Send automatic payment notification. Default: No",
             control_type: "checkbox",
             type: "boolean"
           },
           {
             name: "MERGEPAYMENTREQ",
             label: "Merge payment requests",
-            hint: "Default: true",
+            hint: "Default: Yes",
             control_type: "checkbox",
             type: "boolean"
           },
           {
             name: "ACHENABLED",
             label: "ACH enabled",
-            hint: "Default: false",
+            hint: "Default: No",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -291,7 +291,11 @@
             hint: "Contact info",
             type: "object",
             properties: [
-              { name: "CONTACTNAME", label: "Contact name" },
+              {
+                name: "CONTACTNAME",
+                label: "Contact name",
+                hint: "Contact name of an existing contact"
+              },
               { name: "PRINTAS", label: "Print as" },
               { name: "COMPANYNAME", label: "Company name" },
               {
@@ -496,7 +500,6 @@
           {
             name: "POSTACTUALCOST",
             label: "Post actual cost",
-            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -512,7 +515,7 @@
           {
             name: "PAYMENTNOTIFY",
             label: "Payment notify",
-            hint: "Send automatic payment notification. Default: false",
+            hint: "Send automatic payment notification",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -525,7 +528,6 @@
           {
             name: "ACHENABLED",
             label: "ACH enabled",
-            hint: "Default: false",
             control_type: "checkbox",
             type: "boolean"
           },
@@ -571,13 +573,11 @@
           {
             name: "returnto",
             label: "Return to contact",
-            optional: false,
             type: "object",
             properties: [{
               name: "contactname",
               label: "Contact name",
               hint: "Contact name of an existing contact",
-              optional: false,
               control_type: "select",
               pick_list: "contact_names",
               toggle_hint: "Select from list",
@@ -593,13 +593,11 @@
           {
             name: "payto",
             label: "Pay to contact",
-            optional: false,
             type: "object",
             properties: [{
               name: "contactname",
               label: "Contact name",
               hint: "Contact name of an existing contact",
-              optional: false,
               control_type: "select",
               pick_list: "contact_names",
               toggle_hint: "Select from list",
