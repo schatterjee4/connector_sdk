@@ -20,7 +20,7 @@
 
     authorization: {
       type: 'oauth2',
-      
+
       authorization_url: lambda do |connection|
         scopes = [
           "forms:read",
@@ -31,7 +31,7 @@
           "#{connection['client_id']}&scope=#{scopes}" \
           "&redirect_uri=https%3A%2F%2Fwww.workato.com%2Foauth%2Fcallback"
       end,
-      
+
       acquire: lambda do |connection, auth_code, redirect_uri|
         response = post("https://api.typeform.com/oauth/token").
                     payload(client_id: connection["client_id"],
@@ -42,20 +42,20 @@
 
         [response, nil, nil]
       end,
-      
+
       apply: lambda { |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
       }
     }
 
   },
-  
+
   test: ->(connection) {
     get("https://api.typeform.com/forms")
   },
 
   object_definitions: {
-    
+
     get_forms: {
 
       fields: lambda do |connection| 
@@ -130,7 +130,7 @@
   },
 
   actions: {
-    
+
     search_forms: {
       subtitle: "Search forms",
       description: "Search <span class='provider'>forms</span> in " \
@@ -139,26 +139,26 @@
       input_fields: lambda { |object_definitions|
           object_definitions['get_forms']
       },
-      
+
       execute: lambda { |connection, input| 
         response = get("https://api.typeform.com/forms").
 		  params(search: input["search"],
 				 page_size: 200,
 		         workspace_id: input["workspace_id"])
-        
+
         {
           forms: response['items']
         }
-				 
+
       },
-	  
+
 	  output_fields: lambda { |object_definitions|
         [
           { name: "forms", type: "array", of: "object", properties: object_definitions["forms"] }
         ]
-	  }
-    },
-    
+      }
+    }
+
   },
 
   triggers: {
@@ -166,17 +166,17 @@
     new_form: {
       # Results are listed in descending order based on the modified date.
       type: :paging_desc,
-      
-      description: 'New <span class="provider">Form</span> in <span class="provider">Typeform</span>',
+
+      description: 'New <span class="provider">Form</span> " \
+	    in <span class="provider">Typeform</span>',
       subtitle: "New form in Typeform",
-      
+
       input_fields: lambda do
       end,
 
-      poll: lambda  do |_connection, input, closure|
+      poll: lambda  do |_connection, _input, closure|
         closure ||= 1
         per_page = 100
-        created_since = (input["since"] || 1.hour.ago).to_time
 
         forms = get("https://api.typeform.com/forms").
                   params(page_size: per_page,
@@ -188,7 +188,7 @@
       end,
 
       dedup: lambda do |forms|
-        if forms["items"].length > 0
+        if forms["items"].length.positive?
           forms["items"].pluck("id")
         else
           []
@@ -199,7 +199,7 @@
         [
 		  { name: "total_items", type: "integer" },
 		  { name: "page_count", type: "integer" },
-          { 
+		  { 
             name: "items", 
             type: "array", 
             of: "object",
