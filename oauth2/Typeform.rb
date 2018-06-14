@@ -154,7 +154,7 @@
 	  
 	  output_fields: lambda { |object_definitions|
         [
-          { name: "forms", type: "array", of: "object", properties: object_definitions['forms'] }
+          { name: "forms", type: "array", of: "object", properties: object_definitions["forms"] }
         ]
 	  }
     },
@@ -171,53 +171,51 @@
       subtitle: "New form in Typeform",
       
       input_fields: lambda do
-        [
-          {
-            name: 'since',
-            label: 'From',
-            type: 'timestamp',
-            sticky: true,
-            hint: "Get forms created since given date/time. " \
-              "Leave empty to get forms created from one hour ago"
-          }
-        ]
       end,
-      
-      poll: lambda  do |connection, input, closure|
+
+      poll: lambda  do |_connection, input, closure|
         closure ||= 1
         per_page = 100
-        created_since = (input['since'] || 1.hour.ago).to_time
-        
-        forms = get("https://api.typeform.com/forms").
-                    params(page_size: per_page,
-                           page: closure)
+        created_since = (input["since"] || 1.hour.ago).to_time
 
+        forms = get("https://api.typeform.com/forms").
+                  params(page_size: per_page,
+                         page: closure)
         {
-          events: forms.dig('items') || [],
+          events: forms || [],
           next_page: (forms.length >= per_page) ? closure + 1 : nil
         }
       end,
 
       dedup: lambda do |forms|
-        if forms.dig('items')
-          forms.dig('items').pluck('id')
+        if forms["items"].length > 0
+          forms["items"].pluck("id")
         else
           []
         end
       end,
-    
+
       output_fields: lambda do |object_definitions|
-        object_definitions['forms']
+        [
+		  { name: "total_items", type: "integer" },
+		  { name: "page_count", type: "integer" },
+          { 
+            name: "items", 
+            type: "array", 
+            of: "object",
+            properties: object_definitions["forms"]
+          }
+        ]
       end
 
     }
   },
 
   pick_lists: {
-    workspace_id: lambda do |connection| 
-      get("https://api.typeform.com/workspaces")['items'].
+    workspace_id: lambda do |_connection| 
+      get("https://api.typeform.com/workspaces")["items"].
         map { |workspace_id| [workspace_id["name"], workspace_id["id"]] }
-    end,
+    end
 
   }
 }
