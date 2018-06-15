@@ -13,33 +13,62 @@
     authorization: {
       type: "custom_auth",
 
-      refresh_on: [/Expired Token/],
-
-      acquire: ->(_connection) {},
-
-      detect_on: [%r{<status>failure</status>}],
-
-      apply: lambda { |connection|
-        headers("Content-Type" => "x-intacct-xml-request")
-        payload do |current|
-          current["control"] = {
+      acquire: lambda { |connection|
+        payload = {
+          "control" => {
             "senderid" => connection["sender_id"],
             "password" => connection["sender_password"],
             "controlid" => "testControlId",
             "uniqueid" => false,
             "dtdversion" => 3.0
-          }
-          current["operation"] = {
+          },
+          "operation" => {
             "authentication" => {
               "login" => {
                 "userid" => connection["login_username"],
                 "companyid" => connection["company_id"],
                 "password" => connection["login_password"]
               }
+            },
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "getAPISession" => ""
+              }
             }
           }
-          content = current.delete("content")
-          current["operation"]["content"] = content if content && content != {}
+        }
+
+        {
+          session_id: post("/ia/xml/xmlgw.phtml", payload).
+            headers("Content-Type" => "x-intacct-xml-request").
+            format_xml("request").
+            dig("response", 0, "operation", 0, "result", 0, "data", 0,
+                "api", 0, "sessionid", 0, "content!") || ""
+        }
+      },
+
+      refresh_on: [401],
+
+      detect_on: [%r{<status>failure</status>}],
+
+      apply: lambda { |connection|
+        headers("Content-Type" => "x-intacct-xml-request")
+        payload do |current_payload|
+          current_payload&.[]=(
+            "control",
+            {
+              "senderid" => connection["sender_id"],
+              "password" => connection["sender_password"],
+              "controlid" => "testControlId",
+              "uniqueid" => false,
+              "dtdversion" => 3.0
+            })
+          current_payload&.[]("operation")&.[]=(
+            "authentication",
+            {
+              "sessionid" => connection["session_id"]
+            })
         end
         format_xml("request")
       }
@@ -48,7 +77,15 @@
     base_uri: ->(_connection) { "https://api.intacct.com" }
   },
 
-  test: ->(_connection) { post("/ia/xml/xmlgw.phtml") },
+  test: ->(_connection) {
+    payload = {
+      "control" => {},
+      "operation" => {
+        "authentication" => {}
+      }
+    }
+    post("/ia/xml/xmlgw.phtml", payload)
+  },
 
   object_definitions: {
     api_session: {
@@ -60,7 +97,7 @@
       }
     },
 
-    result: {
+    create_or_update_response: {
       fields: lambda { |_connection|
         [
           { name: "status", label: "Job status" },
@@ -1112,35 +1149,32 @@
           { name: "supdocdescription", label: "Attachment description" },
           {
             name: "attachments",
-            hint: "Zero to many attachments",
-            type: "array",
-            of: "object",
-            properties: [
-              {
-                name: "attachment",
-                type: "object",
-                properties: [
-                  {
-                    name: "attachmentname",
-                    label: "Attachment name",
-                    hint: "File name, no period or extension",
-                    sticky: true
-                  },
-                  {
-                    name: "attachmenttype",
-                    label: "Attachment type",
-                    hint: "File extension, no period",
-                    sticky: true
-                  },
-                  {
-                    name: "attachmentdata",
-                    label: "Attachment data",
-                    hint: "Base64-encoded file binary data",
-                    sticky: true
-                  }
-                ]
-              }
-            ]
+            type: "object",
+            properties: [{
+              name: "attachment",
+              hint: "Zero to many attachments",
+              type: "array",
+              properties: [
+                {
+                  name: "attachmentname",
+                  label: "Attachment name",
+                  hint: "File name, no period or extension",
+                  sticky: true
+                },
+                {
+                  name: "attachmenttype",
+                  label: "Attachment type",
+                  hint: "File extension, no period",
+                  sticky: true
+                },
+                {
+                  name: "attachmentdata",
+                  label: "Attachment data",
+                  hint: "Base64-encoded file binary data",
+                  sticky: true
+                }
+              ]
+            }]
           },
           { name: "creationdate", label: "Creation date" },
           { name: "createdby", label: "Created by" },
@@ -1186,15 +1220,39 @@
   },
 
   methods: {
-    parse_nested_elements: lambda { |input|
-      input.map do |key, value|
-        if key == "content!"
-          value
+    parse_xml_to_hash: lambda { |xml_obj|
+      xml_obj["xml"]
+        .reject { |key, _value| key[/^@/] }
+        .inject({}) do |hash, (key, value)|
+        if value.is_a?(Array)
+          hash.merge(if value.length != 1 ||
+            xml_obj["array_fields"].include?(key)
+                       {
+                         key => value.map do |inner_hash|
+                                  call("parse_xml_to_hash",
+                                       "xml" => inner_hash,
+                                       "array_fields" => xml_obj["array_fields"])
+                                end
+                       }
+                     else
+                       {
+                         key => call("parse_xml_to_hash",
+                                     "xml" => value[0],
+                                     "array_fields" => xml_obj["array_fields"])
+                       }
+                     end)
         else
-          value = value&.first if value.is_a?(Array)
-          { key => call("parse_nested_elements", value) } if value != {}
+          value
         end
-      end&.compact.inject(:merge)
+      end.presence
+    },
+
+    build_date_object: lambda { |raw_date|
+      {
+        "year" => raw_date.to_date.strftime("%Y"),
+        "month" => raw_date.to_date.strftime("%m"),
+        "day" => raw_date.to_date.strftime("%d")
+      }
     }
   },
 
@@ -1210,24 +1268,34 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "create_supdoc" => input["attachment"]
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "create_supdoc" => input["attachment"]
+              }
             }
           }
         }
         attachment_response = post("/ia/xml/xmlgw.phtml", payload).
-                              dig("response", 0, "operation", 0,
+                              dig("response", 0,
+                                  "operation", 0,
                                   "result", 0) || {}
-        call("parse_nested_elements", attachment_response)
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
         object_definitions["supdoc_create"]
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     get_attachment: {
@@ -1237,20 +1305,30 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "get" => {
-                "@object" => "supdoc",
-                "@key" => input["key"]
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "get" => {
+                  "@object" => "supdoc",
+                  "@key" => input["key"]
+                }
               }
             }
           }
         }
         attachment_response = post("/ia/xml/xmlgw.phtml", payload).
-                              dig("response", 0, "operation", 0, "result", 0,
-                                  "data", 0, "supdoc", 0) || {}
-        call("parse_nested_elements", attachment_response)
+                              dig("response", 0,
+                                  "operation", 0,
+                                  "result", 0,
+                                  "data", 0,
+                                  "supdoc", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |_object_definitions|
@@ -1273,17 +1351,25 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update_supdoc" => input
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update_supdoc" => input
+              }
             }
           }
         }
         attachment_response = post("/ia/xml/xmlgw.phtml", payload).
-                              dig("response", 0, "operation", 0,
+                              dig("response", 0,
+                                  "operation", 0,
                                   "result", 0) || {}
-        call("parse_nested_elements", attachment_response)
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
@@ -1293,7 +1379,9 @@
           required("supdocid")
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     # Attachment folder related actions
@@ -1307,26 +1395,37 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "create_supdocfolder" => input
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "create_supdocfolder" => input
+              }
             }
           }
         }
         folder_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", folder_response)
+                          dig("response", 0,
+                              "operation", 0,
+                              "result", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => folder_response,
+             "array_fields" => [])
       },
 
-     input_fields: lambda { |object_definitions|
-       object_definitions["supdocfolder"].
-         ignored("creationdate", "createdby", "lastmodified",
-                 "lastmodifiedby", "name", "description", "parentfolder").
-         required("supdocfoldername")
-     },
+      input_fields: lambda { |object_definitions|
+        object_definitions["supdocfolder"].
+          ignored("creationdate", "createdby", "lastmodified",
+                  "lastmodifiedby", "name", "description", "parentfolder").
+          required("supdocfoldername")
+      },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     get_attachment_folder: {
@@ -1336,21 +1435,30 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "get" => {
-                "@object" => "supdocfolder",
-                "@key" => input["key"]
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "get" => {
+                  "@object" => "supdocfolder",
+                  "@key" => input["key"]
+                }
               }
             }
           }
         }
         attachment_folder_response = post("/ia/xml/xmlgw.phtml", payload).
-                                     dig("response", 0, "operation", 0,
-                                         "result", 0, "data", 0,
+                                     dig("response", 0,
+                                         "operation", 0,
+                                         "result", 0,
+                                         "data", 0,
                                          "supdocfolder", 0) || {}
-        call("parse_nested_elements", attachment_folder_response)
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_folder_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |_object_definitions|
@@ -1374,16 +1482,25 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update_supdocfolder" => input
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update_supdocfolder" => input
+              }
             }
           }
         }
         folder_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", folder_response)
+                          dig("response", 0,
+                              "operation", 0,
+                              "result", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => folder_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
@@ -1393,7 +1510,9 @@
           required("supdocfoldername")
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     # API Session related actions
@@ -1406,16 +1525,27 @@
 
       execute: lambda { |_connection, _input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "getAPISession" => ""
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "getAPISession" => ""
+              }
             }
           }
         }
         api_response = post("/ia/xml/xmlgw.phtml", payload).
-                       dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", api_response)
+                       dig("response", 0,
+                           "operation", 0,
+                           "result", 0,
+                           "data", 0,
+                           "api", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => api_response,
+             "array_fields" => [])
       },
 
       output_fields: lambda { |object_definitions|
@@ -1434,17 +1564,27 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "create" => { "EMPLOYEE" => input }
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "create" => { "EMPLOYEE" => input }
+              }
             }
           }
         }
         employee_response = post("/ia/xml/xmlgw.phtml", payload).
-                            dig("response", 0, "operation", 0, "result", 0,
-                                "data", 0, "employee", 0) || {}
-        call("parse_nested_elements", employee_response)
+                            dig("response", 0,
+                                "operation", 0,
+                                "result", 0,
+                                "data", 0,
+                                "employee", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => employee_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
@@ -1465,21 +1605,31 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "read" => {
-                "object" => "EMPLOYEE",
-                "keys" => input["RECORDNO"],
-                "fields" => "*"
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "read" => {
+                  "object" => "EMPLOYEE",
+                  "keys" => input["RECORDNO"],
+                  "fields" => "*"
+                }
               }
             }
           }
         }
         employee_response = post("/ia/xml/xmlgw.phtml", payload).
-                            dig("response", 0, "operation", 0, "result", 0,
-                                "data", 0, "EMPLOYEE", 0) || {}
-        call("parse_nested_elements", employee_response)
+                            dig("response", 0,
+                                "operation", 0,
+                                "result", 0,
+                                "data", 0,
+                                "EMPLOYEE", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => employee_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
@@ -1503,17 +1653,27 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update" => { "EMPLOYEE" => input }
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update" => { "EMPLOYEE" => input }
+              }
             }
           }
         }
         employee_response = post("/ia/xml/xmlgw.phtml", payload).
-                            dig("response", 0, "operation", 0, "result", 0,
-                                "data", 0, "employee", 0) || {}
-        call("parse_nested_elements", employee_response)
+                            dig("response", 0,
+                                "operation", 0,
+                                "result", 0,
+                                "data", 0,
+                                "employee", 0) || {}
+
+        call("parse_xml_to_hash",
+             "xml" => employee_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
@@ -1537,40 +1697,41 @@
         "for the action to be successful!",
 
       execute: lambda { |_connection, input|
-        build_date_object = lambda { |raw_date|
-          {
-            "year" => raw_date.to_date.strftime("%Y"),
-            "month" => raw_date.to_date.strftime("%m"),
-            "day" => raw_date.to_date.strftime("%d")
-          }
-        }
-
-        input["datecreated"] = (raw_date = input["datecreated"].presence) &&
-                               build_date_object[raw_date]
-        input["dateposted"] = (raw_date = input["dateposted"].presence) &&
-                              build_date_object[raw_date]
-        input["datedue"] = (raw_date = input["datedue"].presence) &&
-                           build_date_object[raw_date]
-        input["exchratedate"] = (raw_date = input["exchratedate"].presence) &&
-                                build_date_object[raw_date]
+        input["datecreated"] = (date_created = input["datecreated"]) &&
+                               call("build_date_object", date_created)
+        input["dateposted"] = (date_posted = input["dateposted"]) &&
+                              call("build_date_object", date_posted)
+        input["datedue"] = (date_due = input["datedue"]) &&
+                           call("build_date_object", date_due)
+        input["exchratedate"] = (exchrate_date = input["exchratedate"]) &&
+                                call("build_date_object", exchrate_date)
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update_potransaction" =>  input&.compact
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update_potransaction" => input&.compact
+              }
             }
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
                           dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", po_txn_response)
+
+        call("parse_xml_to_hash",
+             "xml" => po_txn_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
         object_definitions["po_txn_header"].required("@key")
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     add_purchase_transaction_items: {
@@ -1583,23 +1744,32 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update_potransaction" =>  input
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update_potransaction" => input
+              }
             }
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
                           dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", po_txn_response)
+
+        call("parse_xml_to_hash",
+             "xml" => po_txn_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
         object_definitions["po_txn_transitem"].required("@key")
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     },
 
     update_purchase_transaction_items: {
@@ -1612,61 +1782,82 @@
 
       execute: lambda { |_connection, input|
         payload = {
-          "content" => {
-            "function" => {
-              "@controlid" => "testControlId",
-              "update_potransaction" =>  input
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "update_potransaction" => input
+              }
             }
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
                           dig("response", 0, "operation", 0, "result", 0) || {}
-        call("parse_nested_elements", po_txn_response)
+
+        call("parse_xml_to_hash",
+             "xml" => po_txn_response,
+             "array_fields" => [])
       },
 
       input_fields: lambda { |object_definitions|
         object_definitions["po_txn_updatepotransitem"].required("@key")
       },
 
-      output_fields: ->(object_definitions) { object_definitions["result"] }
+      output_fields: lambda { |object_definitions|
+        object_definitions["create_or_update_response"]
+      }
     }
   },
 
   pick_lists: {
     classes: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "CLASS",
-              "fields" => "NAME, CLASSID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "CLASS",
+                "fields" => "NAME, CLASSID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
       }
       class_response = post("/ia/xml/xmlgw.phtml", payload).
-                       dig("response", 0, "operation", 0, "result", 0,
+                       dig("response", 0,
+                           "operation", 0,
+                           "result", 0,
                            "data", 0, "class") || []
 
       class_response.map do |value|
-        class_var = call("parse_nested_elements", value)
+        class_var = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [class_var["NAME"], class_var["CLASSID"]]
       end
     },
 
     contact_names: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "CONTACT",
-              "fields" => "RECORDNO, CONTACTNAME",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "CONTACT",
+                "fields" => "RECORDNO, CONTACTNAME",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1676,21 +1867,27 @@
                              "data", 0, "contact") || []
 
       contact_response.map do |value|
-        contact = call("parse_nested_elements", value)
+        contact = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [contact["CONTACTNAME"], contact["CONTACTNAME"]]
       end
     },
 
     departments: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "DEPARTMENT",
-              "fields" => "TITLE, DEPARTMENTID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "DEPARTMENT",
+                "fields" => "TITLE, DEPARTMENTID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1700,21 +1897,27 @@
                                 "data", 0, "department") || []
 
       department_response.map do |value|
-        department = call("parse_nested_elements", value)
+        department = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [department["TITLE"], department["DEPARTMENTID"]]
       end
     },
 
     employees: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "EMPLOYEE",
-              "fields" => "TITLE, EMPLOYEEID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "EMPLOYEE",
+                "fields" => "TITLE, EMPLOYEEID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1724,7 +1927,9 @@
                               "data", 0, "employee") || []
 
       employee_response.map do |value|
-        employee = call("parse_nested_elements", value)
+        employee = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [employee["TITLE"], employee["EMPLOYEEID"]]
       end
     },
@@ -1733,14 +1938,18 @@
 
     locations: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "LOCATION",
-              "fields" => "NAME, LOCATIONID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "LOCATION",
+                "fields" => "NAME, LOCATIONID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1750,21 +1959,27 @@
                               "data", 0, "location") || []
 
       location_response.map do |value|
-        location = call("parse_nested_elements", value)
+        location = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [location["NAME"], location["LOCATIONID"]]
       end
     },
 
     projects: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "PROJECT",
-              "fields" => "NAME, PROJECTID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "PROJECT",
+                "fields" => "NAME, PROJECTID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1774,7 +1989,9 @@
                              "data", 0, "project") || []
 
       project_response.map do |value|
-        project = call("parse_nested_elements", value)
+        project = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [project["NAME"], project["PROJECTID"]]
       end
     },
@@ -1789,14 +2006,18 @@
 
     warehouses: lambda { |_connection|
       payload = {
-        "content" => {
-          "function" => {
-            "@controlid" => "testControlId",
-            "readByQuery" => {
-              "object" => "WAREHOUSE",
-              "fields" => "NAME, WAREHOUSEID",
-              "query" => "STATUS = 'T'",
-              "pagesize" => "1000"
+        "control" => {},
+        "operation" => {
+          "authentication" => {},
+          "content" => {
+            "function" => {
+              "@controlid" => "testControlId",
+              "readByQuery" => {
+                "object" => "WAREHOUSE",
+                "fields" => "NAME, WAREHOUSEID",
+                "query" => "STATUS = 'T'",
+                "pagesize" => "1000"
+              }
             }
           }
         }
@@ -1806,7 +2027,9 @@
                                "data", 0, "warehouse") || []
 
       warehouse_response.map do |value|
-        warehouse = call("parse_nested_elements", value)
+        warehouse = call("parse_xml_to_hash",
+                         "xml" => value,
+                         "array_fields" => [])
         [warehouse["NAME"], warehouse["WAREHOUSEID"]]
       end
     }
