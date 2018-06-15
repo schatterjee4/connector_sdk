@@ -1221,9 +1221,9 @@
 
   methods: {
     parse_xml_to_hash: lambda { |xml_obj|
-      xml_obj["xml"]
-        .reject { |key, _value| key[/^@/] }
-        .inject({}) do |hash, (key, value)|
+      xml_obj["xml"].
+        reject { |key, _value| key[/^@/] }.
+        inject({}) do |hash, (key, value)|
         if value.is_a?(Array)
           hash.merge(if value.length != 1 ||
             xml_obj["array_fields"].include?(key)
@@ -1231,7 +1231,8 @@
                          key => value.map do |inner_hash|
                                   call("parse_xml_to_hash",
                                        "xml" => inner_hash,
-                                       "array_fields" => xml_obj["array_fields"])
+                                       "array_fields" =>
+                                         xml_obj["array_fields"])
                                 end
                        }
                      else
@@ -1868,8 +1869,8 @@
 
       contact_response.map do |value|
         contact = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
+                       "xml" => value,
+                       "array_fields" => [])
         [contact["CONTACTNAME"], contact["CONTACTNAME"]]
       end
     },
@@ -1898,8 +1899,8 @@
 
       department_response.map do |value|
         department = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
+                          "xml" => value,
+                          "array_fields" => [])
         [department["TITLE"], department["DEPARTMENTID"]]
       end
     },
@@ -1928,8 +1929,8 @@
 
       employee_response.map do |value|
         employee = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
+                        "xml" => value,
+                        "array_fields" => [])
         [employee["TITLE"], employee["EMPLOYEEID"]]
       end
     },
@@ -1960,8 +1961,8 @@
 
       location_response.map do |value|
         location = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
+                        "xml" => value,
+                        "array_fields" => [])
         [location["NAME"], location["LOCATIONID"]]
       end
     },
@@ -1990,8 +1991,8 @@
 
       project_response.map do |value|
         project = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
+                       "xml" => value,
+                       "array_fields" => [])
         [project["NAME"], project["PROJECTID"]]
       end
     },
