@@ -51,7 +51,7 @@
 
   object_definitions: {
     get_forms: {
-      fields: lambda do |connection| 
+      fields: lambda do
         [
           {
             name: "workspace_id",
@@ -66,13 +66,13 @@
             label: "Form Name",
             hint: "Whole or partial form name to search for",
             type: "string"
-          },
+          }
         ]
       end
     },
 
     forms: {
-      fields: ->() {
+      fields: lambda do
         [
           { name: "id" },
           { name: "title" },
@@ -99,7 +99,7 @@
             ]
           }
         ]
-      }
+      end
     }
   },
 
@@ -111,26 +111,29 @@
       help: "Search will return a list of forms that matches " \
         "the search criteria.",
       input_fields: lambda do |object_definitions|
-        object_definitions['get_forms']
+        object_definitions["get_forms"]
       end,
 
-      execute: lambda do |connection, input| 
+      execute: lambda do |_connection, input|
         response = get("https://api.typeform.com/forms").
                      params(search: input["search"],
                             page_size: 200,
                             workspace_id: input["workspace_id"])
 
         {
-          forms: response['items']
+          forms: response["items"]
         }
-
       end,
 
       output_fields: lambda do |object_definitions|
         [
-          { name: "forms", type: "array", of: "object", properties: object_definitions["forms"] }
+          { 
+            name: "forms", 
+            type: "array", 
+            of: "object", 
+            properties: object_definitions["forms"] }
         ]
-      end,
+      end
     }
   },
 
@@ -156,7 +159,7 @@
 
         {
           events: forms["items"] || [],
-          next_page: (forms.length >= per_page) ? closure + 1 : nil
+          next_page: forms.length >= per_page ? closure + 1 : nil
         }
       end,
 
@@ -175,10 +178,9 @@
   },
 
   pick_lists: {
-    workspace_id: lambda do |_connection| 
+    workspace_id: lambda do |_connection|
       get("https://api.typeform.com/workspaces")["items"].
         map { |workspace_id| [workspace_id["name"], workspace_id["id"]] }
     end
-
   }
 }
