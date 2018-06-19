@@ -130,7 +130,7 @@
             name: 'user_assignment', 
             type: :object,
             properties: 
-			  [
+              [
                 { name: 'id', type: :integer },
                 { name: 'is_project_manager', type: :boolean },
                 { name: 'is_active', type: :boolean },
@@ -167,9 +167,9 @@
           { name: 'ended_time', type: :timestamp },
           { name: 'is_running', type: :boolean },
           { 
-            name: 'invoice', 
+            name: 'invoice',
             type: :object,
-            properties: 
+            properties:
               [
                 { name: 'id', type: :integer },
                 { name: 'number' }
@@ -179,7 +179,7 @@
             name: 'external_reference', 
             type: :object,
             properties: 
-			  [
+              [
                 { name: 'id', type: :integer },
                 { name: 'group_id', type: :integer },
                 { name: 'permalink' },
@@ -198,42 +198,76 @@
   },
 
   actions: {
-    get_time_entries: {
-	  help: "Fetchs time entries of a specified date. Returns all " \
-	    "time entries if left blank. Returns a maximum of 100 records.",
-		
+    search_time_entries: {
+      description: "Search <span class='provider'>time entries</span> " \
+        "in <span class='provider'>Harvest</span>",
+      help: "Fetches the time entries that matches the criteria. Returns all " \
+        "time entries if left blank. Returns a maximum of 100 records.",
+
       input_fields: ->() {
         [
-          { 
-            name: "account_id", 
-            type: "select", 
+          {
+            name: "account_id",
+            type: "select",
             control_type: "select",
             pick_list: "account_id",
             optional: false,
             hint: "Account to list clients from"
           },
-          { 
-            name: "from", 
-            type: "date", 
-            sticky: true 
+          {
+            name: "user_id",
+            type: "integer"
           },
-		  { 
-            name: "to", 
-            type: "date", 
-            sticky: true 
+          {
+            name: "client_id",
+            type: "integer"
+          },
+          {
+            name: "project_id",
+            type: "integer"
+          },
+          {
+            name: "is_billed",
+            type: "boolean",
+            control_type: "select",
+            pick_list: "true_false",
+            hint: "True if invoiced, False if not yet invoiced"
+          },
+          {
+            name: "is_running",
+            type: "boolean",
+            control_type: "select",
+            pick_list: "true_false",
+            hint: "True if running, False if not running"
+
+          },
+          {
+            name: "from",
+            type: "date",
+            hint: "Date of the time entry on or " \
+              "after this will be returned"
+          },
+          {
+            name: "to",
+            type: "date",
+            hint: "Date of the time entry on or " \
+              "before this will be returned"
           }
         ]
       },
 
       execute: lambda do |connection, input|
-	    #API cap per page is 100.
-		# from_time = input["from"] != "" ? input["from"].to_time.utc.iso8601 : ""
-		# to_time = input["to"] != "" ? input["to"].to_time.utc.iso8601 : ""
+      #API cap per page is 100.
         time_entries = get("https://api.harvestapp.com/v2/time_entries").
-                         params(from: input["from"].to_time.utc.iso8601,
-                                to: input["to"].to_time.utc.iso8601,
-                                per_page: 100).
-                         headers("Harvest-Account-Id": input["account_id"])
+          params(user_id: input["user_id"],
+                 client_id: input["client_id"],
+                 project_id: input["project_id"],
+                 is_billed: input["is_billed"],
+                 is_running: input["is_running"],
+                 from: input["from"],
+                 to: input["to"],
+                 per_page: 100).
+          headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: ->(object_definitions) {
@@ -242,41 +276,45 @@
     },
 
     get_recent_clients: {
+      description: "Get recent <span class='provider'>clients</span> " \
+        "in <span class='provider'>Harvest</span>",
       help: "Fetchs clients that are last modified after a " \
         "specified time. Returns a maximum of 100 records.",
 
       input_fields: ->() {
         [
-          { 
-            name: "account_id", 
-            type: "select", 
+          {
+            name: "account_id",
+            type: "select",
             control_type: "select",
             pick_list: "account_id",
             optional: false,
             hint: "Account to list clients from"
           },
-          { 
-            name: 'updated_since', 
-            type: "timestamp", 
-            hint: "Defaults to 1 hour ago if left blank" },
+          {
+            name: "updated_since",
+            type: "date_time",
+            hint: "Defaults to 1 hour ago if left blank"
+          },
         ]
       },
 
-      execute: lambda do |connection, input|
+      execute: lambda do |_connection, input|
         #API cap per page is 100.
+        updated_after = input["updated_since"] || now - 1.hours
         clients = get("https://api.harvestapp.com/v2/clients").
-                    params(updated_since: input["updated_since"].to_time.utc.iso8601,
-                           per_page: 100).
-                    headers("Harvest-Account-Id": input["account_id"])
+          params(updated_since: updated_after.to_time.utc.iso8601,
+                 per_page: 100).
+          headers("Harvest-Account-Id": input["account_id"])
       end,
-      
+
       output_fields: lambda do |object_definitions|
         [
-          { 
-            name: "clients", 
+          {
+            name: "clients",
             type: "array",
-            of: "object", 
-            properties: object_definitions['client'] 
+            of: "object",
+            properties: object_definitions["client"]
           }
         ]
       end,
@@ -290,67 +328,66 @@
 
       input_fields: ->() {
         [
-          { 
-            name: "since", 
-            type: "timestamp", 
-			sticky: true,
+          {
+            name: "since",
+            type: "timestamp",
+            sticky: true,
             hint: "Defaults to 1 hour ago if left blank"
           },
-		  { 
-            name: "account_id", 
-            type: "select", 
+          {
+            name: "account_id",
+            type: "select",
             control_type: "select",
             pick_list: "account_id",
             optional: false,
             hint: "Account to list clients from"
           },
-          { 
-            name: "is_active", 
-            type: "boolean", 
+          {
+            name: "is_active",
+            type: "boolean",
             control_type: "select",
-            pick_list: "active",
+            pick_list: "true_false",
             hint: "True for active, False for inactive"
           }
         ]
       },
 
-      poll: lambda do |connection, input, page| 
-        created_since = ( input['since'] || (now - 1.hours) )
+      poll: lambda do |_connection, input, page| 
+        created_since = (input["since"] || (now - 1.hours))
         page ||= 1
         limit = 100
         clients = get("https://api.harvestapp.com/v2/clients").
-                    params(updated_since: created_since.to_time.utc.iso8601,
-                           is_active: input["is_active"],
-                           page: page,
-                           per_page: limit).
-                    headers("Harvest-Account-Id": input["account_id"])
-      
+                  params(updated_since: created_since.to_time.utc.iso8601,
+                         is_active: input["is_active"],
+                         page: page,
+                         per_page: limit).
+                  headers("Harvest-Account-Id": input["account_id"])
+
         {
           events: clients["clients"],
           next_page: clients["next_page"]
         }
-		
       end,
-      
+
       dedup: lambda do |client|
         client["id"]
       end,
-      
-      output_fields: ->(object_definitions) {
+
+      output_fields: lambda do |object_definitions|
         object_definitions["client"]
       }
     }
   },
-  
+
   pick_lists: {
-    account_id: lambda do |connection|
+    account_id: lambda do |_connection|
       get("https://id.getharvest.com/api/v2/accounts")["accounts"].
         map { |account| [account["name"], account["id"]] }
     end,
-    active: lambda do |_connection|
+    true_false: lambda do |_connection|
       [
-        ["True", "true"],
-        ["False", "false"]
+        %w(True true),
+        %w(False false)
       ]
     end
   }
