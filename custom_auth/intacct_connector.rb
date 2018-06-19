@@ -1698,7 +1698,7 @@
         "for the action to be successful!",
 
       execute: lambda { |_connection, input|
-        ["datecreated", "dateposted", "datedue", "exchratedate"].
+        %w[datecreated dateposted datedue exchratedate].
           each do |date_field|
             input&.[]=(date_field,
                        call("build_date_object", input[date_field]))
