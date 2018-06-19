@@ -79,7 +79,7 @@
           { name: "id" },
           { name: "title" },
           { name: "last_updated_at", type: "timestamp" },
-          { 
+          {
             name: "self",
             type: "object",
             properties: [
@@ -167,7 +167,7 @@
       end,
 
       dedup: lambda do |forms|
-        if forms.length > 0
+        if forms.present?
           forms["id"]
         else
           []
