@@ -28,19 +28,19 @@
         ].join(" ")
 
         "https://api.typeform.com/oauth/authorize?client_id=" \
-          "#{connection["client_id"]}&scope=#{scopes}" \
+          "#{connection['client_id']}&scope=#{scopes}" \
           "&redirect_uri=https%3A%2F%2Fwww.workato.com%2Foauth%2Fcallback"
       end,
 
       acquire: lambda do |connection, auth_code, _redirect_uri|
         response = post("https://api.typeform.com/oauth/token").
-          payload(
-            client_id: connection["client_id"],
-            client_secret: connection["client_secret"],
-            code: auth_code,
-            redirect_uri: "https://www.workato.com/oauth/callback"
-          ).
-          request_format_www_form_urlencoded
+                   payload(
+                     client_id: connection["client_id"],
+                     client_secret: connection["client_secret"],
+                     code: auth_code,
+                     redirect_uri: "https://www.workato.com/oauth/callback"
+                   ).
+                   request_format_www_form_urlencoded
 
         [response, nil, nil]
       end,
