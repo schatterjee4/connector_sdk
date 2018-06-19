@@ -204,7 +204,7 @@
       help: "Fetches the time entries that matches the criteria. Returns all " \
         "time entries if left blank. Returns a maximum of 100 records.",
 
-      input_fields: ->() {
+      input_fields: lambda do |_object_definitions|
         [
           {
             name: "account_id",
@@ -254,25 +254,25 @@
               "before this will be returned"
           }
         ]
-      },
-
-      execute: lambda do |connection, input|
-      #API cap per page is 100.
-        time_entries = get("https://api.harvestapp.com/v2/time_entries").
-          params(user_id: input["user_id"],
-                 client_id: input["client_id"],
-                 project_id: input["project_id"],
-                 is_billed: input["is_billed"],
-                 is_running: input["is_running"],
-                 from: input["from"],
-                 to: input["to"],
-                 per_page: 100).
-          headers("Harvest-Account-Id": input["account_id"])
       end,
 
-      output_fields: ->(object_definitions) {
-        object_definitions['time_entry']
-      }
+      execute: lambda do |_connection, input|
+        # API cap per page is 100.
+        get("https://api.harvestapp.com/v2/time_entries").
+        params(user_id: input["user_id"],
+               client_id: input["client_id"],
+               project_id: input["project_id"],
+               is_billed: input["is_billed"],
+               is_running: input["is_running"],
+               from: input["from"],
+               to: input["to"],
+               per_page: 100).
+        headers("Harvest-Account-Id": input["account_id"])
+      end,
+
+      output_fields: lambda do |object_definitions|
+        object_definitions["time_entry"]
+      end
     },
 
     get_recent_clients: {
@@ -281,7 +281,7 @@
       help: "Fetchs clients that are last modified after a " \
         "specified time. Returns a maximum of 100 records.",
 
-      input_fields: ->() {
+      input_fields: lambda do |_object_definitions|
         [
           {
             name: "account_id",
@@ -295,17 +295,17 @@
             name: "updated_since",
             type: "date_time",
             hint: "Defaults to 1 hour ago if left blank"
-          },
+          }
         ]
-      },
+      end,
 
       execute: lambda do |_connection, input|
-        #API cap per page is 100.
+        # API cap per page is 100.
         updated_after = input["updated_since"] || now - 1.hours
-        clients = get("https://api.harvestapp.com/v2/clients").
-          params(updated_since: updated_after.to_time.utc.iso8601,
+        get("https://api.harvestapp.com/v2/clients").
+        params(updated_since: updated_after.to_time.utc.iso8601,
                  per_page: 100).
-          headers("Harvest-Account-Id": input["account_id"])
+        headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
@@ -317,16 +317,16 @@
             properties: object_definitions["client"]
           }
         ]
-      end,
+      end
     }
   },
 
   triggers: {
     new_or_updated_client: {
-    # API returns clients sorted by descending creation date.
+      # API returns clients sorted by descending creation date.
       type: :paging_desc,
 
-      input_fields: ->() {
+      input_fields: lambda do |_object_definitions|
         [
           {
             name: "since",
@@ -350,9 +350,9 @@
             hint: "True for active, False for inactive"
           }
         ]
-      },
+      end,
 
-      poll: lambda do |_connection, input, page| 
+      poll: lambda do |_connection, input, page|
         created_since = (input["since"] || (now - 1.hours))
         page ||= 1
         limit = 100
