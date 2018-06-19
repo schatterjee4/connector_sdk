@@ -1,34 +1,34 @@
 {
-  title: 'Typeform',
+  title: "Typeform",
 
   connection: {
     fields: [
       {
-        name: 'client_id',
-        label: 'Client ID',
-        hint: 'You can find your client ID in the settings page.',
+        name: "client_id",
+        label: "Client ID",
+        hint: "You can find your client ID in the settings page.",
         optional: false
       },
       {
-        name: 'client_secret',
-        label: 'Client Secret',
-        control_type: 'password',
-        hint: 'You can find your client ID in the settings page.',
+        name: "client_secret",
+        label: "Client Secret",
+        control_type: "password",
+        hint: "You can find your client ID in the settings page.",
         optional: false
       }
     ],
 
     authorization: {
-      type: 'oauth2',
+      type: "oauth2",
 
       authorization_url: lambda do |connection|
         scopes = [
           "forms:read",
-          "workspaces:read",
+          "workspaces:read"
         ].join(" ")
 
         "https://api.typeform.com/oauth/authorize?client_id=" \
-          "#{connection['client_id']}&scope=#{scopes}" \
+          "#{connection["client_id"]}&scope=#{scopes}" \
           "&redirect_uri=https%3A%2F%2Fwww.workato.com%2Foauth%2Fcallback"
       end,
 
@@ -40,7 +40,7 @@
             code: auth_code,
             redirect_uri: "https://www.workato.com/oauth/callback"
           ).
-          request_format_www_form_urlencoded,
+          request_format_www_form_urlencoded
 
         [response, nil, nil]
       end,
@@ -118,9 +118,9 @@
 
       execute: lambda do |_connection, input|
         response = get("https://api.typeform.com/forms").
-                     params(search: input["search"],
-                            page_size: 200,
-                            workspace_id: input["workspace_id"])
+                   params(search: input["search"],
+                          page_size: 200,
+                          workspace_id: input["workspace_id"])
 
         {
           forms: response["items"]
@@ -145,8 +145,8 @@
       # Results are listed in descending order based on the modified date.
       type: :paging_desc,
 
-      description: 'New <span class="provider">Form</span> ' \
-        'in <span class="provider">Typeform</span>',
+      description: "New <span class='provider'>Form</span> " \
+        "in <span class='provider'>Typeform</span>",
       subtitle: "New form in Typeform",
 
       input_fields: lambda do
@@ -158,7 +158,7 @@
 
         forms = get("https://api.typeform.com/forms").
                 params(page_size: per_page,
-                         page: closure)
+                       page: closure)
 
         {
           events: forms["items"] || [],
