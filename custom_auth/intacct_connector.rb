@@ -48,7 +48,7 @@
         }
       },
 
-      refresh_on: [401],
+      refresh_on: [401, /Invalid session/],
 
       detect_on: [%r{<status>failure</status>}],
 
@@ -1221,39 +1221,39 @@
 
   methods: {
     parse_xml_to_hash: lambda { |xml_obj|
-      xml_obj["xml"].
-        reject { |key, _value| key[/^@/] }.
+      xml_obj["xml"]&.
+        reject { |key, _value| key[/^@/] }&.
         inject({}) do |hash, (key, value)|
         if value.is_a?(Array)
-          hash.merge(if value.length != 1 ||
-            xml_obj["array_fields"].include?(key)
+          hash.merge(if (array_fields = xml_obj["array_fields"])&.include?(key)
                        {
                          key => value.map do |inner_hash|
                                   call("parse_xml_to_hash",
                                        "xml" => inner_hash,
-                                       "array_fields" =>
-                                         xml_obj["array_fields"])
+                                       "array_fields" => array_fields)
                                 end
                        }
                      else
                        {
                          key => call("parse_xml_to_hash",
                                      "xml" => value[0],
-                                     "array_fields" => xml_obj["array_fields"])
+                                     "array_fields" => array_fields)
                        }
                      end)
         else
           value
         end
-      end.presence
+      end&.presence
     },
 
-    build_date_object: lambda { |raw_date|
-      {
-        "year" => raw_date.to_date.strftime("%Y"),
-        "month" => raw_date.to_date.strftime("%m"),
-        "day" => raw_date.to_date.strftime("%d")
-      }
+    build_date_object: lambda { |date_field|
+      if (raw_date = date_field&.to_date)
+        {
+          "year" => raw_date&.strftime("%Y") || "",
+          "month" => raw_date&.strftime("%m") || "",
+          "day" => raw_date&.strftime("%d") || ""
+        }
+      end
     }
   },
 
@@ -1329,7 +1329,7 @@
 
         call("parse_xml_to_hash",
              "xml" => attachment_response,
-             "array_fields" => [])
+             "array_fields" => ["attachment"])
       },
 
       input_fields: lambda { |_object_definitions|
@@ -1698,14 +1698,11 @@
         "for the action to be successful!",
 
       execute: lambda { |_connection, input|
-        input["datecreated"] = (date_created = input["datecreated"]) &&
-                               call("build_date_object", date_created)
-        input["dateposted"] = (date_posted = input["dateposted"]) &&
-                              call("build_date_object", date_posted)
-        input["datedue"] = (date_due = input["datedue"]) &&
-                           call("build_date_object", date_due)
-        input["exchratedate"] = (exchrate_date = input["exchratedate"]) &&
-                                call("build_date_object", exchrate_date)
+        ["datecreated", "dateposted", "datedue", "exchratedate"].
+          each do |date_field|
+            input&.[]=(date_field,
+                       call("build_date_object", input[date_field]))
+          end
         payload = {
           "control" => {},
           "operation" => {
@@ -1835,14 +1832,12 @@
                        dig("response", 0,
                            "operation", 0,
                            "result", 0,
-                           "data", 0, "class") || []
+                           "data", 0) || []
 
-      class_response.map do |value|
-        class_var = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
-        [class_var["NAME"], class_var["CLASSID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => class_response,
+           "array_fields" => ["class"])["class"]&.
+        pluck("NAME", "CLASSID") || []
     },
 
     contact_names: lambda { |_connection|
@@ -1864,15 +1859,15 @@
         }
       }
       contact_response = post("/ia/xml/xmlgw.phtml", payload).
-                         dig("response", 0, "operation", 0, "result", 0,
-                             "data", 0, "contact") || []
+                         dig("response", 0,
+                             "operation", 0,
+                             "result", 0,
+                             "data", 0) || []
 
-      contact_response.map do |value|
-        contact = call("parse_xml_to_hash",
-                       "xml" => value,
-                       "array_fields" => [])
-        [contact["CONTACTNAME"], contact["CONTACTNAME"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => contact_response,
+           "array_fields" => ["contact"])["contact"]&.
+        pluck("CONTACTNAME", "CONTACTNAME") || []
     },
 
     departments: lambda { |_connection|
@@ -1894,15 +1889,15 @@
         }
       }
       department_response = post("/ia/xml/xmlgw.phtml", payload).
-                            dig("response", 0, "operation", 0, "result", 0,
-                                "data", 0, "department") || []
+                            dig("response", 0,
+                                "operation", 0,
+                                "result", 0,
+                                "data", 0) || []
 
-      department_response.map do |value|
-        department = call("parse_xml_to_hash",
-                          "xml" => value,
-                          "array_fields" => [])
-        [department["TITLE"], department["DEPARTMENTID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => department_response,
+           "array_fields" => ["department"])["department"]&.
+        pluck("TITLE", "DEPARTMENTID") || []
     },
 
     employees: lambda { |_connection|
@@ -1924,15 +1919,15 @@
         }
       }
       employee_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0,
-                              "data", 0, "employee") || []
+                          dig("response", 0,
+                              "operation", 0,
+                              "result", 0,
+                              "data", 0) || []
 
-      employee_response.map do |value|
-        employee = call("parse_xml_to_hash",
-                        "xml" => value,
-                        "array_fields" => [])
-        [employee["TITLE"], employee["EMPLOYEEID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => employee_response,
+           "array_fields" => ["employee"])["employee"]&.
+        pluck("TITLE", "EMPLOYEEID") || []
     },
 
     genders: ->(_connection) { [%w[Male male], %w[Female female]] },
@@ -1956,15 +1951,15 @@
         }
       }
       location_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0,
-                              "data", 0, "location") || []
+                          dig("response", 0,
+                              "operation", 0,
+                              "result", 0,
+                              "data", 0) || []
 
-      location_response.map do |value|
-        location = call("parse_xml_to_hash",
-                        "xml" => value,
-                        "array_fields" => [])
-        [location["NAME"], location["LOCATIONID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => location_response,
+           "array_fields" => ["location"])["location"]&.
+        pluck("NAME", "LOCATIONID") || []
     },
 
     projects: lambda { |_connection|
@@ -1986,15 +1981,15 @@
         }
       }
       project_response = post("/ia/xml/xmlgw.phtml", payload).
-                         dig("response", 0, "operation", 0, "result", 0,
-                             "data", 0, "project") || []
+                         dig("response", 0,
+                             "operation", 0,
+                             "result", 0,
+                             "data", 0) || []
 
-      project_response.map do |value|
-        project = call("parse_xml_to_hash",
-                       "xml" => value,
-                       "array_fields" => [])
-        [project["NAME"], project["PROJECTID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => project_response,
+           "array_fields" => ["project"])["project"]&.
+        pluck("NAME", "PROJECTID") || []
     },
 
     statuses: ->(_connection) { [%w[Active active], %w[Inactive inactive]] },
@@ -2024,15 +2019,15 @@
         }
       }
       warehouse_response = post("/ia/xml/xmlgw.phtml", payload).
-                           dig("response", 0, "operation", 0, "result", 0,
-                               "data", 0, "warehouse") || []
+                           dig("response", 0,
+                               "operation", 0,
+                               "result", 0,
+                               "data", 0) || []
 
-      warehouse_response.map do |value|
-        warehouse = call("parse_xml_to_hash",
-                         "xml" => value,
-                         "array_fields" => [])
-        [warehouse["NAME"], warehouse["WAREHOUSEID"]]
-      end
+      call("parse_xml_to_hash",
+           "xml" => warehouse_response,
+           "array_fields" => ["warehouse"])["warehouse"]&.
+        pluck("NAME", "WAREHOUSEID") || []
     }
   }
 }
