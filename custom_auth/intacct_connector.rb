@@ -77,7 +77,7 @@
     base_uri: ->(_connection) { "https://api.intacct.com" }
   },
 
-  test: ->(_connection) {
+  test: lambda do |_connection|
     payload = {
       "control" => {},
       "operation" => {
@@ -85,7 +85,7 @@
       }
     }
     post("/ia/xml/xmlgw.phtml", payload)
-  },
+  end,
 
   object_definitions: {
     api_session: {
@@ -1243,7 +1243,7 @@
         else
           value
         end
-      end&.presence
+      end || {}
     end,
 
     build_date_object: lambda do |date_field|
