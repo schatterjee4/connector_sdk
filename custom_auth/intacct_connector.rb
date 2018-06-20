@@ -13,7 +13,7 @@
     authorization: {
       type: "custom_auth",
 
-      acquire: lambda { |connection|
+      acquire: lambda do |connection|
         payload = {
           "control" => {
             "senderid" => connection["sender_id"],
@@ -46,13 +46,13 @@
             dig("response", 0, "operation", 0, "result", 0, "data", 0,
                 "api", 0, "sessionid", 0, "content!") || ""
         }
-      },
+      end,
 
       refresh_on: [401, /Invalid session/],
 
       detect_on: [%r{<status>failure</status>}],
 
-      apply: lambda { |connection|
+      apply: lambda do |connection|
         headers("Content-Type" => "x-intacct-xml-request")
         payload do |current_payload|
           current_payload&.[]=(
@@ -71,7 +71,7 @@
             })
         end
         format_xml("request")
-      }
+      end
     },
 
     base_uri: ->(_connection) { "https://api.intacct.com" }
@@ -89,27 +89,27 @@
 
   object_definitions: {
     api_session: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           { name: "sessionid", label: "Session ID" },
           { name: "endpoint", label: "Endpoint" }
         ]
-      }
+      end
     },
 
     create_or_update_response: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           { name: "status", label: "Job status" },
           { name: "function", label: "Job function" },
           { name: "controlid", label: "Control ID" },
           { name: "key", label: "Record key" }
         ]
-      }
+      end
     },
 
     employee_create: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           { name: "RECORDNO", label: "Record number", type: "integer" },
           { name: "EMPLOYEEID", label: "Employee ID", sticky: true },
@@ -300,11 +300,11 @@
           { name: "CREATEDBY", label: "Created by" },
           { name: "MODIFIEDBY", label: "Modified by" }
         ]
-      }
+      end
     },
 
     employee_get: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           { name: "RECORDNO", label: "Record number", type: "integer" },
           {
@@ -577,12 +577,12 @@
           { name: "CREATEDBY", label: "Created by" },
           { name: "MODIFIEDBY", label: "Modified by" }
         ]
-      }
+      end
     },
 
     # Purchase order transaction
     po_txn_header: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           {
             name: "@key",
@@ -699,11 +699,11 @@
               "on transaction definition configuration)"
           }
         ]
-      }
+      end
     },
 
     po_txn_transitem: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           {
             name: "@key",
@@ -884,11 +884,11 @@
             ]
           }
         ]
-      }
+      end
     },
 
     po_txn_updatepotransitem: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           {
             name: "@key",
@@ -1052,12 +1052,12 @@
             ]
           }
         ]
-      }
+      end
     },
 
     # attachment
     supdoc_create: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [{
           name: "attachment",
           optional: false,
@@ -1117,11 +1117,11 @@
             }
           ]
         }]
-      }
+      end
     },
 
     supdoc_get: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           {
             name: "supdocid",
@@ -1181,12 +1181,12 @@
           { name: "lastmodified", label: "Last modified" },
           { name: "lastmodifiedby", label: "Last modified by" }
         ]
-      }
+      end
     },
 
     # attachment folder
     supdocfolder: {
-      fields: lambda { |_connection|
+      fields: lambda do |_connection|
         [
           {
             name: "name",
@@ -1215,12 +1215,12 @@
           { name: "lastmodified", label: "Last modified" },
           { name: "lastmodifiedby", label: "Last modified by" }
         ]
-      }
+      end
     }
   },
 
   methods: {
-    parse_xml_to_hash: lambda { |xml_obj|
+    parse_xml_to_hash: lambda do |xml_obj|
       xml_obj["xml"]&.
         reject { |key, _value| key[/^@/] }&.
         inject({}) do |hash, (key, value)|
@@ -1244,9 +1244,9 @@
           value
         end
       end&.presence
-    },
+    end,
 
-    build_date_object: lambda { |date_field|
+    build_date_object: lambda do |date_field|
       if (raw_date = date_field&.to_date)
         {
           "year" => raw_date&.strftime("%Y") || "",
@@ -1254,7 +1254,7 @@
           "day" => raw_date&.strftime("%d") || ""
         }
       end
-    }
+    end
   },
 
   actions: {
@@ -1267,7 +1267,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1288,15 +1288,15 @@
         call("parse_xml_to_hash",
              "xml" => attachment_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["supdoc_create"]
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     get_attachment: {
@@ -1304,7 +1304,7 @@
       description: "Get <span class='provider'>attachment</span> in " \
         "<span class='provider'>Intacct</span>",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1330,16 +1330,16 @@
         call("parse_xml_to_hash",
              "xml" => attachment_response,
              "array_fields" => ["attachment"])
-      },
+      end,
 
-      input_fields: lambda { |_object_definitions|
+      input_fields: lambda do |_object_definitions|
         [{ name: "key", label: "Supporting document ID", optional: false }]
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["supdoc_get"].
           ignored("supdocfoldername", "supdocdescription")
-      }
+      end
     },
 
     update_attachment: {
@@ -1350,7 +1350,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1371,18 +1371,18 @@
         call("parse_xml_to_hash",
              "xml" => attachment_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["supdoc_get"].
           ignored("creationdate", "createdby", "lastmodified",
                   "lastmodifiedby", "folder", "description").
           required("supdocid")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     # Attachment folder related actions
@@ -1394,7 +1394,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1415,18 +1415,18 @@
         call("parse_xml_to_hash",
              "xml" => folder_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["supdocfolder"].
           ignored("creationdate", "createdby", "lastmodified",
                   "lastmodifiedby", "name", "description", "parentfolder").
           required("supdocfoldername")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     get_attachment_folder: {
@@ -1434,7 +1434,7 @@
       description: "Get <span class='provider'>attachment folder</span> in " \
         "<span class='provider'>Intacct</span>",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1460,17 +1460,17 @@
         call("parse_xml_to_hash",
              "xml" => attachment_folder_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |_object_definitions|
+      input_fields: lambda do |_object_definitions|
         [{ name: "key", label: "Folder name", optional: false }]
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["supdocfolder"].
           ignored("supdocfoldername", "supdocfolderdescription",
                   "supdocparentfoldername")
-      }
+      end
     },
 
     update_attachment_folder: {
@@ -1481,7 +1481,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1502,18 +1502,18 @@
         call("parse_xml_to_hash",
              "xml" => folder_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["supdocfolder"].
           ignored("creationdate", "createdby", "lastmodified",
                   "lastmodifiedby", "name", "description", "parentfolder").
           required("supdocfoldername")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     # API Session related actions
@@ -1524,7 +1524,7 @@
       help: "Action returns a unique identifier for an API session " \
         "and its endpoint.",
 
-      execute: lambda { |_connection, _input|
+      execute: lambda do |_connection, _input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1547,11 +1547,11 @@
         call("parse_xml_to_hash",
              "xml" => api_response,
              "array_fields" => [])
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["api_session"]
-      }
+      end
     },
 
     # Employee related actions
@@ -1563,7 +1563,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1586,17 +1586,17 @@
         call("parse_xml_to_hash",
              "xml" => employee_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["employee_create"].
           ignored("RECORDNO", "CREATEDBY", "MODIFIEDBY", "WHENCREATED",
                   "WHENMODIFIED")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
-      }
+      end
     },
 
     get_employee: {
@@ -1604,7 +1604,7 @@
       description: "Get <span class='provider'>employee</span> in " \
         "<span class='provider'>Intacct</span>",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1631,17 +1631,17 @@
         call("parse_xml_to_hash",
              "xml" => employee_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["employee_get"].
           only("RECORDNO").
           required("RECORDNO")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["employee_get"]
-      }
+      end
     },
 
     update_employee: {
@@ -1652,7 +1652,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1675,17 +1675,17 @@
         call("parse_xml_to_hash",
              "xml" => employee_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["employee_get"].
           ignored("CREATEDBY", "MODIFIEDBY", "WHENCREATED", "WHENMODIFIED").
           required("RECORDNO")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
-      }
+      end
     },
 
     # Purchase Order Transaction related actions
@@ -1697,7 +1697,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         %w[datecreated dateposted datedue exchratedate].
           each do |date_field|
             input&.[]=(date_field,
@@ -1721,15 +1721,15 @@
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["po_txn_header"].required("@key")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     add_purchase_transaction_items: {
@@ -1740,7 +1740,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1759,15 +1759,15 @@
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["po_txn_transitem"].required("@key")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     },
 
     update_purchase_transaction_items: {
@@ -1778,7 +1778,7 @@
         "fields in the same order as listed below, " \
         "for the action to be successful!",
 
-      execute: lambda { |_connection, input|
+      execute: lambda do |_connection, input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1797,20 +1797,20 @@
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
              "array_fields" => [])
-      },
+      end,
 
-      input_fields: lambda { |object_definitions|
+      input_fields: lambda do |object_definitions|
         object_definitions["po_txn_updatepotransitem"].required("@key")
-      },
+      end,
 
-      output_fields: lambda { |object_definitions|
+      output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
-      }
+      end
     }
   },
 
   pick_lists: {
-    classes: lambda { |_connection|
+    classes: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1838,9 +1838,9 @@
            "xml" => class_response,
            "array_fields" => ["class"])["class"]&.
         pluck("NAME", "CLASSID") || []
-    },
+    end,
 
-    contact_names: lambda { |_connection|
+    contact_names: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1868,9 +1868,9 @@
            "xml" => contact_response,
            "array_fields" => ["contact"])["contact"]&.
         pluck("CONTACTNAME", "CONTACTNAME") || []
-    },
+    end,
 
-    departments: lambda { |_connection|
+    departments: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1898,9 +1898,9 @@
            "xml" => department_response,
            "array_fields" => ["department"])["department"]&.
         pluck("TITLE", "DEPARTMENTID") || []
-    },
+    end,
 
-    employees: lambda { |_connection|
+    employees: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1928,11 +1928,11 @@
            "xml" => employee_response,
            "array_fields" => ["employee"])["employee"]&.
         pluck("TITLE", "EMPLOYEEID") || []
-    },
+    end,
 
     genders: ->(_connection) { [%w[Male male], %w[Female female]] },
 
-    locations: lambda { |_connection|
+    locations: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1960,9 +1960,9 @@
            "xml" => location_response,
            "array_fields" => ["location"])["location"]&.
         pluck("NAME", "LOCATIONID") || []
-    },
+    end,
 
-    projects: lambda { |_connection|
+    projects: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -1990,17 +1990,17 @@
            "xml" => project_response,
            "array_fields" => ["project"])["project"]&.
         pluck("NAME", "PROJECTID") || []
-    },
+    end,
 
     statuses: ->(_connection) { [%w[Active active], %w[Inactive inactive]] },
 
-    termination_types: lambda { |_connection|
+    termination_types: lambda do |_connection|
       [%w[Voluntary voluntary], %w[Involuntary involuntary],
        %w[Deceased deceased], %w[Disability disability],
        %w[Retired retired]]
-    },
+    end,
 
-    warehouses: lambda { |_connection|
+    warehouses: lambda do |_connection|
       payload = {
         "control" => {},
         "operation" => {
@@ -2028,6 +2028,6 @@
            "xml" => warehouse_response,
            "array_fields" => ["warehouse"])["warehouse"]&.
         pluck("NAME", "WAREHOUSEID") || []
-    }
+    end
   }
 }
