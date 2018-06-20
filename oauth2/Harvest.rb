@@ -194,7 +194,7 @@
           { name: "cost_rate", type: "number" }
         ]
       end
-	}
+    }
   },
 
   actions: {
