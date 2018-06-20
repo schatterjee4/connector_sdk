@@ -1,5 +1,5 @@
 {
-  title: 'Harvest',
+  title: "Harvest",
 
   connection: {
     fields: [
@@ -23,7 +23,7 @@
     ],
 
     authorization: {
-      type: 'oauth2',
+      type: "oauth2",
 
       authorization_url: lambda do |connection| 
         response = "https://id.getharvest.com/oauth2/authorize?" \
@@ -74,13 +74,13 @@
     client: {
       fields: ->() {
         [
-          { name: 'id', type: :integer },
-          { name: 'name' },
-          { name: 'is_active', type: :boolean },
-          { name: 'address' },
-          { name: 'created_at', type: :datetime },
-          { name: 'updated_at', type: :datetime },
-          { name: 'currency' }
+          { name: "id", type: "integer" },
+          { name: "name" },
+          { name: "is_active", type: "boolean" },
+          { name: "address" },
+          { name: "created_at", type: "date_time" },
+          { name: "updated_at", type: "date_time" },
+          { name: "currency" }
         ]
       }
     },
@@ -88,110 +88,110 @@
     time_entry: {
       fields: ->() {
         [
-          { name: 'id', type: :integer },
-          { name: 'spent_date', type: :date },
+          { name: "id", type: "integer" },
+          { name: "spent_date", type: "date" },
           { 
-            name: 'user', 
-            type: :object,
+            name: "user", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'name' }
+                { name: "id", type: "integer" },
+                { name: "name" }
               ]
           },
           { 
-            name: 'client', 
-            type: :object,
+            name: "client", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'name' }
+                { name: "id", type: "integer" },
+                { name: "name" }
               ]
           },
           { 
-            name: 'project', 
-            type: :object,
+            name: "project", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'name' }
+                { name: "id", type: "integer" },
+                { name: "name" }
               ]
           },
           { 
-            name: 'task', 
-            type: :object,
+            name: "task", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'name' }
+                { name: "id", type: "integer" },
+                { name: "name" }
               ]
           },
           { 
-            name: 'user_assignment', 
-            type: :object,
+            name: "user_assignment", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'is_project_manager', type: :boolean },
-                { name: 'is_active', type: :boolean },
-                { name: 'budget', type: :number },
-                { name: 'created_at', type: :date_time },
-                { name: 'updated_at', type: :date_time },
-                { name: 'hourly_rate', type: :number }
+                { name: "id", type: "integer" },
+                { name: "is_project_manager", type: "boolean" },
+                { name: "is_active", type: "boolean" },
+                { name: "budget", type: "number" },
+                { name: "created_at", type: "date_time" },
+                { name: "updated_at", type: "date_time" },
+                { name: "hourly_rate", type: "number" }
               ]
           },
           { 
-            name: 'task_assignment', 
-            type: :object,
+            name: "task_assignment", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'billable', type: :boolean },
-                { name: 'is_active', type: :boolean },
-                { name: 'created_at', type: :date_time },
-                { name: 'updated_at', type: :date_time },
-                { name: 'hourly_rate', type: :number },
-                { name: 'budget', type: :number }
+                { name: "id", type: "integer" },
+                { name: "billable", type: "boolean" },
+                { name: "is_active", type: "boolean" },
+                { name: "created_at", type: "date_time" },
+                { name: "updated_at", type: "date_time" },
+                { name: "hourly_rate", type: "number" },
+                { name: "budget", type: "number" }
               ]
           },
-          { name: 'hours', type: :number },
-          { name: 'notes' },
-          { name: 'created_at', type: :date_time },
-          { name: 'updated_at', type: :date_time },
-          { name: 'is_locked', type: :boolean },
-          { name: 'locked_reason' },
-          { name: 'is_closed', type: :boolean },
-          { name: 'is_billed', type: :boolean },
-          { name: 'timer_started_at' , type: :datetime },
-          { name: 'started_time', type: :timestamp },
-          { name: 'ended_time', type: :timestamp },
-          { name: 'is_running', type: :boolean },
+          { name: "hours", type: "number" },
+          { name: "notes" },
+          { name: "created_at", type: "date_time" },
+          { name: "updated_at", type: "date_time" },
+          { name: "is_locked", type: "boolean" },
+          { name: "locked_reason" },
+          { name: "is_closed", type: "boolean" },
+          { name: "is_billed", type: "boolean" },
+          { name: "timer_started_at" , type: "date_time" },
+          { name: "started_time", type: "timestamp" },
+          { name: "ended_time", type: "timestamp" },
+          { name: "is_running", type: "boolean" },
           { 
-            name: 'invoice',
-            type: :object,
+            name: "invoice",
+            type: "object",
             properties:
               [
-                { name: 'id', type: :integer },
-                { name: 'number' }
+                { name: "id", type: "integer" },
+                { name: "number" }
               ]
           },
           { 
-            name: 'external_reference', 
-            type: :object,
+            name: "external_reference", 
+            type: "object",
             properties: 
               [
-                { name: 'id', type: :integer },
-                { name: 'group_id', type: :integer },
-                { name: 'permalink' },
-                { name: 'service' },
-                { name: 'service_icon_url' },
-                { name: 'number' }
+                { name: "id", type: "integer" },
+                { name: "group_id", type: "integer" },
+                { name: "permalink" },
+                { name: "service" },
+                { name: "service_icon_url" },
+                { name: "number" }
               ]
           },
-          { name: 'billable', type: :boolean },
-          { name: 'budgeted', type: :boolean },
-          { name: 'billable_rate', type: :number },
-          { name: 'cost_rate', type: :number },      
+          { name: "billable", type: "boolean" },
+          { name: "budgeted", type: "boolean" },
+          { name: "billable_rate", type: "number" },
+          { name: "cost_rate", type: "number" }
         ]
       }
     }
@@ -259,15 +259,15 @@
       execute: lambda do |_connection, input|
         # API cap per page is 100.
         get("https://api.harvestapp.com/v2/time_entries").
-        params(user_id: input["user_id"],
-               client_id: input["client_id"],
-               project_id: input["project_id"],
-               is_billed: input["is_billed"],
-               is_running: input["is_running"],
-               from: input["from"],
-               to: input["to"],
-               per_page: 100).
-        headers("Harvest-Account-Id": input["account_id"])
+          params(user_id: input["user_id"],
+                 client_id: input["client_id"],
+                 project_id: input["project_id"],
+                 is_billed: input["is_billed"],
+                 is_running: input["is_running"],
+                 from: input["from"],
+                 to: input["to"],
+                 per_page: 100).
+          headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
@@ -303,9 +303,9 @@
         # API cap per page is 100.
         updated_after = input["updated_since"] || now - 1.hours
         get("https://api.harvestapp.com/v2/clients").
-        params(updated_since: updated_after.to_time.utc.iso8601,
+          params(updated_since: updated_after.to_time.utc.iso8601,
                  per_page: 100).
-        headers("Harvest-Account-Id": input["account_id"])
+          headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
