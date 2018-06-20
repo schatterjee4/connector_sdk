@@ -26,19 +26,19 @@
       type: "oauth2",
 
       authorization_url: lambda do |connection|
-        response = "https://id.getharvest.com/oauth2/authorize?" \
-          "client_id=#{connection["client_id"]}&response_type=code"
+        "https://id.getharvest.com/oauth2/authorize?" \
+          "client_id=#{connection['client_id']}&response_type=code"
       end,
 
       acquire: lambda do |connection, auth_code|
         response = post("https://id.getharvest.com/api/v2/oauth2/token").
-          payload(
-            code: auth_code,
-            client_id: connection["client_id"],
-            client_secret: connection["client_secret"],
-            grant_type: "authorization_code"
-          ).
-          request_format_www_form_urlencoded
+                   payload(
+                     code: auth_code,
+                     client_id: connection["client_id"],
+                     client_secret: connection["client_secret"],
+                     grant_type: "authorization_code"
+                   ).
+                   request_format_www_form_urlencoded
 
         [
           {
@@ -64,15 +64,15 @@
           request_format_www_form_urlencoded
       end,
 
-      apply: lambda do |connection, access_token|
+      apply: lambda do |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
       end
-    },
+    }
   },
 
   object_definitions: {
     client: {
-      fields: ->() {
+      fields: lambda do |_object_definitions|
         [
           { name: "id", type: "integer" },
           { name: "name" },
@@ -82,11 +82,11 @@
           { name: "updated_at", type: "date_time" },
           { name: "currency" }
         ]
-      }
+      end
     },
 
     time_entry: {
-      fields: ->() {
+      fields: lambda do |_object_definitions|
         [
           { name: "id", type: "integer" },
           { name: "spent_date", type: "date" },
@@ -193,8 +193,8 @@
           { name: "billable_rate", type: "number" },
           { name: "cost_rate", type: "number" }
         ]
-      }
-    }
+      end
+	}
   },
 
   actions: {
@@ -266,7 +266,7 @@
                  from: input["from"],
                  to: input["to"],
                  per_page: 100).
-        headers("Harvest-Account-Id": input["account_id"])
+          headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
