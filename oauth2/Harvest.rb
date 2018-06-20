@@ -15,7 +15,7 @@
         name: "client_secret",
         label: "Client Secret",
         control_type: "password",
-        optional: false, 
+        optional: false,
         hint: "You can find your client secret " \
           "<a href='https://id.getharvest.com/developers' " \
           "target='_blank'>here</a>"
@@ -25,7 +25,7 @@
     authorization: {
       type: "oauth2",
 
-      authorization_url: lambda do |connection| 
+      authorization_url: lambda do |connection|
         response = "https://id.getharvest.com/oauth2/authorize?" \
           "client_id=#{connection["client_id"]}&response_type=code"
       end,
@@ -90,46 +90,46 @@
         [
           { name: "id", type: "integer" },
           { name: "spent_date", type: "date" },
-          { 
-            name: "user", 
+          {
+            name: "user",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "name" }
               ]
           },
-          { 
-            name: "client", 
+          {
+            name: "client",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "name" }
               ]
           },
-          { 
-            name: "project", 
+          {
+            name: "project",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "name" }
               ]
           },
-          { 
-            name: "task", 
+          {
+            name: "task",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "name" }
               ]
           },
-          { 
-            name: "user_assignment", 
+          {
+            name: "user_assignment",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "is_project_manager", type: "boolean" },
@@ -140,10 +140,10 @@
                 { name: "hourly_rate", type: "number" }
               ]
           },
-          { 
-            name: "task_assignment", 
+          {
+            name: "task_assignment",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "billable", type: "boolean" },
@@ -162,11 +162,11 @@
           { name: "locked_reason" },
           { name: "is_closed", type: "boolean" },
           { name: "is_billed", type: "boolean" },
-          { name: "timer_started_at" , type: "date_time" },
+          { name: "timer_started_at", type: "date_time" },
           { name: "started_time", type: "timestamp" },
           { name: "ended_time", type: "timestamp" },
           { name: "is_running", type: "boolean" },
-          { 
+          {
             name: "invoice",
             type: "object",
             properties:
@@ -175,10 +175,10 @@
                 { name: "number" }
               ]
           },
-          { 
-            name: "external_reference", 
+          {
+            name: "external_reference",
             type: "object",
-            properties: 
+            properties:
               [
                 { name: "id", type: "integer" },
                 { name: "group_id", type: "integer" },
@@ -239,7 +239,6 @@
             control_type: "select",
             pick_list: "true_false",
             hint: "True if running, False if not running"
-
           },
           {
             name: "from",
@@ -267,7 +266,7 @@
                  from: input["from"],
                  to: input["to"],
                  per_page: 100).
-          headers("Harvest-Account-Id": input["account_id"])
+        headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
