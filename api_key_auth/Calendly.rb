@@ -21,6 +21,8 @@
     }
   },
 
+  base_uri: ->(_connection) { "https://api.intacct.com" },
+
   object_definitions: {
     user: {
       fields: lambda do
@@ -258,13 +260,13 @@
       end,
 
       webhook_subscribe: lambda do |webhook_url, _connection, input|
-        case input["event_type"]
-        when "invitee.created"
-          event_type = ["invitee.created"]
-        when "invitee.canceled"
-          event_type = ["invitee.canceled"]
-        else
-          event_type = ["invitee.created", "invitee.canceled"]
+        event_type = case input["event_type"]
+                     when "invitee.created"
+                       ["invitee.created"]
+                     when "invitee.canceled"
+                       ["invitee.canceled"]
+                     else
+                       ["invitee.created", "invitee.canceled"]
         end
 
         post("https://calendly.com/api/v1/hooks").
