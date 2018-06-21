@@ -5,7 +5,7 @@
     fields: [
       {
         name: "api_key",
-    hint: "You can find your API key " \
+        hint: "You can find your API key " \
           "<a href='https://calendly.com/integrations' " \
           "target='_blank'>here</a>"
       }
@@ -38,7 +38,7 @@
                 name: "avatar",
                 type: "object",
                 properties: [
-                  { name: "url", control_type:"url" }
+                  { name: "url", control_type: "url" }
                 ]
               },
               { name: "created_at", type: "date_time" },
