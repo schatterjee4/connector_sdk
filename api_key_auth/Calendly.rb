@@ -4,7 +4,10 @@
   connection: {
     fields: [
       {
-        name: "api_key"
+        name: "api_key",
+		hint: "You can find your API key " \
+          "<a href='https://calendly.com/integrations' " \
+          "target='_blank'>here</a>"
       }
     ],
 
@@ -87,47 +90,47 @@
                 ]
               },
               { 
-                 name: "invitee", type: "object", properties: [
-                   { name: "uuid" },
-                   { name: "first_name" },
-                   { name: "last_name"} ,
-                   { name: "name" },
-                   { name: "email", control_type: "email" },
-                   { name: "timezone" },
-                   { name: "created_at", type: "date_time" },
-                   { name: "location" },
-                   { name: "canceled", type: "boolean" },
-                   { name: "canceler_name" },
-                   { name: "cancel_reason" },
-                   { name: "canceled_at", type: "date_time" }
+                name: "invitee", type: "object", properties: [
+                  { name: "uuid" },
+                  { name: "first_name" },
+                  { name: "last_name"} ,
+                  { name: "name" },
+                  { name: "email", control_type: "email" },
+                  { name: "timezone" },
+                  { name: "created_at", type: "date_time" },
+                  { name: "location" },
+                  { name: "canceled", type: "boolean" },
+                  { name: "canceler_name" },
+                  { name: "cancel_reason" },
+                  { name: "canceled_at", type: "date_time" }
                 ]
               },
-              { 
-                 name: "questions_and_answers", type: "array", properties: [
-                   { name: "question" },
-                   { name: "answer" }
+              {
+                name: "questions_and_answers", type: "array", properties: [
+                  { name: "question" },
+                  { name: "answer" }
                 ]
               },
-              { 
-                 name: "questions_and_responses", type: "object", properties: [
-                   { name: "1_question" },
-                   { name: "1_response" },
-                   { name: "2_question" },
-                   { name: "2_response" },
-                   { name: "3_question" },
-                   { name: "3_response" },
-                   { name: "4_question" },
-                   { name: "4_response" }
+              {
+                name: "questions_and_responses", type: "object", properties: [
+                  { name: "1_question" },
+                  { name: "1_response" },
+                  { name: "2_question" },
+                  { name: "2_response" },
+                  { name: "3_question" },
+                  { name: "3_response" },
+                  { name: "4_question" },
+                  { name: "4_response" }
                 ]
               },
-              { 
-                 name: "tracking", type: "object", properties: [
-                   { name: "utm_campaign" },
-                   { name: "utm_source" },
-                   { name: "utm_medium" },
-                   { name: "utm_content" },
-                   { name: "utm_term" },
-                   { name: "salesforce_uuid" }
+              {
+                name: "tracking", type: "object", properties: [
+                  { name: "utm_campaign" },
+                  { name: "utm_source" },
+                  { name: "utm_medium" },
+                  { name: "utm_content" },
+                  { name: "utm_term" },
+                  { name: "salesforce_uuid" }
                 ]
               }
             ]
@@ -178,9 +181,9 @@
                         ]
                       }
                     ]
-                  },
+                  }
                 ]
-              },
+              }
             ]
           },
           {
@@ -217,7 +220,7 @@
     }
   },
 
-  test: lambda do |connection|
+  test: lambda do |_connection|
     get("https://calendly.com/api/v1/echo")
   end,
 
@@ -243,9 +246,9 @@
     new_event: {
       description: "New <span class='provider'>event</span> " \
         "in <span class='provider'>Calendly</span>",
-      input_fields: lambda do |object_definitions|
+      input_fields: lambda do |_object_definitions|
         {
-          name: "event_type",
+          name: "event",
           control_type: "select",
           pick_list: "event_type",
           optional: false
@@ -253,13 +256,13 @@
       end,
 
       webhook_subscribe: lambda do |webhook_url, _connection, input|
-        event_type = []
-        if input["event_type"] == "invitee.created"
+		case input["event_type"]
+        when "invitee.created"
           event_type = ["invitee.created"]
-        elsif input["event_type"] == "invitee.canceled"
+        when "invitee.canceled"
           event_type = ["invitee.canceled"]
         else
-          event_type = ["invitee.created","invitee.canceled"]
+          event_type = ["invitee.created", "invitee.canceled"]
         end
 
         post("https://calendly.com/api/v1/hooks").
