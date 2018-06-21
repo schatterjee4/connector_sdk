@@ -5,7 +5,7 @@
     fields: [
       {
         name: "api_key",
-		hint: "You can find your API key " \
+    hint: "You can find your API key " \
           "<a href='https://calendly.com/integrations' " \
           "target='_blank'>here</a>"
       }
@@ -34,11 +34,11 @@
               { name: "slug" },
               { name: "email", control_type: "email" },
               { name: "url", control_type: "url" },
-              { 
+              {
                 name: "avatar",
                 type: "object",
                 properties: [
-                  { name: "url", control_type:"url" }  
+                  { name: "url", control_type:"url" }
                 ]
               },
               { name: "created_at", type: "date_time" },
@@ -54,46 +54,48 @@
         [
           { name: "event" },
           { name: "time", type: "date_time" },
-          { name: "payload", type: "object", properties: [
-              { 
-                 name: "event_type", type: "object", properties: [
-                   { name: "kind" },
-                   { name: "slug" },
-                   { name: "name" },
-                   { name: "duration", type: "integer" }
+          {
+            name: "payload", type: "object", properties: [
+              {
+                name: "event_type", type: "object", properties: [
+                  { name: "kind" },
+                  { name: "slug" },
+                  { name: "name" },
+                  { name: "duration", type: "integer" }
                 ]
               },
-              { 
-                 name: "event", type: "object", properties: [
-                   { name: "uuid" },
-                   { name: "assigned_to", type: "array" },
-                   { name: "extended_assigned_to", type: "array", properties: [
-                        { name: "name" },
-                        { name: "email" },
-                        { name: "primary", type: "boolean" }
-                      ]
-                   },
-                   { name: "start_time", type: "date_time" },
-                   { name: "start_time_pretty" },
-                   { name: "invitee_start_time", type: "date_time" },
-                   { name: "invitee_start_time_pretty" },
-                   { name: "end_time", type: "date_time" },
-                   { name: "end_time_pretty" },
-                   { name: "invitee_end_time", type: "date_time" },
-                   { name: "invitee_end_time_pretty" },
-                   { name: "created_at", type: "date_time" },
-                   { name: "location" },
-                   { name: "canceled", type: "boolean" },
-                   { name: "canceler_name" },
-                   { name: "cancel_reason" },
-                   { name: "canceled_at", type: "date_time" }
+              {
+                name: "event", type: "object", properties: [
+                  { name: "uuid" },
+                  { name: "assigned_to", type: "array" },
+                  {
+                    name: "extended_assigned_to", type: "array", properties: [
+                      { name: "name" },
+                      { name: "email" },
+                      { name: "primary", type: "boolean" }
+                    ]
+                  },
+                  { name: "start_time", type: "date_time" },
+                  { name: "start_time_pretty" },
+                  { name: "invitee_start_time", type: "date_time" },
+                  { name: "invitee_start_time_pretty" },
+                  { name: "end_time", type: "date_time" },
+                  { name: "end_time_pretty" },
+                  { name: "invitee_end_time", type: "date_time" },
+                  { name: "invitee_end_time_pretty" },
+                  { name: "created_at", type: "date_time" },
+                  { name: "location" },
+                  { name: "canceled", type: "boolean" },
+                  { name: "canceler_name" },
+                  { name: "cancel_reason" },
+                  { name: "canceled_at", type: "date_time" }
                 ]
               },
-              { 
+              {
                 name: "invitee", type: "object", properties: [
                   { name: "uuid" },
                   { name: "first_name" },
-                  { name: "last_name"} ,
+                  { name: "last_name" },
                   { name: "name" },
                   { name: "email", control_type: "email" },
                   { name: "timezone" },
@@ -256,7 +258,7 @@
       end,
 
       webhook_subscribe: lambda do |webhook_url, _connection, input|
-		case input["event_type"]
+        case input["event_type"]
         when "invitee.created"
           event_type = ["invitee.created"]
         when "invitee.canceled"
