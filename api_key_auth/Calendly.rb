@@ -21,7 +21,7 @@
     }
   },
 
-  base_uri: ->(_connection) { "https://api.intacct.com" },
+  base_uri: ->(_connection) { "https://api.harvestapp.com/" },
 
   object_definitions: {
     user: {
@@ -267,7 +267,7 @@
                        ["invitee.canceled"]
                      else
                        ["invitee.created", "invitee.canceled"]
-        end
+                     end
 
         post("https://calendly.com/api/v1/hooks").
           payload(url: webhook_url, events: event_type)
