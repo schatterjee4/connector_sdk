@@ -843,7 +843,7 @@
                       type: "string"
                     }
                   },
-                  { name: "customerid" , label: "Customer ID" },
+                  { name: "customerid", label: "Customer ID" },
                   { name: "vendorid", label: "Vendor ID" },
                   {
                     name: "employeeid",
@@ -1193,7 +1193,7 @@
             label: "Folder name",
             hint: "Attachment folder name"
           },
-          { name: "description",label: "Folder description" },
+          { name: "description", label: "Folder description" },
           {
             name: "parentfolder",
             label: "Parent folder name",
