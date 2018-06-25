@@ -391,7 +391,7 @@
             properties: object_definitions["client"]
           }
         ]
-      end,
+      end
 
       sample_output: lambda do |_connection, input|
         {
