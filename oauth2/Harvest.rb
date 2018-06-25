@@ -191,7 +191,7 @@
           { name: "cost_rate", type: "number" }
         ]
       end
-	}
+    }
   },
 
   actions: {
@@ -244,6 +244,7 @@
       execute: lambda do |_connection, input|
         # API cap per page is 100.
         get("/v2/time_entries").
+          headers("Harvest-Account-Id": input["account_id"]).
           params(user_id: input["user_id"],
                  client_id: input["client_id"],
                  project_id: input["project_id"],
@@ -251,8 +252,7 @@
                  is_running: input["is_running"],
                  from: input["from"],
                  to: input["to"],
-                 per_page: 100).
-          headers("Harvest-Account-Id": input["account_id"])
+                 per_page: 100)
       end,
 
       output_fields: lambda do |object_definitions|
@@ -318,7 +318,7 @@
             properties: object_definitions["client"]
           }
         ]
-      end,
+      end
 
       sample_output: lambda do |_connection, input|
         {
