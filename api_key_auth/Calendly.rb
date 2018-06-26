@@ -22,7 +22,7 @@
 
     base_uri: lambda do
       "https://calendly.com"
-    end,
+    end
   },
 
   object_definitions: {
@@ -248,7 +248,7 @@
         object_definitions["event_types"]
       end,
 
-      sample_output: lambda do |_connection, input|
+      sample_output: lambda do |_connection, _input|
         get("/api/v1/users/me/event_types?include=owner").
           params(per_page: 1) || []
       end
@@ -298,7 +298,7 @@
         object_definitions["event"]
       end,
 
-      sample_output: lambda do |_connection, input|
+      sample_output: lambda do |_connection, _input|
         {
           "event": "invitee.created",
           "time": "2018-03-14T19:16:01Z",
@@ -329,7 +329,8 @@
               "start_time": "2018-03-14T12:00:00Z",
               "start_time_pretty": "12:00pm - Wednesday, March 14, 2018",
               "invitee_start_time": "2018-03-14T12:00:00Z",
-              "invitee_start_time_pretty": "12:00pm - Wednesday, March 14, 2018",
+              "invitee_start_time_pretty": "12:00pm - Wednesday, " \
+              "March 14, 2018",
               "end_time": "2018-03-14T12:15:00Z",
               "end_time_pretty": "12:15pm - Wednesday, March 14, 2018",
               "invitee_end_time": "2018-03-14T12:15:00Z",
@@ -350,7 +351,7 @@
               "timezone": "UTC",
               "created_at": "2018-03-14T00:00:00Z",
               "is_reschedule": false,
-              "payments":[
+              "payments": [
                 {
                   "id": "ch_AAAAAAAAAAAAAAAAAAAAAAAA",
                   "provider": "stripe",
@@ -358,7 +359,7 @@
                   "currency": "USD",
                   "terms": "sample terms of payment (up to 1,024 characters)",
                   "successful": true
-                  }
+                }
               ],
               "canceled": false,
               "canceler_name": "",
