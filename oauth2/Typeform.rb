@@ -35,8 +35,7 @@
                            client_secret: connection["client_secret"],
                            code: auth_code,
                            redirect_uri: "https://www.workato.com/oauth/" \
-                           "callback"
-                   ).
+                           "callback").
                    request_format_www_form_urlencoded
 
         [response, nil, nil]
@@ -140,7 +139,7 @@
         ]
       end,
 
-      sample_output: lambda do |_connection, input|
+      sample_output: lambda do |_connection, _input|
         {
           forms: get("/forms").
             params(page_size: 1)["items"] || []
@@ -180,7 +179,7 @@
         object_definitions["forms"]
       end,
 
-      sample_output: lambda do |_connection, input|
+      sample_output: lambda do |_connection, _input|
         get("/forms").params(page_size: 1).dig("items", 0) || []
       end
     }
