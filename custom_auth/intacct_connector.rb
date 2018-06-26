@@ -701,8 +701,19 @@
           },
           {
             name: "state",
-            hint: "Action. Use Draft, Pending or Closed. (Default depends " \
-              "on transaction definition configuration)"
+            label: "State",
+            hint: "Action Draft, Pending or Closed. (Default depends " \
+              "on transaction definition configuration)",
+            control_type: "select",
+            pick_list: "transaction_states",
+            toggle_hint: "Select from list",
+            toggle_field: {
+              name: "state",
+              label: "State",
+              toggle_hint: "Use custom value",
+              control_type: "text",
+              type: "string"
+            }
           }
         ]
       end
@@ -2163,6 +2174,10 @@
       [%w[Voluntary voluntary], %w[Involuntary involuntary],
        %w[Deceased deceased], %w[Disability disability],
        %w[Retired retired]]
+    end,
+
+    transaction_states: lambda do |_connection|
+      [%w[Draft Draft], %w[Pending Pending], %w[Closed Closed]]
     end,
 
     warehouses: lambda do |_connection|
