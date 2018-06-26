@@ -269,8 +269,8 @@
       sample_output: lambda do |_connection, input|
         {
           time_entries: get("/v2/time_entries").
-          	params(per_page: 1).
-          	headers("Harvest-Account-Id": input["account_id"])["time_entries"] || []
+            params(per_page: 1).
+            headers("Harvest-Account-Id": input["account_id"])["time_entries"] || []
         }
       end
     },
@@ -302,11 +302,11 @@
 
       execute: lambda do |_connection, input|
         # API cap per page is 100.
-          get("/v2/clients").
-                  params(per_page: 100,
-                         updated_since: (input["updated_since"] || now - 1.hours).
-                         to_time.utc.iso8601).
-                  headers("Harvest-Account-Id": input["account_id"])
+        get("/v2/clients").
+          params(per_page: 100,
+                 updated_since: (input["updated_since"] || now - 1.hours).
+                 to_time.utc.iso8601).
+          headers("Harvest-Account-Id": input["account_id"])
       end,
 
       output_fields: lambda do |object_definitions|
@@ -323,8 +323,8 @@
       sample_output: lambda do |_connection, input|
         {
           clients: get("/v2/clients").
-          	params(per_page: 1).
-          	headers("Harvest-Account-Id": input["account_id"])["clients"] || []
+            params(per_page: 1).
+            headers("Harvest-Account-Id": input["account_id"])["clients"] || []
         }
       end
     }
@@ -396,8 +396,8 @@
       sample_output: lambda do |_connection, input|
         {
           clients: get("/v2/clients").
-          	params(per_page: 1).
-          	headers("Harvest-Account-Id": input["account_id"])["clients"] || []
+            params(per_page: 1).
+            headers("Harvest-Account-Id": input["account_id"])["clients"] || []
         }
       end
     }
@@ -406,7 +406,7 @@
   pick_lists: {
     account_id: lambda do |_connection|
       get("https://id.getharvest.com/api/v2/accounts")["accounts"].
-	    pluck("name", "id")
+        pluck("name", "id")
     end,
     true_false: lambda do |_connection|
       [
