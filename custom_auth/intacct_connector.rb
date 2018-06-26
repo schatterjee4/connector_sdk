@@ -1301,7 +1301,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "create_supdoc",
@@ -1353,7 +1353,7 @@
           ignored("supdocfoldername", "supdocdescription")
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1421,7 +1421,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "update_supdoc",
@@ -1471,7 +1471,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "create_supdocfolder",
@@ -1524,7 +1524,7 @@
                   "supdocparentfoldername")
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1592,7 +1592,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "update_supdocfolder",
@@ -1639,7 +1639,7 @@
         object_definitions["api_session"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           sessionid: "ABCDzfHEFnEM2pxLOKhfecjzcQ3anA..",
           endpoint: "https://api.intacct.com/ia/xml/xmlgw.phtml"
@@ -1690,7 +1690,7 @@
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           "RECORDNO" => 1234,
           "EMPLOYEEID" => "EMP-007"
@@ -1742,7 +1742,7 @@
         object_definitions["employee_get"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         payload = {
           "control" => {},
           "operation" => {
@@ -1815,7 +1815,7 @@
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           "RECORDNO" => 1234,
           "EMPLOYEEID" => "EMP-007"
@@ -1865,7 +1865,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "update_potransaction",
@@ -1911,7 +1911,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "update_potransaction",
@@ -1957,7 +1957,7 @@
         object_definitions["create_or_update_response"]
       end,
 
-      sample_output: lambda do |object_definitions|
+      sample_output: lambda do |_object_definitions, _input|
         {
           status: "success",
           function: "update_potransaction",
