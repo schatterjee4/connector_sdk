@@ -22,10 +22,7 @@
       type: "oauth2",
 
       authorization_url: lambda do |connection|
-        scopes = [
-          "forms:read",
-          "workspaces:read"
-        ].join(" ")
+        scopes = ["forms:read", "workspaces:read"].join(" ")
 
         "https://api.typeform.com/oauth/authorize?client_id=" \
           "#{connection['client_id']}&scope=#{scopes}" \
@@ -34,11 +31,11 @@
 
       acquire: lambda do |connection, auth_code, _redirect_uri|
         response = post("https://api.typeform.com/oauth/token").
-                   payload(
-                     client_id: connection["client_id"],
-                     client_secret: connection["client_secret"],
-                     code: auth_code,
-                     redirect_uri: "https://www.workato.com/oauth/callback"
+                   payload(client_id: connection["client_id"],
+                           client_secret: connection["client_secret"],
+                           code: auth_code,
+                           redirect_uri: "https://www.workato.com/oauth/" \
+                           "callback"
                    ).
                    request_format_www_form_urlencoded
 
@@ -48,12 +45,16 @@
       apply: lambda { |_connection, access_token|
         headers("Authorization": "Bearer #{access_token}")
       }
-    }
+    },
+
+    base_uri: lambda do
+      "https://api.typeform.com"
+    end
   },
 
   object_definitions: {
     get_forms: {
-      fields: lambda do
+      fields: lambda do |_object_definitions|
         [
           {
             name: "workspace_id",
@@ -61,7 +62,7 @@
             hint: "Workspace that form belongs to",
             type: "string",
             control_type: "select",
-            pick_list: "workspace_id"
+            pick_list: "workspaces"
           },
           {
             name: "search",
@@ -74,7 +75,7 @@
     },
 
     forms: {
-      fields: lambda do
+      fields: lambda do |_object_definitions|
         [
           { name: "id" },
           { name: "title" },
@@ -112,12 +113,13 @@
         "<span class='provider'>Typeform</span>",
       help: "Search will return a list of forms that matches " \
         "the search criteria.",
+
       input_fields: lambda do |object_definitions|
         object_definitions["get_forms"]
       end,
 
       execute: lambda do |_connection, input|
-        response = get("https://api.typeform.com/forms").
+        response = get("/forms").
                    params(search: input["search"],
                           page_size: 200,
                           workspace_id: input["workspace_id"])
@@ -136,6 +138,13 @@
             properties: object_definitions["forms"]
           }
         ]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        {
+          forms: get("/forms").
+            params(page_size: 1)["items"] || []
+        }
       end
     }
   },
@@ -149,14 +158,11 @@
         "in <span class='provider'>Typeform</span>",
       subtitle: "New form in Typeform",
 
-      input_fields: lambda do
-      end,
-
       poll: lambda do |_connection, _input, closure|
         closure ||= 1
         per_page = 100
 
-        forms = get("https://api.typeform.com/forms").
+        forms = get("/forms").
                 params(page_size: per_page,
                        page: closure)
 
@@ -167,23 +173,23 @@
       end,
 
       dedup: lambda do |forms|
-        if forms.present?
-          forms["id"]
-        else
-          []
-        end
+        forms["id"]
       end,
 
       output_fields: lambda do |object_definitions|
         object_definitions["forms"]
+      end,
+
+      sample_output: lambda do |_connection, input|
+        get("/forms").params(page_size: 1).dig("items", 0) || []
       end
     }
   },
 
   pick_lists: {
-    workspace_id: lambda do |_connection|
-      get("https://api.typeform.com/workspaces")["items"].
-        map { |workspace_id| [workspace_id["name"], workspace_id["id"]] }
+    workspaces: lambda do |_connection|
+      get("/workspaces")["items"].
+        pluck("name", "id")
     end
   }
 }
