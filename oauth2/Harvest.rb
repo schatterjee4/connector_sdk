@@ -64,7 +64,7 @@
 
     base_uri: lambda do
       "https://api.harvestapp.com"
-    end,
+    end
   },
 
   object_definitions: {
@@ -269,8 +269,8 @@
       sample_output: lambda do |_connection, input|
         {
           time_entries: get("/v2/time_entries").
-            params(per_page: 1).
-            headers("Harvest-Account-Id": input["account_id"])["time_entries"] || []
+            headers("Harvest-Account-Id": input["account_id"]).
+            params(per_page: 1)["time_entries"] || []
         }
       end
     },
