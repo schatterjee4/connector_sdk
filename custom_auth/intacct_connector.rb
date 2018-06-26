@@ -1,5 +1,5 @@
 {
-  title: "Intacct (custom)",
+  title: "Sage Intacct (custom)",
 
   connection: {
     fields: [
@@ -38,13 +38,19 @@
             }
           }
         }
+        api_response = post("/ia/xml/xmlgw.phtml", payload).
+                       headers("Content-Type" => "x-intacct-xml-request").
+                       format_xml("request").
+                       dig("response", 0,
+                           "operation", 0,
+                           "result", 0,
+                           "data", 0,
+                           "api", 0)
 
         {
-          session_id: post("/ia/xml/xmlgw.phtml", payload).
-            headers("Content-Type" => "x-intacct-xml-request").
-            format_xml("request").
-            dig("response", 0, "operation", 0, "result", 0, "data", 0,
-                "api", 0, "sessionid", 0, "content!") || ""
+          session_id: (call("parse_xml_to_hash",
+                            "xml" => api_response,
+                            "array_fields" => []) || {})["sessionid"]
         }
       end,
 
@@ -100,8 +106,8 @@
     create_or_update_response: {
       fields: lambda do |_connection|
         [
-          { name: "status", label: "Job status" },
-          { name: "function", label: "Job function" },
+          { name: "status" },
+          { name: "function" },
           { name: "controlid", label: "Control ID" },
           { name: "key", label: "Record key" }
         ]
@@ -1243,7 +1249,7 @@
         else
           value
         end
-      end || {}
+      end&.presence
     end,
 
     build_date_object: lambda do |date_field|
@@ -1260,9 +1266,8 @@
   actions: {
     # Attachment related actions
     create_attachments: {
-      subtitle: "Create attachments",
       description: "Create <span class='provider'>attachments</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1281,13 +1286,11 @@
           }
         }
         attachment_response = post("/ia/xml/xmlgw.phtml", payload).
-                              dig("response", 0,
-                                  "operation", 0,
-                                  "result", 0) || {}
+                              dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => attachment_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1296,13 +1299,22 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "create_supdoc",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     get_attachment: {
-      subtitle: "Get attachment",
+      subtitle: "Get attachment by ID",
       description: "Get <span class='provider'>attachment</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
 
       execute: lambda do |_connection, input|
         payload = {
@@ -1325,11 +1337,11 @@
                                   "operation", 0,
                                   "result", 0,
                                   "data", 0,
-                                  "supdoc", 0) || {}
+                                  "supdoc", 0)
 
         call("parse_xml_to_hash",
              "xml" => attachment_response,
-             "array_fields" => ["attachment"])
+             "array_fields" => ["attachment"]) || {}
       end,
 
       input_fields: lambda do |_object_definitions|
@@ -1339,13 +1351,40 @@
       output_fields: lambda do |object_definitions|
         object_definitions["supdoc_get"].
           ignored("supdocfoldername", "supdocdescription")
+      end,
+
+      sample_output: lambda do |object_definitions|
+        payload = {
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "get_list" => {
+                  "@object" => "supdoc",
+                  "@maxitems" => "1"
+                }
+              }
+            }
+          }
+        }
+        attachment_response = post("/ia/xml/xmlgw.phtml", payload).
+                              dig("response", 0,
+                                  "operation", 0,
+                                  "result", 0,
+                                  "data", 0,
+                                  "supdoc", 0)
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_response,
+             "array_fields" => ["supdoc"]) || {}
       end
     },
 
     update_attachment: {
-      subtitle: "Update attachment",
       description: "Update <span class='provider'>attachment</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the value for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1364,13 +1403,11 @@
           }
         }
         attachment_response = post("/ia/xml/xmlgw.phtml", payload).
-                              dig("response", 0,
-                                  "operation", 0,
-                                  "result", 0) || {}
+                              dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => attachment_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1382,14 +1419,22 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "update_supdoc",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     # Attachment folder related actions
     create_attachment_folder: {
-      subtitle: "Create attachment folder",
       description: "Create <span class='provider'>attachment folder</span> " \
-         "in <span class='provider'>Intacct</span>",
+         "in <span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1408,13 +1453,11 @@
           }
         }
         folder_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0,
-                              "operation", 0,
-                              "result", 0) || {}
+                          dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => folder_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1426,13 +1469,22 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "create_supdocfolder",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     get_attachment_folder: {
-      subtitle: "Get attachment folder",
+      subtitle: "Get attachment folder by folder name",
       description: "Get <span class='provider'>attachment folder</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
 
       execute: lambda do |_connection, input|
         payload = {
@@ -1455,11 +1507,11 @@
                                          "operation", 0,
                                          "result", 0,
                                          "data", 0,
-                                         "supdocfolder", 0) || {}
+                                         "supdocfolder", 0)
 
         call("parse_xml_to_hash",
              "xml" => attachment_folder_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |_object_definitions|
@@ -1470,13 +1522,40 @@
         object_definitions["supdocfolder"].
           ignored("supdocfoldername", "supdocfolderdescription",
                   "supdocparentfoldername")
+      end,
+
+      sample_output: lambda do |object_definitions|
+        payload = {
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "get_list" => {
+                  "@object" => "supdocfolder",
+                  "@maxitems" => "1"
+                }
+              }
+            }
+          }
+        }
+        attachment_folder_response = post("/ia/xml/xmlgw.phtml", payload).
+                                     dig("response", 0,
+                                         "operation", 0,
+                                         "result", 0,
+                                         "data", 0,
+                                         "supdocfolder", 0)
+
+        call("parse_xml_to_hash",
+             "xml" => attachment_folder_response,
+             "array_fields" => []) || {}
       end
     },
 
     update_attachment_folder: {
-      subtitle: "Update attachment folder",
       description: "Update <span class='provider'>attachment folder</span> " \
-        "in <span class='provider'>Intacct</span>",
+        "in <span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1495,13 +1574,11 @@
           }
         }
         folder_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0,
-                              "operation", 0,
-                              "result", 0) || {}
+                          dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => folder_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1513,14 +1590,23 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "update_supdocfolder",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     # API Session related actions
     get_api_session: {
-      subtitle: "Get API session",
+      title: "Get API session",
       description: "Get <span class='provider'>API session</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
       help: "Action returns a unique identifier for an API session " \
         "and its endpoint.",
 
@@ -1542,23 +1628,29 @@
                            "operation", 0,
                            "result", 0,
                            "data", 0,
-                           "api", 0) || {}
+                           "api", 0)
 
         call("parse_xml_to_hash",
              "xml" => api_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       output_fields: lambda do |object_definitions|
         object_definitions["api_session"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          sessionid: "ABCDzfHEFnEM2pxLOKhfecjzcQ3anA..",
+          endpoint: "https://api.intacct.com/ia/xml/xmlgw.phtml"
+        }
       end
     },
 
     # Employee related actions
     create_employee: {
-      subtitle: "Create employee",
       description: "Create <span class='provider'>employee</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1581,11 +1673,11 @@
                                 "operation", 0,
                                 "result", 0,
                                 "data", 0,
-                                "employee", 0) || {}
+                                "employee", 0)
 
         call("parse_xml_to_hash",
              "xml" => employee_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1596,13 +1688,20 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          "RECORDNO" => 1234,
+          "EMPLOYEEID" => "EMP-007"
+        }
       end
     },
 
     get_employee: {
-      subtitle: "Get employee",
+      subtitle: "Get employee by recod number",
       description: "Get <span class='provider'>employee</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
 
       execute: lambda do |_connection, input|
         payload = {
@@ -1626,11 +1725,11 @@
                                 "operation", 0,
                                 "result", 0,
                                 "data", 0,
-                                "EMPLOYEE", 0) || {}
+                                "EMPLOYEE", 0)
 
         call("parse_xml_to_hash",
              "xml" => employee_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1641,13 +1740,42 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["employee_get"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        payload = {
+          "control" => {},
+          "operation" => {
+            "authentication" => {},
+            "content" => {
+              "function" => {
+                "@controlid" => "testControlId",
+                "readByQuery" => {
+                  "object" => "EMPLOYEE",
+                  "query" =>  "",
+                  "fields" => "*",
+                  "pagesize" => "1"
+                }
+              }
+            }
+          }
+        }
+        employee_response = post("/ia/xml/xmlgw.phtml", payload).
+                            dig("response", 0,
+                                "operation", 0,
+                                "result", 0,
+                                "data", 0,
+                                "employee", 0)
+
+        call("parse_xml_to_hash",
+             "xml" => employee_response,
+             "array_fields" => []) || {}
       end
     },
 
     update_employee: {
-      subtitle: "Update employee",
       description: "Update <span class='provider'>employee</span> in " \
-        "<span class='provider'>Intacct</span>",
+        "<span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1670,11 +1798,11 @@
                                 "operation", 0,
                                 "result", 0,
                                 "data", 0,
-                                "employee", 0) || {}
+                                "employee", 0)
 
         call("parse_xml_to_hash",
              "xml" => employee_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1685,14 +1813,20 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["employee_get"].only("RECORDNO", "EMPLOYEEID")
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          "RECORDNO" => 1234,
+          "EMPLOYEEID" => "EMP-007"
+        }
       end
     },
 
     # Purchase Order Transaction related actions
     update_purchase_transaction_header: {
-      subtitle: "Update purchase transaction header",
       description: "Update <span class='provider'>purchase transaction " \
-        "header</span> in <span class='provider'>Intacct</span>",
+        "header</span> in <span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1716,11 +1850,11 @@
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0) || {}
+                          dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1729,13 +1863,21 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "update_potransaction",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     add_purchase_transaction_items: {
-      subtitle: "Add purchase transaction items",
       description: "Add <span class='provider'>purchase transaction " \
-        "items</span> in <span class='provider'>Intacct</span>",
+        "items</span> in <span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1754,11 +1896,11 @@
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0) || {}
+                          dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1767,13 +1909,21 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "update_potransaction",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     },
 
     update_purchase_transaction_items: {
-      subtitle: "Update purchase transaction items",
       description: "Update <span class='provider'>purchase transaction " \
-        "items</span> in <span class='provider'>Intacct</span>",
+        "items</span> in <span class='provider'>Sage Intacct (custom)</span>",
       help: "Pay special attention to enter the values for the " \
         "fields in the same order as listed below, " \
         "for the action to be successful!",
@@ -1792,11 +1942,11 @@
           }
         }
         po_txn_response = post("/ia/xml/xmlgw.phtml", payload).
-                          dig("response", 0, "operation", 0, "result", 0) || {}
+                          dig("response", 0, "operation", 0, "result", 0)
 
         call("parse_xml_to_hash",
              "xml" => po_txn_response,
-             "array_fields" => [])
+             "array_fields" => []) || {}
       end,
 
       input_fields: lambda do |object_definitions|
@@ -1805,6 +1955,15 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["create_or_update_response"]
+      end,
+
+      sample_output: lambda do |object_definitions|
+        {
+          status: "success",
+          function: "update_potransaction",
+          controlid: "testControlId",
+          key: 1234
+        }
       end
     }
   },
@@ -1832,11 +1991,12 @@
                        dig("response", 0,
                            "operation", 0,
                            "result", 0,
-                           "data", 0) || []
+                           "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => class_response,
-           "array_fields" => ["class"])["class"]&.
+           "array_fields" => ["class"])&.
+        []("class")&.
         pluck("NAME", "CLASSID") || []
     end,
 
@@ -1862,11 +2022,12 @@
                          dig("response", 0,
                              "operation", 0,
                              "result", 0,
-                             "data", 0) || []
+                             "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => contact_response,
-           "array_fields" => ["contact"])["contact"]&.
+           "array_fields" => ["contact"])&.
+        []("contact")&.
         pluck("CONTACTNAME", "CONTACTNAME") || []
     end,
 
@@ -1892,11 +2053,12 @@
                             dig("response", 0,
                                 "operation", 0,
                                 "result", 0,
-                                "data", 0) || []
+                                "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => department_response,
-           "array_fields" => ["department"])["department"]&.
+           "array_fields" => ["department"])&.
+        []("department")&.
         pluck("TITLE", "DEPARTMENTID") || []
     end,
 
@@ -1922,11 +2084,12 @@
                           dig("response", 0,
                               "operation", 0,
                               "result", 0,
-                              "data", 0) || []
+                              "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => employee_response,
-           "array_fields" => ["employee"])["employee"]&.
+           "array_fields" => ["employee"])&.
+        []("employee")&.
         pluck("TITLE", "EMPLOYEEID") || []
     end,
 
@@ -1954,11 +2117,12 @@
                           dig("response", 0,
                               "operation", 0,
                               "result", 0,
-                              "data", 0) || []
+                              "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => location_response,
-           "array_fields" => ["location"])["location"]&.
+           "array_fields" => ["location"])&.
+        []("location")&.
         pluck("NAME", "LOCATIONID") || []
     end,
 
@@ -1984,11 +2148,12 @@
                          dig("response", 0,
                              "operation", 0,
                              "result", 0,
-                             "data", 0) || []
+                             "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => project_response,
-           "array_fields" => ["project"])["project"]&.
+           "array_fields" => ["project"])&.
+        []("project")&.
         pluck("NAME", "PROJECTID") || []
     end,
 
@@ -2022,11 +2187,12 @@
                            dig("response", 0,
                                "operation", 0,
                                "result", 0,
-                               "data", 0) || []
+                               "data", 0)
 
       call("parse_xml_to_hash",
            "xml" => warehouse_response,
-           "array_fields" => ["warehouse"])["warehouse"]&.
+           "array_fields" => ["warehouse"])&.
+        []("warehouse")&.
         pluck("NAME", "WAREHOUSEID") || []
     end
   }
