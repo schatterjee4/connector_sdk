@@ -32,12 +32,10 @@
 
       acquire: lambda do |connection, auth_code|
         response = post("https://id.getharvest.com/api/v2/oauth2/token").
-                   payload(
-                     code: auth_code,
-                     client_id: connection["client_id"],
-                     client_secret: connection["client_secret"],
-                     grant_type: "authorization_code"
-                   ).
+                   payload(code: auth_code,
+                           client_id: connection["client_id"],
+                           client_secret: connection["client_secret"],
+                           grant_type: "authorization_code").
                    request_format_www_form_urlencoded
 
         [response, nil, nil]
@@ -47,13 +45,11 @@
 
       refresh: lambda do |connection, refresh_token|
         post("https://id.getharvest.com/api/v2/oauth2/token").
-          payload(
-            grant_type: "refresh_token",
-            client_id: connection["client_id"],
-            client_secret: connection["client_secret"],
-            refresh_token: refresh_token,
-            redirect_uri: "https://www.workato.com/oauth/callback"
-          ).
+          payload(grant_type: "refresh_token",
+                  client_id: connection["client_id"],
+                  client_secret: connection["client_secret"],
+                  refresh_token: refresh_token,
+                  redirect_uri: "https://www.workato.com/oauth/callback").
           request_format_www_form_urlencoded
       end,
 
@@ -373,7 +369,7 @@
                   headers("Harvest-Account-Id": input["account_id"])
 
         {
-          events: clients,
+          events: clients["clients"],
           next_page: clients["next_page"]
         }
       end,
@@ -383,22 +379,14 @@
       end,
 
       output_fields: lambda do |object_definitions|
-        [
-          {
-            name: "clients",
-            type: "array",
-            of: "object",
-            properties: object_definitions["client"]
-          }
-        ]
+        object_definitions["client"]
       end,
 
       sample_output: lambda do |_connection, input|
-        {
-          clients: get("/v2/clients").
-            params(per_page: 1).
-            headers("Harvest-Account-Id": input["account_id"])["clients"] || []
-        }
+        get("/v2/clients").
+          params(per_page: 1).
+          headers("Harvest-Account-Id": input["account_id"]).
+          dig("clients", 0) || []
       end
     }
   },
