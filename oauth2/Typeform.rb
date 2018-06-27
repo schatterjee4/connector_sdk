@@ -118,13 +118,11 @@
       end,
 
       execute: lambda do |_connection, input|
-        response = get("/forms").
-                   params(search: input["search"],
-                          page_size: 200,
-                          workspace_id: input["workspace_id"])
-
         {
-          forms: response["items"]
+          forms: get("/forms").
+                 params(search: input["search"],
+                        page_size: 200,
+                        workspace_id: input["workspace_id"])["items"]
         }
       end,
 
