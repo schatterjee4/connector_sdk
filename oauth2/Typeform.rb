@@ -120,9 +120,9 @@
       execute: lambda do |_connection, input|
         {
           forms: get("/forms").
-                 params(search: input["search"],
-                        page_size: 200,
-                        workspace_id: input["workspace_id"])["items"]
+            params(search: input["search"],
+                   page_size: 200,
+                   workspace_id: input["workspace_id"])["items"]
         }
       end,
 
