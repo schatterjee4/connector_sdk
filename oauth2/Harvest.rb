@@ -386,7 +386,7 @@
         get("/v2/clients").
           params(per_page: 1).
           headers("Harvest-Account-Id": input["account_id"]).
-          dig("clients", 0) || []
+          dig("clients", 0) || {}
       end
     }
   },
