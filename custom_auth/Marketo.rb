@@ -14,8 +14,7 @@
       { name: "client_secret",
         control_type: "password",
         optional: false,
-        hint: "Client Secret can be found in Admin > " \
-          "Integration > LaunchPoint" }
+        hint: "Client Secret can be found in Admin > Integration > LaunchPoint" }
     ],
 
     authorization: {
