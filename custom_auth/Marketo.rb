@@ -49,11 +49,11 @@
       fields: lambda do |_connection|
         get("/rest/v1/leads/describe.json")["result"].
           map { |field|
-           {
+            {
               name: field.dig("rest", "name"),
               label: field.dig("displayName"),
               type: (
-                if %(integer boolean date).include? (field.dig("dataType"))
+                if ["integer", "boolean", "date"].include? (field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
                   "date_time"
@@ -64,7 +64,7 @@
                 end
               ),
               control_type: (
-                if %w(integer boolean date url email phone).
+                if ["integer", "boolean", "date", "url", "email", "phone"].
                   include?(field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
