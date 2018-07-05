@@ -14,7 +14,8 @@
       { name: "client_secret",
         control_type: "password",
         optional: false,
-        hint: "Client Secret can be found in Admin > Integration > LaunchPoint" }
+        hint: "Client Secret can be found in Admin > " \
+          "Integration > LaunchPoint" }
     ],
 
     authorization: {
@@ -22,11 +23,11 @@
 
       acquire: lambda do |connection|
         {
-          access_token: get("https://#{connection['domain']}.mktorest.com" \
-            "/identity/oauth/token").
-              params(client_id: connection["client_id"],
-                     client_secret: connection["client_secret"],
-                     grant_type: "client_credentials")["access_token"],
+          access_token: get("https://#{connection['domain']}.mktorest.com"
+                          "/identity/oauth/token").
+                        params(client_id: connection["client_id"],
+                               client_secret: connection["client_secret"],
+                               grant_type: "client_credentials")["access_token"]
         }
       end,
 
@@ -47,14 +48,14 @@
 
   object_definitions: {
     lead: {
-      fields: lambda do |connection|
+      fields: lambda do |_connection|
         get("/rest/v1/leads/describe.json")["result"].
-          map{ |field| 
-            { 
-              name: field.dig("rest","name"), 
+          map { |field|
+           {
+              name: field.dig("rest", "name"),
               label: field.dig("displayName"),
               type: (
-                if ["integer","boolean","date"].include?(field.dig("dataType"))
+                if ["integer", "boolean", "date"].include? (field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
                   "date_time"
@@ -75,8 +76,8 @@
                 else
                   "text"
                 end
-              ),
-            } 
+              )
+            }
           }
       end
     },
@@ -85,7 +86,7 @@
         [
           { name: "requestId" },
           { name: "success", type: "boolean" },
-          { 
+          {
             name: "result", type: "array", of: "object", properties: [
               { name: "batchId" },
               { name: "importId" },
@@ -170,7 +171,7 @@
           request_format_multipart_form.
           payload(file: [input["file"], "text/csv"])
       end,
-      
+
       output_fields: lambda do |object_definitions|
         object_definitions["bulk_lead"]
       end
