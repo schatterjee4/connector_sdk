@@ -193,15 +193,15 @@
         ]
       end,
 
-      poll: lambda do |connection, input, next_poll|
+      poll: lambda do |_connection, input, next_poll|
         next_token = next_poll
-        
+
         if next_token.present?
-          response = get("/rest/v1/leads/programs/#{input["program"]}.json").
-            params(batchSize: 300, nextPageToken: next_token)
+          response = get("/rest/v1/leads/programs/#{input['program']}.json").
+                     params(batchSize: 300, nextPageToken: next_token)
         else
-          response = get("/rest/v1/leads/programs/#{input["program"]}.json").
-            params(batchSize: 300)
+          response = get("/rest/v1/leads/programs/#{input['program']}.json").
+                     params(batchSize: 300)
         end
         {
           events: response["result"],
@@ -209,14 +209,14 @@
           next_poll: (response["nextPageToken"] || nil)
         }
       end,
-      
+
       dedup: lambda do |item|
         item["id"]
       end,
 
       output_fields: lambda do |object_definitions|
         object_definitions["lead"].
-          only("id","firstName","lastName","email","createdAt","updatedAt").
+          only("id", "firstName", "lastName", "email", "createdAt", "updatedAt").
           concat(
             [
               {
@@ -225,9 +225,12 @@
                   { name: "isExhausted", type: "boolean" },
                   { name: "acquiredBy", type: "boolean" },
                   { name: "reachedSuccess", type: "boolean" },
-                  { 
-                    name: "membershipDate", type: "timestamp", control_type: "date_time"
-                    # render_input: "date_time_conversion", parse_output: "date_time_conversion" 
+                  {
+                    name: "membershipDate",
+                    type: "timestamp",
+                    control_type: "date_time",
+                    render_input: "date_time_conversion",
+                    parse_output: "date_time_conversion"
                   },
                   { name: "nurtureCadence" },
                   { name: "stream" }
@@ -240,20 +243,20 @@
   },
 
   pick_lists: {
-    programs: lambda do |connection|
+    programs: lambda do |_connection|
       get("/rest/asset/v1/programs.json").
         params(maxReturn: 200)["result"].pluck("name", "id")
     end,
     
     lookup_types: lambda do
       [
-        %W[ID id],
-        %W[Email email],
-        %W[Salesforce\ Account\ ID sfdcAccountId],
-        %W[Salesforce\ Contact\ ID sfdcContactId],
-        %W[Salesforce\ Lead\ ID sfdcLeadId],
-        %W[Salesforce\ Opportunity\ ID sfdcOpptyId],
-        %W[Salesforce\ Lead\ Owner\ ID sfdcLeadOwnerId]
+        %w[ID id],
+        %w[Email email],
+        %w[Salesforce\ Account\ ID sfdcAccountId],
+        %w[Salesforce\ Contact\ ID sfdcContactId],
+        %w[Salesforce\ Lead\ ID sfdcLeadId],
+        %w[Salesforce\ Opportunity\ ID sfdcOpptyId],
+        %w[Salesforce\ Lead\ Owner\ ID sfdcLeadOwnerId]
       ]
     end
   }
