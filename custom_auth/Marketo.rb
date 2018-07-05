@@ -115,8 +115,8 @@
 
   actions: {
     bulk_import_leads: {
-      description: "Bulk import <span class=\"provider\">leads</span> into " \
-        "<span class=\"provider\">Marketo</span>",
+      description: "Bulk import <span class='provider'>leads</span> into " \
+        "<span class='provider'>Marketo</span>",
       help: "Bulk import a list of leads in CSV format. " \
         "Max file size is 10MB.",
       
@@ -162,26 +162,13 @@
         object_definitions["bulk_lead"]
       end
     }
-    # test: {
-      # execute: lambda do |connection, input|
-        # response = get("/rest/v1/leads/describe.json")["result"]
-# # 		puts response.pluck("displayName")
-        # fields = response.map do |field|
-          # {
-            # name: field["rest"]["name"], label: field["displayName"]
-          # }
-        # end
-        # {
-          # array: fields
-        # }
-      # end,
-    # },
   },
 
   triggers: {
     new_lead_in_program: {
-      description: "New <span class=\"provider\">lead</span> in <span class=\"provider\">Marketo</span> program",
-      
+      description: "New <span class='provider'>lead</span> in " \
+        "<span class='provider'>Marketo</span> program",
+
       input_fields: lambda do
         [
           { name: "program",
@@ -216,7 +203,8 @@
 
       output_fields: lambda do |object_definitions|
         object_definitions["lead"].
-          only("id", "firstName", "lastName", "email", "createdAt", "updatedAt").
+          only("id", "firstName", "lastName",
+               "email", "createdAt", "updatedAt").
           concat(
             [
               {
@@ -247,7 +235,7 @@
       get("/rest/asset/v1/programs.json").
         params(maxReturn: 200)["result"].pluck("name", "id")
     end,
-    
+
     lookup_types: lambda do
       [
         %w[ID id],
