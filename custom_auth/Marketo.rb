@@ -14,7 +14,8 @@
       { name: "client_secret",
         control_type: "password",
         optional: false,
-        hint: "Client Secret can be found in Admin > Integration > LaunchPoint" }
+        hint: "Client Secret can be found in Admin > " \
+          "Integration > LaunchPoint" }
     ],
 
     authorization: {
@@ -22,7 +23,8 @@
 
       acquire: lambda do |connection|
         {
-          access_token: get("https://#{connection['domain']}.mktorest.com/identity/oauth/token").
+          access_token: get("https://#{connection['domain']}.mktorest.com"
+                          "/identity/oauth/token").
                         params(client_id: connection["client_id"],
                                client_secret: connection["client_secret"],
                                grant_type: "client_credentials")["access_token"]
