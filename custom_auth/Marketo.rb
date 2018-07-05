@@ -22,10 +22,11 @@
 
       acquire: lambda do |connection|
         {
-          access_token: get("https://#{connection["domain"]}.mktorest.com/identity/oauth/token").
-            params("grant_type" => "client_credentials",
-                   "client_id" => connection["client_id"],
-                   "client_secret" => connection["client_secret"])["access_token"],
+          access_token: get("https://#{connection['domain']}.mktorest.com" \
+            "/identity/oauth/token").
+              params(client_id: connection["client_id"],
+                     client_secret: connection["client_secret"],
+                     grant_type: "client_credentials")["access_token"],
         }
       end,
 
@@ -40,7 +41,7 @@
     },
 
     base_uri: lambda do |connection|
-      "https://#{connection["domain"]}.mktorest.com"
+      "https://#{connection['domain']}.mktorest.com"
     end
   },
 
@@ -64,7 +65,8 @@
                 end
               ),
               control_type: (
-                if ["integer","boolean","date","url","email","phone"].include?(field.dig("dataType"))
+                if ["integer","boolean","date","url","email","phone"].
+                  include?(field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
                   "date_time"
@@ -89,20 +91,37 @@
               { name: "importId" },
               { name: "message" },
               { name: "status" },
-              { name: "numOfLeadsProcessed", label: "Leads processed", type: "integer", control_type: "integer" },
-              { name: "numOfRowsFailed", label: "Rows failed", type: "integer", control_type: "integer" },
-              { name: "numOfRowsWithWarning", label: "Rows with warning", type: "integer", control_type: "integer" }
+              {
+                name: "numOfLeadsProcessed",
+                label: "Leads processed",
+                type: "integer",
+                control_type: "integer"
+              },
+              {
+                name: "numOfRowsFailed",
+                label: "Rows failed",
+                type: "integer",
+                control_type: "integer"
+              },
+              {
+                name: "numOfRowsWithWarning",
+                label: "Rows with warning",
+                type: "integer",
+                control_type: "integer"
+              }
             ]
           },
           {
             name: "warnings", type: "array", of: "object", properties: [
               { name: "code", type: "integer", control_type: "integer" },
-              { name: "message" } ]
+              { name: "message" }
+            ]
           },
           {
             name: "errors", type: "array", of: "object", properties: [
               { name: "code", type: "integer", control_type: "integer" },
-              { name: "message" } ]
+              { name: "message" }
+            ]
           }
         ]
       end
@@ -110,7 +129,8 @@
   },
 
   test: lambda do |connection|
-    get("https://#{connection["domain"]}.mktorest.com/rest/v1/lead.json?batchSize=1")
+    get("https://#{connection['domain']}.mktorest.com" \
+      "/rest/v1/lead.json?batchSize=1")
   end,
 
   actions: {
@@ -119,45 +139,52 @@
         "<span class='provider'>Marketo</span>",
       help: "Bulk import a list of leads in CSV format. " \
         "Max file size is 10MB.",
-      
+
       input_fields: lambda do
         [
-          { 
-            name: "lookupField", label: "Lookup using", control_type: "select", pick_list: "lookup_types", optional: false,
-            hint: "Field to use for deduplication. Default is email. Note: You can use ID for update only operations."
+          {
+            name: "lookupField",
+            label: "Lookup using",
+            control_type: "select",
+            pick_list: "lookup_types",
+            optional: false,
+            hint: "Field to use for deduplication. Default is email. " \
+              "Note: You can use ID for update only operations."
           },
-          { name: "file",
+          {
+            name: "file",
             label: "CSV contents",
             optional: false,
             hint: "Place contents of CSV including header here. " \
               "CSV header name must be aligned with REST API name. " \
               "Find out more <a href='https://developers.marketo.com/" \
-              "rest-api/lead-database/fields/' target='_blank'>here</a>" }
+              "rest-api/lead-database/fields/' target='_blank'>here</a>"
+          }
         ]
       end,
-      
-      execute: lambda do |connection, input|
-        response = post("/bulk/v1/leads.json?format=csv").
-                   params(format: "csv",
-                          lookupField: input["lookupField"]).
-                   request_format_multipart_form.
-                   payload(file: [input["file"], "text/csv"])
+
+      execute: lambda do |_connection, input|
+        post("/bulk/v1/leads.json?format=csv").
+          params(format: "csv",
+                 lookupField: input["lookupField"]).
+          request_format_multipart_form.
+          payload(file: [input["file"], "text/csv"])
       end,
       
       output_fields: lambda do |object_definitions|
         object_definitions["bulk_lead"]
       end
     },
-    
+
     get_bulk_job_status: {
       input_fields: lambda do
         { name: "batchId", label: "Batch ID", optional: false }
       end,
-      
-      execute: lambda do |connection, input|
-        response = get("/bulk/v1/leads/batch/#{input["batchId"]}.json")
+
+      execute: lambda do |_connection, input|
+        get("/bulk/v1/leads/batch/#{input['batchId']}.json")
       end,
-      
+
       output_fields: lambda do |object_definitions|
         object_definitions["bulk_lead"]
       end
