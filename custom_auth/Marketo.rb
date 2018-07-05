@@ -55,7 +55,7 @@
               name: field.dig("rest", "name"),
               label: field.dig("displayName"),
               type: (
-                if ["integer", "boolean", "date"].include? (field.dig("dataType"))
+                if %(integer boolean date).include? (field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
                   "date_time"
@@ -66,7 +66,7 @@
                 end
               ),
               control_type: (
-                if ["integer","boolean","date","url","email","phone"].
+                if %w(integer boolean date url email phone).
                   include?(field.dig("dataType"))
                   field.dig("dataType")
                 elsif field.dig("dataType") == "datetime"
