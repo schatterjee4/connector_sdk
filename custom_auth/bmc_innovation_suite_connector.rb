@@ -85,7 +85,7 @@
           { name: "450000121", label: "Flowset" },
           { name: "1000000000", label: "Description" },
           { name: "1000000001", label: "Company" },
-          { name: "1000000063", label: "Category Tier 1"},
+          { name: "1000000063", label: "Category Tier 1" },
           { name: "1000000064", label: "Category Tier 2" },
           { name: "1000000065", label: "Category Tier 3" },
           { name: "1000000164", label: "Priority" },
@@ -279,7 +279,7 @@
 
       execute: lambda do |_connection, input|
         (get("/api/rx/application/record/recordinstance/" \
-          "com.bmc.dsm.hrcm-lib:Case/#{input["id"]}")["fieldInstances"] || []).
+          "com.bmc.dsm.hrcm-lib:Case/#{input['id']}")["fieldInstances"] || []).
           map { |_key, field| { field["id"].to_s => field["value"] } }.
           inject(:merge)
       end,
@@ -388,8 +388,8 @@
           startIndex: 0,
           propertySelection: "379"
         }
-        latest_record = get("/api/rx/application/datapage", params)
-                        .dig("data", 0, "379") || ''
+        latest_record = get("/api/rx/application/datapage", params).
+                        dig("data", 0, "379") || ""
         params = {
           dataPageType: "com.bmc.arsys.rx.application.association.datapage." \
             "AssociationInstanceDataPageQuery",
@@ -417,9 +417,9 @@
       end,
 
       execute: lambda do |_connection, input|
-        get("/api/com.bmc.arsys.rx.foundation/person/cards/#{input['id']}")
-          .params(include: "thumbnail,primarySite,primaryemail,primaryphone," \
-                  "department")
+        get("/api/com.bmc.arsys.rx.foundation/person/cards/#{input['id']}").
+          params(include: "thumbnail,primarySite,primaryemail,primaryphone," \
+            "department")
       end,
 
       output_fields: lambda do |object_definitions|
@@ -427,9 +427,9 @@
       end,
 
       sample_output: lambda do |_connection, _input|
-        get("/api/com.bmc.arsys.rx.foundation/person/cards")
-          .params(include: "thumbnail,primarySite,primaryemail,primaryphone," \
-            "department", pageSize: 1, sortBy: '-6').dig("data", 0)
+        get("/api/com.bmc.arsys.rx.foundation/person/cards").
+          params(include: "thumbnail,primarySite,primaryemail,primaryphone," \
+            "department", pageSize: 1, sortBy: "-6").dig("data", 0)
       end
     },
 
@@ -513,8 +513,8 @@
           recordDefinitionName: "com.bmc.dsm.hrcm-lib:Case"
         }
         ticket_status_id = get("api/com.bmc.dsm.shared-services-lib" \
-          "/rx/application/statustransition/nextstatuslist", sample_params)
-                           .dig(0, "guid") || ''
+          "/rx/application/statustransition/nextstatuslist", sample_params).
+                           .dig(0, "guid") || ""
         params = {
           dataPageType: "com.bmc.arsys.rx.application.association." \
             "datapage.AssociationInstanceDataPageQuery",
@@ -601,7 +601,7 @@
             "1000000881,1000001021,1000005261"
         }
 
-        get('/api/rx/application/datapage', params).dig("data", 0) || {}
+        get("/api/rx/application/datapage", params).dig("data", 0) || {}
       end
     }
   }
