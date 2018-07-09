@@ -178,7 +178,7 @@
       end,
 
       sample_output: lambda do |_connection, _input|
-        get("/forms").params(page_size: 1).dig("items", 0) || []
+        get("/forms").params(page_size: 1).dig("items", 0) || {}
       end
     }
   },
