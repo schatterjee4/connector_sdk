@@ -514,7 +514,7 @@
         }
         ticket_status_id = get("api/com.bmc.dsm.shared-services-lib" \
           "/rx/application/statustransition/nextstatuslist", sample_params).
-                           .dig(0, "guid") || ""
+                           dig(0, "guid") || ""
         params = {
           dataPageType: "com.bmc.arsys.rx.application.association." \
             "datapage.AssociationInstanceDataPageQuery",
