@@ -327,7 +327,7 @@
   },
 
   triggers: {
-    new_or_updated_client: {
+    new_client: {
       # API returns clients sorted by descending creation date.
       type: :paging_desc,
 
