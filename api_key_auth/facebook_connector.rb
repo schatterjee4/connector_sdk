@@ -90,7 +90,11 @@
             hint: "Get comments created since given date/time. " \
               "Leave empty to get all comments for the post."
           },
-          { name: "user_likes", type: "boolean", control_type: "checkbox" }
+          {
+            name: "user_likes",
+            type: "boolean",
+            control_type: "checkbox"
+          }
         ]
       end
     },
