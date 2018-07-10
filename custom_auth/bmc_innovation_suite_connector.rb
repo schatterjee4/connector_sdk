@@ -230,7 +230,7 @@
             "1000000881,1000001021,1000005261",
           queryExpression: (input || []).
                  map { |key, value| "'#{key}' = \"#{value}\"" }.
-                 join(" OR ")
+                 join(" AND ")
         }
 
         {
