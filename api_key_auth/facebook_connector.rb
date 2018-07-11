@@ -161,7 +161,7 @@
       subtitle: "Get page details",
 
       execute: lambda do |_connection, _input|
-        get("/me?fields=access_token,category,description,id,name")
+        get("/me", fields: "access_token,category,description,id,name")
           .after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
@@ -174,7 +174,7 @@
       output_fields: ->(object_definitions) { object_definitions["page"] },
 
       sample_output: lambda do |_connection, _input|
-        get("/me?fields=access_token,category,description,id,name")
+        get("/me", fields: "access_token,category,description,id,name")
           .after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
@@ -194,7 +194,7 @@
 
       execute: lambda do |_connection, _input|
         {
-          posts: get("/me?fields=feed.limit(10)")
+          posts: get("/me", fields: "feed.limit(10)")
             .after_error_response(400) do |_code, body, _header, message|
               if body.include? "Session has expired"
                 error("The session has expired. " \
@@ -229,12 +229,12 @@
         "<span class='provider'>Facebook (custom)</span>",
 
       execute: lambda do |_connection, input|
-        since = input["since"] ? (input["since"]&.to_time&.to_i - 1) : 1
+        since = input["since"] ? (input&.[]("since")&.to_time&.to_i - 1) : 1
         {
-          comments: get("/#{input['post_id']}/comments" \
-            "?fields=created_time,from,id,message,user_likes",
-                        { since: since } || {})
-            .after_error_response(400) do |_code, body, _header, message|
+          comments: get("/#{input['post_id']}/comments",
+                        fields: "created_time,from,id,message,user_likes",
+                        since: since).
+            after_error_response(400) do |_code, body, _header, message|
               if body.include? "Session has expired"
                 error("The session has expired. " \
                   "Please get a fresh access token.")
@@ -246,9 +246,9 @@
       end,
 
       input_fields: lambda do |object_definitions|
-        object_definitions["comment"]
-          .only("post_id", "since")
-          .required("post_id")
+        object_definitions["comment"].
+          only("post_id", "since").
+          required("post_id")
       end,
 
       output_fields: lambda do |object_definitions|
@@ -278,16 +278,16 @@
         message_count = input["message_count"] || 100
 
         {
-          messages:  get("/#{input['conversation_id']}/messages" \
-            "?fields=created_time,from,id,message,to&limit=#{message_count}")
-            .[]("data") || []
+          messages:  get("/#{input['conversation_id']}/messages",
+                         fields: "created_time,from,id,message,to",
+                         limit: message_count)["data"] || []
         }
       end,
 
       input_fields: lambda do |object_definitions|
-        object_definitions["message"]
-          .only("conversation_id", "message_count")
-          .required("conversation_id")
+        object_definitions["message"].
+          only("conversation_id", "message_count").
+          required("conversation_id")
       end,
 
       output_fields: lambda do |object_definitions|
@@ -295,15 +295,16 @@
           name: "messages",
           type: "array",
           of: "object",
-          properties: object_definitions["message"]
-            .ignored("conversation_id", "message_count")
+          properties: object_definitions["message"].
+            ignored("conversation_id", "message_count")
         }]
       end,
 
       sample_output: lambda do |_connection, input|
         {
-          messages:  [get("/#{input['conversation']}/messages" \
-            "?fields=created_time,from,id,message,to').dig('data", 0)] || []
+          messages:  [get("/#{input['conversation']}/messages",
+                          fields: "created_time,from,id,message,to").
+                        dig("data", 0)] || []
         }
       end
     },
@@ -313,8 +314,8 @@
         "<span class='provider'>Facebook (custom)</span>",
 
       execute: lambda do |_connection, input|
-        post("/#{input['comment_id']}/comments", "message" => input["message"])
-          .after_error_response(400) do |_code, body, _header, message|
+        post("/#{input['comment_id']}/comments", message: input["message"]).
+          after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
             else
@@ -337,7 +338,7 @@
       output_fields: ->(_object_definitions) { [{ name: "id" }] },
 
       sample_output: lambda do |_connection, _input|
-        { "id" => "395089840900326_397482493994394" }
+        { id: "395089840900326_397482493994394" }
       end
     },
 
@@ -355,7 +356,7 @@
 
       output_fields: ->(_object_definitions) { [{ name: "success" }] },
 
-      sample_output: ->(_connection, _input) { { "success" => true } }
+      sample_output: ->(_connection, _input) { { success: true } }
     },
 
     reply_to_message: {
@@ -367,8 +368,8 @@
 
       execute: lambda do |_connection, input|
         post("/#{input['conversation_id']}/messages",
-          "message" => input["message"])
-          .after_error_response(400) do |_code, body, _header, message|
+             message: input["message"]).
+          after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
             else
@@ -394,8 +395,8 @@
 
       sample_output: lambda do |_connection, _input|
         {
-          "id" => "m_mid.$cAAFnPYM1Mrlp__9wuFjzrooj4wjd",
-          "uuid" => "mid.$cAAFnPYM1Mrlp__9wuFjzrooj4wjd"
+          id: "m_mid.$cAAFnPYM1Mrlp__9wuFjzrooj4wjd",
+          uuid: "mid.$cAAFnPYM1Mrlp__9wuFjzrooj4wjd"
         }
       end
     }
@@ -412,7 +413,15 @@
         next_page_url ||= "/me/conversations?fields=can_reply,id,link," \
           "message_count,snippet,updated_time,unread_count"
 
-        conversation = get(next_page_url) || {}
+        conversation = get(next_page_url).
+                       after_error_response(400) do |_code, body, _header, message|
+                         if body.include? "Session has expired"
+                           error("The session has expired. " \
+                             "Please get a fresh access token.")
+                         else
+                             error("#{message}: #{body}")
+                         end
+                       end
         {
           events: conversation["data"] || [],
           next_page: conversation.dig("paging", "next") || nil
@@ -420,7 +429,7 @@
       end,
 
       document_id: lambda do |post|
-        post["id"].to_s + '@' + post["updated_time"].to_s
+        post["id"].to_s + "@" + post["updated_time"].to_s
       end,
 
       output_fields: lambda do |object_definitions|
@@ -428,16 +437,15 @@
       end,
 
       sample_output: lambda do |_connection, _input|
-        get("/me/conversations?fields=can_reply,id,link,message_count," \
-          "snippet,updated_time,unread_count")
-          .dig("data", 0) || []
+        get("/me/conversations", fields: "can_reply,id,link,message_count," \
+          "snippet,updated_time,unread_count").dig("data", 0) || []
       end
     },
 
     new_or_updated_post: {
+      subtitle: "New/updated post",
       description: "New or updated <span class='provider'>post</span> in " \
         "<span class='provider'>Facebook (custom)</span>",
-      subtitle: "New/updated post",
       type: "paging_desc",
 
       input_fields: lambda do |_connection|
@@ -454,17 +462,17 @@
 
       poll: lambda do |_connection, input, next_page_url|
         since = (input["since"].presence || 1.hour.ago).to_time.to_i - 1
-        next_page_url ||= "/me/feed" \
+        next_page_url ||= "/me/feed?" \
           "fields=created_time,from,id,message,type,updated_time&since=#{since}"
-        feed = get(next_page_url)
-               .after_error_response(400) do |_code, body, _header, message|
+        feed = get(next_page_url).
+               after_error_response(400) do |_code, body, _header, message|
                  if body.include? "Session has expired"
                    error("The session has expired. " \
                      "Please get a fresh access token.")
                  else
                    error("#{message}: #{body}")
                  end
-               end || {}
+               end
 
         {
           events: feed["data"] || [],
@@ -473,14 +481,14 @@
       end,
 
       document_id: lambda do |post|
-        post["id"].to_s + '@' + post["updated_time"].to_s
+        post["id"].to_s + "@" + post["updated_time"].to_s
       end,
 
       output_fields: ->(object_definitions) { object_definitions["post"] },
 
       sample_output: lambda do |_connection, _input|
-        get("/me/feed?fields=created_time,from,id,message,type,updated_time")
-          .dig("data", 0) || []
+        get("/me/feed?fields=created_time,from,id,message,type,updated_time").
+          dig("data", 0) || []
       end
     }
   }
