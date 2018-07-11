@@ -84,14 +84,6 @@
           { name: "message" },
           { name: "post_id", label: "Post ID" },
           {
-            name: "since",
-            type: "timestamp",
-            optional: true,
-            sticky: true,
-            hint: "Get comments created since given date/time. " \
-              "Leave empty to get all comments for the post."
-          },
-          {
             name: "user_likes",
             type: "boolean",
             control_type: "checkbox"
@@ -230,7 +222,7 @@
         "<span class='provider'>Facebook (custom)</span>",
 
       execute: lambda do |_connection, input|
-        since = input["since"] ? (input&.[]("since")&.to_time&.to_i - 1) : 1
+        since = (since = input["since"].presence) ? (since.to_time.to_i - 1) : 1
         {
           comments: get("/#{input['post_id']}/comments",
                         fields: "created_time,from,id,message,user_likes",
@@ -247,9 +239,14 @@
       end,
 
       input_fields: lambda do |object_definitions|
-        object_definitions["comment"].
-          only("post_id", "since").
-          required("post_id")
+        object_definitions["comment"].only("post_id").required("post_id") + [{
+          name: "since",
+          type: "timestamp",
+          optional: true,
+          sticky: true,
+          hint: "Get comments created since given date/time. " \
+            "Leave empty to get all comments for the post."
+        }]
       end,
 
       output_fields: lambda do |object_definitions|
@@ -257,7 +254,7 @@
           name: "comments",
           type: "array",
           of: "object",
-          properties: object_definitions["comment"].ignored("post_id", "since")
+          properties: object_definitions["comment"].ignored("post_id")
         }]
       end,
 
@@ -305,7 +302,7 @@
         {
           messages: [get("/#{input['conversation']}/messages",
                          fields: "created_time,from,id,message,to").
-                       dig("data", 0)] || []
+            dig("data", 0)] || []
         }
       end
     },
