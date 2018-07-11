@@ -1,4 +1,5 @@
-# Adds operations missing from the standard adapter, especially for Facebook Page APIs.
+# Adds operations missing from the standard adapter,
+# especially for Facebook Page APIs.
 {
   title: "Facebook (custom)",
 
@@ -26,8 +27,8 @@
   },
 
   test: lambda do |_connection|
-    get("/me")
-      .after_error_response(400) do |_code, body, _header, message|
+    get("/me").
+      after_error_response(400) do |_code, body, _header, message|
         if body.include? "Session has expired"
           error("The session has expired. Please get a fresh access token.")
         else
@@ -56,7 +57,7 @@
           {
             name: "from",
             type: "object",
-            properties: [ { name: "id" }, { name: "name" } ]
+            properties: [{ name: "id" }, { name: "name" }]
           },
           { name: "id" },
           { name: "message" },
@@ -161,8 +162,8 @@
       subtitle: "Get page details",
 
       execute: lambda do |_connection, _input|
-        get("/me", fields: "access_token,category,description,id,name")
-          .after_error_response(400) do |_code, body, _header, message|
+        get("/me", fields: "access_token,category,description,id,name").
+          after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
             else
@@ -174,15 +175,15 @@
       output_fields: ->(object_definitions) { object_definitions["page"] },
 
       sample_output: lambda do |_connection, _input|
-        get("/me", fields: "access_token,category,description,id,name")
-          .after_error_response(400) do |_code, body, _header, message|
+        get("/me", fields: "access_token,category,description,id,name").
+          after_error_response(400) do |_code, body, _header, message|
             if body.include? "Session has expired"
               error("The session has expired. Please get a fresh access token.")
             else
               error("#{message}: #{body}")
             end
-          end
-          .dig("data", 0) || {}
+          end.
+          dig("data", 0) || {}
       end
     },
 
@@ -194,16 +195,16 @@
 
       execute: lambda do |_connection, _input|
         {
-          posts: get("/me", fields: "feed.limit(10)")
-            .after_error_response(400) do |_code, body, _header, message|
+          posts: get("/me", fields: "feed.limit(10)").
+            after_error_response(400) do |_code, body, _header, message|
               if body.include? "Session has expired"
                 error("The session has expired. " \
                   "Please get a fresh access token.")
               else
                 error("#{message}: #{body}")
               end
-            end
-            .dig("feed", "data") || []
+            end.
+            dig("feed", "data") || []
         }
       end,
 
@@ -218,7 +219,7 @@
 
       sample_output: lambda do |_connection, _input|
         {
-          posts: [get('/me/feed').dig("data", 0)] || []
+          posts: [get("/me/feed").dig("data", 0)] || []
         }
       end
     },
@@ -302,9 +303,9 @@
 
       sample_output: lambda do |_connection, input|
         {
-          messages:  [get("/#{input['conversation']}/messages",
-                          fields: "created_time,from,id,message,to").
-                        dig("data", 0)] || []
+          messages: [get("/#{input['conversation']}/messages",
+                         fields: "created_time,from,id,message,to").
+                       dig("data", 0)] || []
         }
       end
     },
@@ -404,27 +405,27 @@
 
   triggers: {
     new_or_updated_conversation: {
+      subtitle: "New/updated conversation",
       description: "New or updated <span class='provider'>conversation" \
         "</span> in <span class='provider'>Facebook (custom)</span>",
-      subtitle: "New/updated conversation",
       type: "paging_desc",
 
       poll: lambda do |_connection, _input, next_page_url|
         next_page_url ||= "/me/conversations?fields=can_reply,id,link," \
           "message_count,snippet,updated_time,unread_count"
 
-        conversation = get(next_page_url).
-                       after_error_response(400) do |_code, body, _header, message|
-                         if body.include? "Session has expired"
-                           error("The session has expired. " \
-                             "Please get a fresh access token.")
-                         else
-                             error("#{message}: #{body}")
-                         end
-                       end
+        response = get(next_page_url).
+                   after_error_response(400) do |_code, body, _header, message|
+                     if body.include? "Session has expired"
+                       error("The session has expired. " \
+                         "Please get a fresh access token.")
+                     else
+                       error("#{message}: #{body}")
+                     end
+                   end
         {
-          events: conversation["data"] || [],
-          next_page: conversation.dig("paging", "next") || nil
+          events: response["data"] || [],
+          next_page: response.dig("paging", "next") || nil
         }
       end,
 
@@ -464,19 +465,19 @@
         since = (input["since"].presence || 1.hour.ago).to_time.to_i - 1
         next_page_url ||= "/me/feed?" \
           "fields=created_time,from,id,message,type,updated_time&since=#{since}"
-        feed = get(next_page_url).
-               after_error_response(400) do |_code, body, _header, message|
-                 if body.include? "Session has expired"
-                   error("The session has expired. " \
-                     "Please get a fresh access token.")
-                 else
-                   error("#{message}: #{body}")
-                 end
-               end
+        response = get(next_page_url).
+                   after_error_response(400) do |_code, body, _header, message|
+                     if body.include? "Session has expired"
+                       error("The session has expired. " \
+                         "Please get a fresh access token.")
+                     else
+                       error("#{message}: #{body}")
+                     end
+                   end
 
         {
-          events: feed["data"] || [],
-          next_page: feed.dig("paging", "next") || nil
+          events: response["data"] || [],
+          next_page: response.dig("paging", "next") || nil
         }
       end,
 
