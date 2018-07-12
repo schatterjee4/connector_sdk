@@ -311,7 +311,8 @@
           { name: "identifiers", type: "array", of: "string" },
           { name: "created_date", type: "date_time" },
           { name: "modified_date", type: "date_time" },
-          { name: "action_network:person_id", label: "Action network:person ID" },
+          { name: "action_network:person_id",
+            label: "Action network:person ID" },
           { name: "action_network:form_id", label: "Action network:form ID" },
           {
             name: "_links",
