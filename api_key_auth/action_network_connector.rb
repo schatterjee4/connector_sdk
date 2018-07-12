@@ -115,8 +115,8 @@
           { name: "title" },
           { name: "description" },
           { name: "petition_text" },
-          { name: "browser_url", label: "URL" },
-          { name: "featured_image_url", label: "URL" },
+          { name: "browser_url", label: "Browser URL" },
+          { name: "featured_image_url", label: "Featured Image URL" },
           { name: "total_signatures", control_type: "number", type: "number" },
           {
             name: "target",
@@ -311,7 +311,7 @@
           { name: "identifiers", type: "array", of: "string" },
           { name: "created_date", type: "date_time" },
           { name: "modified_date", type: "date_time" },
-          { name: "action:person_id", label: "Action:person ID" },
+          { name: "action_network:person_id", label: "Action network:person ID" },
           { name: "action_network:form_id", label: "Action network:form ID" },
           {
             name: "_links",
@@ -496,8 +496,8 @@
                 properties: [{ name: "href", label: "href" }]
               },
               {
-                name: "osdi:record_submission_helper",
-                label: "Osdi:record_submission_helper",
+                name: "osdi:record_submissions_helper",
+                label: "Osdi:record_submissions_helper",
                 type: "object",
                 properties: [{ name: "href", label: "href" }]
               },
@@ -536,7 +536,7 @@
           optional: true,
           sticky: true,
           hint: "Get forms created or updated since given date/time. "\
-            "Leave empty to get cases created or updated one hour ago"
+            "Leave empty to get forms created or updated one hour ago"
         }]
       end,
 
@@ -580,7 +580,7 @@
           optional: true,
           sticky: true,
           hint: "Get petitions created or updated since given date/time. "\
-            "Leave empty to get cases created or updated one hour ago"
+            "Leave empty to get petitions created or updated one hour ago"
         }]
       end,
 
@@ -646,7 +646,7 @@
             optional: true,
             sticky: true,
             hint: "Get signatures created or updated since given date/time. "\
-              "Leave empty to get cases created or updated one hour ago"
+              "Leave empty to get signatures created or updated one hour ago"
           }
         ]
       end,
@@ -726,7 +726,7 @@
             optional: true,
             sticky: true,
             hint: "Get submissions created or updated since given date/time. "\
-              "Leave empty to get cases created or updated one hour ago"
+              "Leave empty to get submissions created or updated one hour ago"
           }
         ]
       end,
