@@ -216,9 +216,10 @@
       end
     },
 
-    get_latest_comments: {
-      title: "Get latest comments for the post",
-      description: "Get latest <span class='provider'>comments</span> in " \
+    get_comments: {
+      title: "Get comments for the post",
+      help: "Fetches comments from a specified time. Returns a maximum of 25 comments.",
+      description: "Get <span class='provider'>comments</span> in " \
         "<span class='provider'>Facebook (custom)</span>",
 
       execute: lambda do |_connection, input|
@@ -245,7 +246,7 @@
           optional: true,
           sticky: true,
           hint: "Get comments created since given date/time. " \
-            "Leave empty to get all comments for the post."
+            "Leave empty to get comments starting from the oldest."
         }]
       end,
 
