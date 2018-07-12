@@ -51,7 +51,7 @@
       type: "api_key",
 
       apply: lambda do |connection|
-        headers('OSDI-API-Token' => connection["api_key"])
+        headers("OSDI-API-Token" => connection["api_key"])
       end
     },
 
@@ -655,7 +655,7 @@
         page ||= 1
         since = (input["since"].presence || 1.hour.ago).utc.iso8601
         response = call("format_api_output_field_names",
-                        get("/api/v2/petitions/#{input["petition_id"]}"\
+                        get("/api/v2/petitions/#{input['petition_id']}"\
                           "/signatures",
                             page: page,
                             filter: "modified_date gt '#{since}'")&.compact)
@@ -735,7 +735,7 @@
         page ||= 1
         since = (input["since"].presence || 1.hour.ago).utc.iso8601
         response = call("format_api_output_field_names",
-                        get("/api/v2/forms/#{input["form_id"]}/submissions",
+                        get("/api/v2/forms/#{input['form_id']}/submissions",
                             page: page,
                             filter: "modified_date gt '#{since}'")&.compact)
 
@@ -775,7 +775,7 @@
   pick_lists: {
     forms: lambda do |_connection|
       get("/api/v2/forms").
-        dig("_embedded", 'osdi:forms').
+        dig("_embedded", "osdi:forms").
         map do |form|
           [form["title"], form.dig("identifiers", 0)&.split(":")&.second]
         end
@@ -783,7 +783,7 @@
 
     petitions: lambda do |_connection|
       get("/api/v2/petitions").
-        dig("_embedded", 'osdi:petitions').
+        dig("_embedded", "osdi:petitions").
         map do |petition|
           [petition["title"],
            petition.dig("identifiers", 0)&.split(":")&.second]
