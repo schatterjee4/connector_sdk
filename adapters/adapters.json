@@ -8,114 +8,102 @@
     },
     {
       "id":"2",
-      "name":"Atlassian",
-      "image":"images/atlassian.png",
-      "link":"https://www.workato.com/custom_adapters/1289?token=156bff2c"
-    },
-    {
-      "id":"3",
       "name":"Base CRM",
       "image":"images/basecrm.png",
       "link":"https://www.workato.com/custom_adapters/1764?token=d1a4cfb3"
     },
     {
-      "id":"4",
+      "id":"3",
       "name":"Bill.com",
       "image":"images/bill.png",
       "link":"https://www.workato.com/custom_adapters/1734?token=48a1ebea"
     },
     {
-      "id":"5",
+      "id":"4",
       "name":"Calendly",
       "image":"images/calendly.png",
       "link":"https://www.workato.com/custom_adapters/2966?token=472495f8"
     },
     {
-      "id":"6",
+      "id":"5",
       "name":"Chartmogul",
       "image":"images/chartmogul.png",
       "link":"https://www.workato.com/custom_adapters/1319?token=51dd82ec"
     },
     {
-      "id":"7",
+      "id":"6",
       "name":"Constant Contact",
       "image":"images/constantcontact.png",
       "link":"https://www.workato.com/custom_adapters/1320?token=f6157902"
     },
     {
-      "id":"8",
+      "id":"7",
       "name":"Domo",
       "image":"images/domo.png",
       "link":"https://www.workato.com/custom_adapters/1321?token=5cd5b806"
     },
     {
-      "id":"9",
+      "id":"8",
       "name":"Google Analytics",
       "image":"images/googleanalytics.png",
       "link":"https://www.workato.com/custom_adapters/1270?token=8d23a89c"
     },
     {
-      "id":"10",
-      "name":"Knack",
-      "image":"images/knack.png",
-      "link":"https://www.workato.com/custom_adapters/2111?token=3fc13680"
-    },
-    {
-      "id":"11",
+      "id":"9",
       "name":"Mandrill",
       "image":"images/mandrill.png",
       "link":"https://www.workato.com/custom_adapters/1986?token=d77f685b"
     },
     {
-      "id":"12",
+      "id":"10",
       "name":"Marketo SDK",
       "image":"images/marketo.png",
       "link":"https://www.workato.com/custom_adapters/2980?token=d88b5471"
     },
     {
-      "id":"13",
+      "id":"11",
       "name":"Microsoft Office 365",
       "image":"images/microsoftoffice365.png",
       "link":"https://www.workato.com/custom_adapters/1284?token=d6601d81"
     },
     {
-      "id":"14",
+      "id":"12",
       "name":"NationBuilder",
       "image":"images/nationbuilder.png",
       "link":"https://www.workato.com/custom_adapters/2403?token=68332176"
     },
     {
-      "id":"15",
+      "id":"13",
       "name":"RightSignature",
       "image":"images/rightsignature.png",
       "link":"https://www.workato.com/custom_adapters/2073?token=59e8a05d"
     },
     {
-      "id":"16",
+      "id":"14",
       "name":"SalesforceIQ",
       "image":"images/salesforceiq.webp",
       "link":"https://www.workato.com/custom_adapters/1747?token=457560e5"
     },
     {
-      "id":"17",
+      "id":"15",
       "name":"Shopware",
       "image":"images/shopware.png",
       "link":"https://www.workato.com/custom_adapters/1324?token=bdb1c519"
     },
     {
-      "id":"18",
+      "id":"16",
       "name":"Spotify",
       "image":"images/spotify.png",
       "link":"https://www.workato.com/custom_adapters/1326?token=6f014f44"
     },
     {
-      "id":"19",
+      "id":"17",
       "name":"Stripe",
       "image":"images/stripe.png",
       "link":"https://www.workato.com/custom_adapters/1327?token=0f626598"
     },
     {
-      "id":"20",
+      "id":"18",
       "name":"Transdirect",
       "image":"images/transdirect.png",
       "link":"https://www.workato.com/custom_adapters/1329?token=d180f84e"
