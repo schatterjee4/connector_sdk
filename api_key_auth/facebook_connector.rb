@@ -218,7 +218,8 @@
 
     get_comments: {
       title: "Get comments for the post",
-      help: "Fetches comments from a specified time. Returns a maximum of 25 comments.",
+      help: "Fetches comments from a specified time. " \
+        "Returns a maximum of 25 comments.",
       description: "Get <span class='provider'>comments</span> in " \
         "<span class='provider'>Facebook (custom)</span>",
 
