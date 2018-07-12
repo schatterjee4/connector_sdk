@@ -498,7 +498,7 @@
               },
               {
                 name: "osdi:record_submissions_helper",
-                label: "Osdi:record_submissions_helper",
+                label: "Osdi:record submissions helper",
                 type: "object",
                 properties: [{ name: "href", label: "href" }]
               },
