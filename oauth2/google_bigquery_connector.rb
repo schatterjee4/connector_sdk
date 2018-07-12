@@ -8,7 +8,7 @@
         hint: "Find client ID " \
           "<a href='https://console.cloud.google.com/apis/credentials' " \
           "target='_blank'>here</a>",
-        optional: false,
+        optional: false
       },
       {
         name: "client_secret",
@@ -16,7 +16,7 @@
           "<a href='https://console.cloud.google.com/apis/credentials' " \
           "target='_blank'>here</a>",
         optional: false,
-        control_type: "password",
+        control_type: "password"
       }
     ],
 
@@ -31,7 +31,7 @@
           "https://www.googleapis.com/auth/cloud-platform.read-only",
           "https://www.googleapis.com/auth/devstorage.full_control",
           "https://www.googleapis.com/auth/devstorage.read_only",
-          "https://www.googleapis.com/auth/devstorage.read_write",
+          "https://www.googleapis.com/auth/devstorage.read_write"
         ].join(" ")
 
         "https://accounts.google.com/o/oauth2/auth?client_id="            \
@@ -41,12 +41,12 @@
 
       acquire: lambda do |connection, auth_code, redirect_uri|
         response = post("https://accounts.google.com/o/oauth2/token").
-                    payload(client_id: connection["client_id"],
-                            client_secret: connection["client_secret"],
-                            grant_type: "authorization_code",
-                            code: auth_code,
-                            redirect_uri: redirect_uri).
-                    request_format_www_form_urlencoded
+                   payload(client_id: connection["client_id"],
+                           client_secret: connection["client_secret"],
+                           grant_type: "authorization_code",
+                           code: auth_code,
+                           redirect_uri: redirect_uri).
+                   request_format_www_form_urlencoded
 
         [response, nil, nil]
       end,
@@ -66,7 +66,7 @@
 
       apply: lambda do |_connection, access_token|
         headers("Authorization" => "Bearer #{access_token}")
-      end,
+      end
     },
 
     base_uri: ->(_connection) { "https://www.googleapis.com" }
@@ -90,7 +90,7 @@
         "TIME"     => "Represents a time, independent of a specific date. " \
           "Example: 11:16:00.000000",
         "DATETIME" => "Represents a year, month, day, hour, minute, " \
-          "second, and subsecond. Example: 2017-09-13T11:16:00.000000",
+          "second, and subsecond. Example: 2017-09-13T11:16:00.000000"
       }
 
       (input["fields"] || []).map do |field|
@@ -130,7 +130,7 @@
                 name: "insertId",
                 hint: "A unique ID for each row. More details <a " \
                  "href='https://cloud.google.com/bigquery/streaming-data-" \
-                 "into-bigquery#dataconsistency' target='_blank'>here</a>.",
+                 "into-bigquery#dataconsistency' target='_blank'>here</a>."
               }
             ].concat(call("schema_for_table", "fields" => fields))
           ]
@@ -171,7 +171,7 @@
           control_type: "select",
           pick_list: "tables",
           pick_list_params: { project_id: "project", dataset_id: "dataset" }
-        },
+        }
       ],
 
       input_fields: ->(object_definitions) { object_definitions["table"] },
