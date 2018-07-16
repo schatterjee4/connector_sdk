@@ -20,7 +20,7 @@
     },
     {
       "id":"4",
-      "name":"Bill.com",
+      "name":"Bill.com (Custom)",
       "image":"images/bill.png",
       "link":"https://www.workato.com/custom_adapters/1734?token=48a1ebea"
     },
@@ -86,7 +86,7 @@
     },
     {
       "id":"15",
-      "name":"Marketo SDK",
+      "name":"Marketo (Custom)",
       "image":"images/marketo.png",
       "link":"https://www.workato.com/custom_adapters/2980?token=d88b5471"
     },
@@ -116,7 +116,7 @@
     },
     {
       "id":"20",
-      "name":"Sage Intacct SDK",
+      "name":"Sage Intacct (Custom)",
       "image":"images/sageintacct.jpg",
       "link":"https://www.workato.com/custom_adapters/3119?token=4dd71bfd"
     },
@@ -140,7 +140,7 @@
     },
     {
       "id":"24",
-      "name":"Stripe",
+      "name":"Stripe (Custom)",
       "image":"images/stripe.png",
       "link":"https://www.workato.com/custom_adapters/1327?token=0f626598"
     },
