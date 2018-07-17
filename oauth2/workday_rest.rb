@@ -863,6 +863,24 @@
           ]
         }
       },
+    
+    get_worker_direct_reports: {
+      input_fields: ->() {
+        [
+          { name: "worker_id", type: "string", optional: false }
+          ]
+        },
+
+      execute: ->(connection, input) {
+        { direct_reports: get("/ccx/api/v1/#{connection['tenant']}/workers/#{input["worker_id"]}/directReports")["data"] }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { name: "direct_reports", type: "object", properties: object_definitions["worker"] }
+          ]
+        }
+      },
 
     get_worker_time_off_summary: {
       input_fields: ->() {
