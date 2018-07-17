@@ -1117,6 +1117,39 @@
           ]
         }
       },
+    
+    get_supervisory_organization: {
+      input_fields: ->() {
+        [
+          {
+            name: "supervisory_organization_id",
+            label: "Supervisory organization",
+            control_type: "select",
+            pick_list: "supervisory_organizations",
+            optional: false,
+            toggle_hint: "Select from list",
+            toggle_field: {
+              name: "supervisory_organization_id",
+              label: "Supervisory organization",
+              type: "string",
+              control_type: "text",
+              optional: false,
+              toggle_hint: "Use Supervisory Organizaton ID"
+              }
+            },
+          ]
+        },
+
+      execute: ->(connection, input) {
+        { supervisory_organization: get("/ccx/api/v1/#{connection['tenant']}/supervisoryOrganizations/#{input["supervisory_organization_id"]}") }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { name: "supervisory_organization", type: "object", properties: object_definitions["supervisory_organization"] }
+          ]
+        }
+      },
 
     list_supervisory_organizations_managed_by_user: {
       input_fields: ->() {
@@ -1234,6 +1267,10 @@
     organization_types: ->(connection) {
       get("/ccx/api/v1/#{connection['tenant']}/organizationTypes").params(limit: 100)['data'].
         map { |organization_type| [organization_type['descriptor'], organization_type['id']] }
+      },
+    supervisory_organizations: ->(connection) {
+      get("/ccx/api/v1/#{connection['tenant']}/supervisoryOrganizations").params(limit: 100)['data'].
+        map { |supervisory_organization| [supervisory_organization['descriptor'], supervisory_organization['id']] }
       }
     },
   }
