@@ -1,11 +1,10 @@
 <!DOCTYPE HTML>
-
 <html>
   <head>
     <title>Workato Developer</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="description" content="Workato Developer" />
-    <meta name="keywords" content="Workato Developer" />	
+    <meta name="keywords" content="Workato Developer" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!--links-->
@@ -18,57 +17,50 @@
   </head>
 
   <body>
+    <!--Nav section-->
     <div class="nav-wrapper">
-      <div class="logo nav-links">
+      <div class="nav-inner-wrapper">
         <a href="http://developer.workato.com/">
           <img class="logo" src="images/logo.svg">
         </a>
+        <ul class="nav-links">
+          <li class="nav-links-li"><a target="_blank" href="https://github.com/workato/connector_sdk">Github</a></li>
+          <li class="nav-links-li"><a target="_blank" href="https://docs.workato.com/developing-connectors/sdk.html">Documentation</a></li>
+          <li class="nav-links-li"><a target="_blank" href="https://support.workato.com/support/tickets/new">Submit Adapter</a></li>
+          <li class="collapse-icon"><a target="javascript:void(0);" onclick="toggleSideNav()">☰</a></li>
+          <li class="return"><a target="_blank" href="https://workato.com">Return to Workato</a></li>
+        </ul>
       </div>
-      <div class="return nav-links"><a href="https://workato.com">Return to Workato</a></div>
     </div>
+    <!--Banner section-->
     <div class="banner-wrapper">
       <div class="banner-header">
         <h1>Welcome to Workato Developer</h1>
         <h3>A marketplace of adapters for your recipe building needs</h3>
       </div>
     </div>
-    <div class="buttons-wrapper">
-      <div class="container-wrapper">
-        <div class="container" id="container-button">
-          <div class="button">
-            <h4> Documentation </h4>
-            Learn how to build a custom adapter for your application here.
-            <a href="http://docs.workato.com/developing-connectors/sdk.html" target="_blank"><div class="button-home">Learn more</div></a>
-          </div>
-          <div class="button">
-            <h4> Submit </h4>
-            Want your custom adapter to be listed? Send us a ticket here.
-            <a href="https://support.workato.com/support/tickets/new" target="_blank"><div class="button-home">Send ticket</div></a>
-          </div>	
-        </div>
-      </div>
+    <!--Search bar-->
+    <div class="container" id="search-bar">
+      <input class="search-form" placeholder="Search for an Adapter" id ="search-form" oninput="filterFunc(this)">
+      <div class="icon-container"><i class="material-icons">search</i></div>
     </div>
+    <!--Adapter List section-->
     <div class="list-wrapper">
-      <div class="list-header">
-        <h2>Custom Adapters</h2>
-      </div>
-      <div class="container" id="search-bar">		
-        <input class="search-form" placeholder="Search app" id ="search-form" oninput="filterFunc(this)">
-        <div class="icon-container"><i class="material-icons">search</i></div>
-      </div>
       <div class="container-wrapper" id="app-wrapper">
         <ul class="container" id="container-apps"></ul>
       </div>
     </div>
+    <!--Footer section-->
     <div class="footer">
       <div class="footer-container">
         Apps listed on this marketplace are created by third party vendors. These applications are not warranted or provided by Workato. Please look through their documentation and ensure that these apps are right for you before proceeding.<br><br>
-        <a href="https://www.workato.com/privacy" target="_blank">Privacy</a>   |   
-        <a href="https://www.workato.com/terms" target="_blank">Terms</a>   |   
+        <a href="https://www.workato.com/privacy" target="_blank">Privacy</a>   |
+        <a href="https://www.workato.com/terms" target="_blank">Terms</a>   |
         <a href="tel:+18444696752">(844)-469-6752</a>  |
         Workato 2017
       </div>
     </div>
+    <!--Script-->
     <script src="js/script.js"></script>
   </body>
 </html>
