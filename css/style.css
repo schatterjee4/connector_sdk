@@ -26,7 +26,7 @@ h1{
 
 h2{
   font-family: Lato, sans-serif;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 600;
   color: #27989f;
 }
@@ -54,17 +54,11 @@ h4{
 
 /* Links */
 
-a{color:#efefef;}
-a:link  {text-decoration: none; color: #efefef;}
-a:visited {text-decoration: none; color: #efefef;}
+a{color:#dfdfdf;}
+a:link  {text-decoration: none; color: #dfdfdf;}
+a:visited {text-decoration: none; color: #dfdfdf;}
 a:hover {text-decoration: none; color: white;}
 a:active {text-decoration: none; color: white;}
-
-.nav-links{
-  font-size: 15px;
-  font-weight: 500;
-  color: white;
-}
 
 /* Navigation */
 
@@ -72,46 +66,67 @@ a:active {text-decoration: none; color: white;}
   z-index: 1;
   top: 0px;
   position: fixed;
-  height: 60px;
+  height: 56px;
   width: 100%;
   padding: 0px;
   background-color: #0b2d2f;
 }
 
-.logo{
-  position: absolute;
-  left: 5%;
-  height: 25px;
-  margin-top:9px;
+.nav-inner-wrapper{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.return{
-  position: fixed;
-  right: 5%;
-  margin-top: 20px;
+.nav-links{
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+.nav-links li{
+  float:left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 20px 12px;
+  cursor: pointer;
+}
+
+.logo{
+  float:left;
+  height: 20px;
+  margin-right:12px;
+  margin-top:18px;
+}
+
+.nav-links .return{
+  float:right;
+}
+
+.nav-links .collapse-icon{
+  float:right;
+  display:none;
 }
 
 /* Banner */
 
 .banner-wrapper{
-  margin-top: 60px;
-  height: 300px;
+  margin-top: 56px;
   width: 100%;
   padding: 0px;
 
-  background: #0b2d2f url(https://cdn.workato.com/assets/home/header-cover-abcdbc68b239568047bab818dc36e3a2.svg) no-repeat 50% 0%;
-  background-size: auto 150%;
-  overflow: hidden;
-  position: relative;
+  background: #0b2d2f url(https://cdn.walter.awsprod.workato.com/assets/home/header-cover-0d64ede24982bf92bc0ea75fcaaee235.svg) no-repeat 50% 0%;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover 75%;
 }
 
 .banner-header{
-  position: absolute;
-  margin-top: 100px;
   width: 100%;
   text-align: center;
-  height: 100px;
-  padding: 0 20px 0 20px;
+  padding: 56px 20px;
 }
 
 /* Buttons */
@@ -140,7 +155,7 @@ a:active {text-decoration: none; color: white;}
 .button-home{
 
   height: 41px;
-  width: calc(100% - 40px);  
+  width: calc(100% - 40px);
   background-image: none;
   border: 1px solid;
   border-radius: 2px;
@@ -171,19 +186,19 @@ a:active {text-decoration: none; color: white;}
 /* App list */
 
 #search-bar{
-  height:60px;
-  max-width: 800px;
+  height:48px;
   width: 100%;
   margin: 0 auto 50px auto;
   padding: 0 20px 0 20px;
   position: relative;
+  border-bottom: 1px solid #e3e3e3;
 }
 
 i{
-  color: #e3e3e3;
+  color: #d3d3d3;
   position: relative;
   left: 20px;
-  top: -40px;	
+  top: -32px;
 }
 
 .icon-container{
@@ -195,16 +210,14 @@ i{
   width: 100%;
   max-width: 800px;
   height: 100%;
-  padding: 20px 20px 20px 60px;
-  border: 1px solid #e3e3e3;
+  padding: 6px 0 0 60px;
+  border: 0px solid #e3e3e3;
   border-radius: 2px;
-  transition: border linear 0.2s;
 }
 
 .search-form:focus {
   outline: none !important;
-  border:1px solid #27989f;
-  box-shadow: 0 0 2px #719ECE;
+  border:0px solid #27989f;
 }
 
 .list-wrapper{
@@ -215,8 +228,7 @@ i{
 .list-header{
   width: 100%;
   text-align: center;
-  height: 100px;
-  margin-top: 100px;
+  padding: 80px 0 40px 0;
 }
 
 .container-wrapper{
@@ -260,16 +272,16 @@ i{
   list-style: none;
 }
 
-#container-apps>li { 
-  width: 75px; 
-  height: 100px; 
-  background: white; 
+#container-apps>li {
+  width: 75px;
+  height: 100px;
+  background: white;
   margin: 0 5% 75px;
-  list-style: none; 
+  list-style: none;
 }
 
 #container-apps>li>a>img {
-  width: 100%; 
+  width: 100%;
   height: 75px;
   border-radius: 2px;
   opacity: 1;
@@ -297,7 +309,6 @@ i{
   background-color: #0b2d2f;
   text-align: center;
   padding: 100px 12px 0px 12px;
-  margin-top: 100px;
 }
 
 .footer-container{
@@ -306,17 +317,24 @@ i{
   color: white;
 }
 
+.show{
+  display:block !important;
+}
+
+.hide{
+  display:none !important;
+}
+
 /* Responsive */
+@media only screen and (min-width: 720px) {
+  .nav-links-li{
+    display:block !important;
+  }
+}
 
 @media only screen and (max-width: 720px) {
-
-  .button{	
-    display: block;	
-  }
-
-  .logo{
-    height: 20px;
-    margin-top:10px;
+  .button{
+    display: block;
   }
 
   h4{
@@ -325,6 +343,17 @@ i{
     color: #27989f;
     margin: 10px 0 15px 0;
   }
+
+  .nav-links li{
+    display:none;
+    width: 100%;
+    background-color: #0b2d2f;
+  }
+
+  .nav-links .collapse-icon{
+    display:block;
+    width: max-content;
+    position: absolute;
+    right: 20px;
+  }
 }
-
-
