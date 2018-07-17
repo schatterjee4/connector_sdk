@@ -186,19 +186,19 @@ a:active {text-decoration: none; color: white;}
 /* App list */
 
 #search-bar{
-  height:60px;
-  max-width: 800px;
+  height:48px;
   width: 100%;
   margin: 0 auto 50px auto;
   padding: 0 20px 0 20px;
   position: relative;
+  border-bottom: 1px solid #e3e3e3;
 }
 
 i{
-  color: #e3e3e3;
+  color: #d3d3d3;
   position: relative;
   left: 20px;
-  top: -40px;
+  top: -32px;
 }
 
 .icon-container{
@@ -210,16 +210,14 @@ i{
   width: 100%;
   max-width: 800px;
   height: 100%;
-  padding: 20px 20px 20px 60px;
-  border: 1px solid #e3e3e3;
+  padding: 6px 0 0 60px;
+  border: 0px solid #e3e3e3;
   border-radius: 2px;
-  transition: border linear 0.2s;
 }
 
 .search-form:focus {
   outline: none !important;
-  border:1px solid #27989f;
-  box-shadow: 0 0 2px #719ECE;
+  border:0px solid #27989f;
 }
 
 .list-wrapper{

@@ -39,34 +39,15 @@
         <h3>A marketplace of adapters for your recipe building needs</h3>
       </div>
     </div>
+    <!--Search bar-->
+    <div class="container" id="search-bar">
+      <input class="search-form" placeholder="Search for an Adapter" id ="search-form" oninput="filterFunc(this)">
+      <div class="icon-container"><i class="material-icons">search</i></div>
+    </div>
     <!--Adapter List section-->
     <div class="list-wrapper">
-      <div class="list-header">
-        <h2>Custom Adapters</h2>
-      </div>
-      <div class="container" id="search-bar">
-        <input class="search-form" placeholder="Search app" id ="search-form" oninput="filterFunc(this)">
-        <div class="icon-container"><i class="material-icons">search</i></div>
-      </div>
       <div class="container-wrapper" id="app-wrapper">
         <ul class="container" id="container-apps"></ul>
-      </div>
-    </div>
-    <!--Button Links section-->
-    <div class="buttons-wrapper">
-      <div class="container-wrapper">
-        <div class="container" id="container-button">
-          <div class="button">
-            <h4> Documentation </h4>
-            Learn how to build a custom adapter for your application here.
-            <a href="http://docs.workato.com/developing-connectors/sdk.html" target="_blank"><div class="button-home">Learn more</div></a>
-          </div>
-          <div class="button">
-            <h4> Submit </h4>
-            Want your custom adapter to be listed? Send us a ticket here.
-            <a href="https://support.workato.com/support/tickets/new" target="_blank"><div class="button-home">Send ticket</div></a>
-          </div>
-        </div>
       </div>
     </div>
     <!--Footer section-->
