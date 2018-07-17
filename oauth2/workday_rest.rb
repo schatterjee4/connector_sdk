@@ -119,7 +119,7 @@
         }
       },
 
-    worker_detailed: {
+    worker_profile: {
       fields: ->() {
         [
           {
@@ -192,6 +192,37 @@
             label: "Primary supervisory organization",
             type: "object",
             name: "primarySupervisoryOrganization"
+            }
+          ]
+        }
+      },
+
+    worker_time_off_summary: {
+      fields: ->() {
+        [
+          {
+            control_type: "text",
+            label: "Descriptor",
+            type: "string",
+            name: "descriptor"
+            },
+          {
+            control_type: "text",
+            label: "ID",
+            type: "string",
+            name: "id"
+            },
+          {
+            control_type: "text",
+            label: "Href",
+            type: "string",
+            name: "href"
+            },
+          {
+            control_type: "text",
+            label: "Total hourly balance",
+            type: "string",
+            name: "totalHourlyBalance"
             }
           ]
         }
@@ -645,6 +676,68 @@
             }
           ]
         }
+      },
+
+    supervisory_organization: {
+      fields: ->() {
+        [
+          {
+            control_type: "text",
+            label: "Descriptor",
+            type: "string",
+            name: "descriptor"
+            },
+          {
+            control_type: "text",
+            label: "ID",
+            type: "string",
+            name: "id"
+            },
+          {
+            control_type: "text",
+            label: "Href",
+            type: "string",
+            name: "href"
+            },
+          {
+            control_type: "text",
+            label: "Workers",
+            type: "string",
+            name: "workers"
+            },
+          {
+            properties: [
+              {
+                control_type: "text",
+                label: "Descriptor",
+                type: "string",
+                name: "descriptor"
+                },
+              {
+                control_type: "text",
+                label: "ID",
+                type: "string",
+                name: "id"
+                },
+              {
+                control_type: "text",
+                label: "Href",
+                type: "string",
+                name: "href"
+                }
+              ],
+            label: "Manager",
+            type: "object",
+            name: "manager"
+            },
+          {
+            control_type: "text",
+            label: "Name",
+            type: "string",
+            name: "name"
+            }
+          ]
+        }
       }
     },
 
@@ -766,7 +859,29 @@
 
       output_fields: ->(object_definitions) {
         [
-          { name: "worker", type: "object", properties: object_definitions["worker_detailed"] }
+          { name: "worker", type: "object", properties: object_definitions["worker_profile"] }
+          ]
+        }
+      },
+
+    get_worker_time_off_summary: {
+      input_fields: ->() {
+        [
+          { name: "worker_id", type: "string", optional: false }
+          ]
+        },
+
+      execute: ->(connection, input) {
+        { 
+          worker_time_off_summary: get("/ccx/api/v1/#{connection['tenant']}/workers/#{input["worker_id"]}").params(
+            view: "timeOffSummary"
+            )
+          }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { worker_time_off_summary: "worker", type: "object", properties: object_definitions["worker_time_off_summary"] }
           ]
         }
       },
@@ -956,6 +1071,20 @@
           ]
         }
       },
+    
+    list_job_change_reasons: {
+      input_fields: ->() {[]},
+
+      execute: ->(connection, input) {
+        { job_change_reasons: get("/ccx/api/v1/#{connection['tenant']}/jobChangeReasons")["data"] }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { name: "job_change_reasons", type: "array", of: "objects", properties: object_definitions["job_change_reason"] }
+          ]
+        }
+      },
 
     get_job_change_reason: {
       input_fields: ->() {
@@ -973,7 +1102,54 @@
           { name: "job_change_reason", type: "object", properties: object_definitions["job_change_reason"] }
           ]
         }
-      }
+      },
+
+    list_supervisory_organizations: {
+      input_fields: ->() {[]},
+
+      execute: ->(connection, input) {
+        { supervisory_organizations: get("/ccx/api/v1/#{connection['tenant']}/supervisoryOrganizations").params(limit: 100)["data"] }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { name: "supervisory_organizations", type: "array", of: "object", properties: object_definitions["supervisory_organization"] }
+          ]
+        }
+      },
+
+    list_supervisory_organizations_managed_by_user: {
+      input_fields: ->() {
+        [
+          {
+            name: "worker_id",
+            label: "Worker",
+            control_type: "select",
+            pick_list: "workers",
+            optional: false,
+            toggle_hint: "Select from list",
+            toggle_field: {
+              name: "worker_id",
+              label: "Worker",
+              type: "string",
+              control_type: "text",
+              optional: false,
+              toggle_hint: "Use Worker ID"
+              }
+            },
+          ]
+        },
+
+      execute: ->(connection, input) {
+        { supervisory_organizations: get("/ccx/api/v1/#{connection['tenant']}/workers/#{input["worker_id"]}/supervisoryOrganizationsManaged").params(limit: 100)["data"] }
+        },
+
+      output_fields: ->(object_definitions) {
+        [
+          { name: "supervisory_organizations", type: "array", of: "object", properties: object_definitions["supervisory_organization"] }
+          ]
+        }
+      },
 
     },
 
