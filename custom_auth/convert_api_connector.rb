@@ -151,9 +151,9 @@
       sample_output: lambda do |_connection, _input|
         {
           "Files" => [{
-              "FileName" => "Workato.pdf",
-              "FileSize" => 1234,
-              "Url" => "https://v2.convertapi.com/d/ABCD/Workato.pdf"
+            "FileName" => "Workato.pdf",
+            "FileSize" => 1234,
+            "Url" => "https://v2.convertapi.com/d/ABCD/Workato.pdf"
           }]
         }
       end
