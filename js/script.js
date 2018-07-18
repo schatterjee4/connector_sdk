@@ -13,14 +13,12 @@ function filterFunc(event) {
   var userInput = event.value.toUpperCase();
 
   $('.app').each(function() {
-    var noResult = true;
     if (this.textContent.toUpperCase().indexOf(userInput) > -1) {
       $(this).show();
     } else {
       $(this).hide();
 
       tempCount += 1;
-
     }
     //Show no result message if all adapters are hidden
     if (tempCount == adapterCount){
