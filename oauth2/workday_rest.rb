@@ -738,6 +738,37 @@
             }
           ]
         }
+      },
+
+    inbox_task_approval: {
+      fields: ->() {
+        [
+          {
+            control_type: "text",
+            label: "ID",
+            type: "string",
+            name: "id"
+            },
+          {
+            control_type: "text",
+            label: "Descriptor",
+            type: "string",
+            name: "descriptor"
+            },
+          {
+            control_type: "text",
+            label: "Href",
+            type: "string",
+            name: "href"
+            },
+          {
+            control_type: "text",
+            label: "Comment",
+            type: "string",
+            name: "comment"
+            }
+          ]
+        }
       }
     },
 
@@ -796,15 +827,15 @@
         },
 
       execute: ->(connection, input) {
-        { inbox_tasks: put("/ccx/api/v1/#{connection['tenant']}/inboxTasks/#{input["inbox_task_id"]}").params(
+        { inbox_task: put("/ccx/api/v1/#{connection['tenant']}/inboxTasks/#{input["inbox_task_id"]}", "{}").params(
           type: "approval"
-          )["data"]
+          )
           }
         },
 
       output_fields: ->(object_definitions) {
         [
-          { name: "inbox_tasks", type: "array", of: "object", properties: object_definitions["inbox_task"] }
+          { name: "inbox_task", type: "object", properties: object_definitions["inbox_task_approval"] }
           ]
         }
       },
@@ -817,15 +848,15 @@
         },
 
       execute: ->(connection, input) {
-        { inbox_tasks: put("/ccx/api/v1/#{connection['tenant']}/inboxTasks/#{input["inbox_task_id"]}").params(
+        { inbox_task: put("/ccx/api/v1/#{connection['tenant']}/inboxTasks/#{input["inbox_task_id"]}", "{}").params(
           type: "denial"
-          )["data"]
+          )
           }
         },
 
       output_fields: ->(object_definitions) {
         [
-          { name: "inbox_tasks", type: "array", of: "object", properties: object_definitions["inbox_task"] }
+          { name: "inbox_task", type: "object", properties: object_definitions["inbox_task_approval"] }
           ]
         }
       },
@@ -863,7 +894,7 @@
           ]
         }
       },
-    
+
     get_worker_direct_reports: {
       input_fields: ->() {
         [
@@ -1089,7 +1120,7 @@
           ]
         }
       },
-    
+
     list_job_change_reasons: {
       input_fields: ->() {[]},
 
@@ -1135,7 +1166,7 @@
           ]
         }
       },
-    
+
     get_supervisory_organization: {
       input_fields: ->() {
         [
