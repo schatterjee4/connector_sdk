@@ -197,20 +197,22 @@ a:active {text-decoration: none; color: white;}
 i{
   color: #d3d3d3;
   position: relative;
-  left: 20px;
-  top: -32px;
+  left: 48px;
+  top: 14px;
 }
 
 .icon-container{
   width:100%;
   max-width: 800px;
+  position: absolute;
+  height: 0;
 }
 
 .search-form{
   width: 100%;
   max-width: 800px;
   height: 100%;
-  padding: 6px 0 0 60px;
+  padding: 4px 0 0 80px;
   border: 0px solid #e3e3e3;
   border-radius: 2px;
 }
@@ -323,6 +325,18 @@ i{
 
 .hide{
   display:none !important;
+}
+
+#no-result{
+  margin: 0 auto;
+  display:none;
+}
+
+.no-result-text{
+  text-align: center;
+  display: block;
+  font-size: 16px;
+  color: #3e3e3e;
 }
 
 /* Responsive */
